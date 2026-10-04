@@ -15,6 +15,21 @@ type Props = {
 /** Ensures each dashboard run starts exactly once (survives Strict Mode remounts). */
 const startedRuns = new Set<number>();
 
+function formatRunError(raw: string): string {
+  let msg = raw;
+  try {
+    const parsed = JSON.parse(raw) as { error?: string };
+    if (parsed.error) msg = parsed.error;
+  } catch {
+    const match = raw.match(/"error"\s*:\s*"([^"]+)"/);
+    if (match?.[1]) msg = match[1];
+  }
+  if (/xai_api_key/i.test(msg)) {
+    return `${msg} Configure XAI_API_KEY no .env.local para executar de verdade.`;
+  }
+  return msg;
+}
+
 export function SkillRunner({
   runId,
   kitId,
