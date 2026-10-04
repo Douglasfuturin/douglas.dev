@@ -1,0 +1,1945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Webinar Deck Template, Demo</title>
+  <style>
+    :root {
+      --bg: #000000;
+      --fg: #ffffff;
+      --muted: rgba(255, 255, 255, 0.6);
+      --divider: rgba(255, 255, 255, 0.15);
+      --accent: #FF5C28;
+      /* Sizing units below are container-query units (cqw/cqh), they resolve
+         against the 16:9 .slide-canvas, NOT the viewport. This keeps every
+         element correctly sized regardless of browser window aspect ratio. */
+      --slide-padding: 8cqh 10cqw;
+      --hero-size: clamp(64px, 11cqw, 200px);
+      --big-size: clamp(48px, 7.5cqw, 140px);
+      --title-size: clamp(40px, 5.5cqw, 96px);
+      --body-size: clamp(28px, 3.2cqw, 56px);
+      --small-size: clamp(20px, 1.8cqw, 32px);
+      --tiny-size: clamp(14px, 1.2cqw, 22px);
+      --transition: opacity 200ms ease;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: 'Inter', 'Helvetica Neue', 'SF Pro Display', system-ui, -apple-system, sans-serif;
+      font-weight: 500;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .deck {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* Slide canvas is locked to 16:9, standard presentation aspect.
+       Letterboxes (black bars) when viewport isn't 16:9.
+       container-type: size makes cqw/cqh units resolve against THIS box. */
+    .slide-canvas {
+      position: relative;
+      width: min(100vw, calc(100vh * 16 / 9));
+      height: min(100vh, calc(100vw * 9 / 16));
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      background: var(--bg);
+      container-type: size;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: var(--slide-padding);
+      opacity: 0;
+      pointer-events: none;
+      transition: var(--transition);
+      text-align: center;
+    }
+
+    .slide.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* ============ Pattern: title (descriptive headline + meta) ============ */
+    .slide.pattern-title {
+      gap: 5cqh;
+    }
+    .slide.pattern-title .deck-title {
+      font-size: var(--title-size);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      max-width: 26ch;
+    }
+    .slide.pattern-title .deck-title .accent {
+      color: var(--accent);
+    }
+    .slide.pattern-title .deck-meta {
+      font-size: var(--small-size);
+      color: var(--muted);
+      font-weight: 400;
+      letter-spacing: 0.02em;
+    }
+    .slide.pattern-title .deck-meta .accent {
+      color: var(--accent);
+    }
+
+    /* ============ Pattern: big-text ============ */
+    .slide.pattern-big-text .text {
+      font-size: var(--big-size);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+      max-width: 22ch;
+    }
+    .slide.pattern-big-text .text .accent {
+      color: var(--accent);
+    }
+
+    /* ============ Pattern: mono-word ============ */
+    .slide.pattern-mono-word .text {
+      font-size: var(--hero-size);
+      font-weight: 800;
+      letter-spacing: -0.05em;
+      line-height: 0.9;
+    }
+
+    /* ============ Pattern: mono-line ============ */
+    .slide.pattern-mono-line .text {
+      font-size: var(--title-size);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+      max-width: 18ch;
+    }
+
+    /* ============ Pattern: mono-name ============ */
+    .slide.pattern-mono-name .text {
+      font-size: var(--hero-size);
+      font-weight: 800;
+      letter-spacing: -0.05em;
+      line-height: 0.9;
+    }
+
+    /* ============ Pattern: three-lines ============ */
+    .slide.pattern-three-lines .lines {
+      display: flex;
+      flex-direction: column;
+      gap: 3cqh;
+    }
+    .slide.pattern-three-lines .line {
+      font-size: var(--body-size);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+    .slide.pattern-three-lines .line-number {
+      color: var(--accent);
+      font-weight: 800;
+      margin-right: 0.6em;
+    }
+
+    /* ============ Pattern: permission ============ */
+    .slide.pattern-permission .question {
+      font-size: var(--title-size);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+      max-width: 20ch;
+    }
+    .slide.pattern-permission .hint {
+      margin-top: 6cqh;
+      font-size: var(--small-size);
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    /* ============ Pattern: instruction ============ */
+    .slide.pattern-instruction .action {
+      font-size: var(--big-size);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+    }
+    .slide.pattern-instruction .reason {
+      margin-top: 4cqh;
+      font-size: var(--body-size);
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    /* ============ Pattern: proof-number / proof-stat ============ */
+    .slide.pattern-proof-number .number,
+    .slide.pattern-proof-stat .number {
+      font-size: var(--hero-size);
+      font-weight: 800;
+      letter-spacing: -0.05em;
+      line-height: 0.9;
+      color: var(--accent);
+    }
+    .slide.pattern-proof-number .label,
+    .slide.pattern-proof-stat .label {
+      margin-top: 4cqh;
+      font-size: var(--body-size);
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+      max-width: 24ch;
+    }
+
+    /* ============ Pattern: case-study-headline ============ */
+    .slide.pattern-case-study-headline .headline {
+      font-size: var(--big-size);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+      max-width: 22ch;
+    }
+    .slide.pattern-case-study-headline .arrow {
+      color: var(--accent);
+      margin: 0 0.3em;
+    }
+
+    /* ============ Pattern: photo-full ============ */
+    .slide.pattern-photo-full {
+      padding: 0;
+    }
+    .slide.pattern-photo-full .photo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* ============ Pattern: photo-text-overlay ============ */
+    .slide.pattern-photo-text-overlay {
+      padding: 0;
+      justify-content: flex-end;
+      align-items: flex-start;
+    }
+    /* Background image always fills the entire slide, edge to edge.
+       The brightness filter guarantees a dark backdrop regardless of what
+       the generator returns, text legibility never depends on the image. */
+    .slide.pattern-photo-text-overlay .photo {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      min-width: 100%;
+      min-height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+      filter: brightness(0.62) saturate(0.9);
+    }
+    /* Scrim, darkest at the bottom-left where the text sits, clearing toward
+       the top-right so the image's emphasis side stays visible. */
+    .slide.pattern-photo-text-overlay::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top right,
+        rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.45) 45%, rgba(0,0,0,0.12) 100%);
+      pointer-events: none;
+    }
+    .slide.pattern-photo-text-overlay .overlay {
+      position: relative;
+      z-index: 1;
+      padding: 6cqh 8cqw;
+      font-size: var(--big-size);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+      max-width: 18ch;
+      text-align: left;
+      text-shadow: 0 2px 24px rgba(0, 0, 0, 0.6);
+    }
+
+    /* ============ Pattern: logo-wall ============ */
+    .slide.pattern-logo-wall .logos {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4cqh 4cqw;
+      align-items: center;
+      justify-items: center;
+      max-width: 80cqw;
+    }
+    .slide.pattern-logo-wall .logo {
+      max-width: 100%;
+      max-height: 10cqh;
+      filter: brightness(0) invert(1);
+      opacity: 0.8;
+    }
+
+    /* ============ Pattern: agenda ============ */
+    .slide.pattern-agenda .items {
+      display: flex;
+      flex-direction: column;
+      gap: 4cqh;
+      align-items: flex-start;
+      text-align: left;
+    }
+    .slide.pattern-agenda .item {
+      font-size: var(--body-size);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      display: flex;
+      gap: 0.6em;
+      align-items: baseline;
+    }
+    .slide.pattern-agenda .item-number {
+      color: var(--accent);
+      font-weight: 800;
+      min-width: 1.5em;
+    }
+
+    /* ============ Pattern: bridge ============ */
+    .slide.pattern-bridge .text {
+      font-size: var(--title-size);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      font-style: italic;
+      color: var(--muted);
+      max-width: 18ch;
+    }
+
+    /* ============ Pattern: big-claim ============ */
+    .slide.pattern-big-claim .claim {
+      font-size: var(--big-size);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1.0;
+      max-width: 22ch;
+    }
+    .slide.pattern-big-claim .claim .accent {
+      color: var(--accent);
+    }
+
+    /* ============ Pattern: vs-belief ============ */
+    .slide.pattern-vs-belief .label {
+      font-size: var(--small-size);
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 3cqh;
+    }
+    .slide.pattern-vs-belief .belief {
+      font-size: var(--big-size);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+      max-width: 22ch;
+      font-style: italic;
+    }
+
+    /* ============ Pattern: scene-setter ============ */
+    .slide.pattern-scene-setter .scene {
+      display: flex;
+      flex-direction: column;
+      gap: 1cqh;
+    }
+    .slide.pattern-scene-setter .scene-line {
+      font-size: var(--hero-size);
+      font-weight: 800;
+      letter-spacing: -0.05em;
+      line-height: 0.95;
+    }
+
+    /* ============ Pattern: framework-named ============ */
+    .slide.pattern-framework-named .name {
+      font-size: var(--big-size);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1.0;
+    }
+    .slide.pattern-framework-named .name .accent {
+      color: var(--accent);
+    }
+
+    /* ============ Pattern: framework-step ============ */
+    .slide.pattern-framework-step .step-number {
+      font-size: var(--hero-size);
+      font-weight: 800;
+      letter-spacing: -0.05em;
+      color: var(--accent);
+      line-height: 0.9;
+      margin-bottom: 3cqh;
+    }
+    .slide.pattern-framework-step .step-name {
+      font-size: var(--big-size);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+      margin-bottom: 3cqh;
+    }
+    .slide.pattern-framework-step .step-description {
+      font-size: var(--body-size);
+      color: var(--muted);
+      font-weight: 400;
+      line-height: 1.2;
+      max-width: 24ch;
+    }
+
+    /* ============ Pattern: misconception ============ */
+    .slide.pattern-misconception {
+      align-items: flex-start;
+      text-align: left;
+    }
+    .slide.pattern-misconception .block {
+      display: flex;
+      flex-direction: column;
+      gap: 1cqh;
+      margin-bottom: 5cqh;
+    }
+    .slide.pattern-misconception .block:last-child {
+      margin-bottom: 0;
+    }
+    .slide.pattern-misconception .label {
+      font-size: var(--small-size);
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .slide.pattern-misconception .text {
+      font-size: var(--title-size);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+      max-width: 22ch;
+    }
+    .slide.pattern-misconception .text.correct {
+      color: var(--accent);
+    }
+
+    /* ============ Pattern: screenshot ============ */
+    .slide.pattern-screenshot {
+      padding: 4cqh 4cqw;
+      justify-content: flex-start;
+    }
+    .slide.pattern-screenshot .screenshot {
+      max-width: 100%;
+      max-height: 80cqh;
+      object-fit: contain;
+      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--divider);
+    }
+    .slide.pattern-screenshot .caption {
+      margin-top: 3cqh;
+      font-size: var(--small-size);
+      color: var(--muted);
+    }
+
+    /* ============ Pattern: quote ============ */
+    .slide.pattern-quote .quote-text {
+      font-size: var(--big-size);
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      font-style: italic;
+      max-width: 22ch;
+    }
+    .slide.pattern-quote .quote-attribution {
+      margin-top: 5cqh;
+      font-size: var(--small-size);
+      color: var(--accent);
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+
+    /* ============ Pattern: avatar / not-for ============ */
+    .slide.pattern-avatar,
+    .slide.pattern-not-for {
+      align-items: flex-start;
+      text-align: left;
+    }
+    .slide.pattern-avatar .label,
+    .slide.pattern-not-for .label {
+      font-size: var(--small-size);
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 4cqh;
+    }
+    .slide.pattern-not-for .label {
+      color: var(--accent);
+    }
+    .slide.pattern-avatar .items,
+    .slide.pattern-not-for .items {
+      display: flex;
+      flex-direction: column;
+      gap: 2.5cqh;
+    }
+    .slide.pattern-avatar .item,
+    .slide.pattern-not-for .item {
+      font-size: var(--body-size);
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      line-height: 1.15;
+    }
+
+    /* ============ Pattern: stack-line / stack-total ============ */
+    .slide.pattern-stack-line,
+    .slide.pattern-stack-total {
+      align-items: stretch;
+      justify-content: center;
+      padding: 8cqh 8cqw;
+    }
+    .slide.pattern-stack-line .stack-list {
+      display: flex;
+      flex-direction: column;
+      gap: 2.5cqh;
+      width: 100%;
+    }
+    .slide.pattern-stack-line .stack-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 4cqw;
+      align-items: baseline;
+      padding-bottom: 2cqh;
+      border-bottom: 1px solid var(--divider);
+    }
+    .slide.pattern-stack-line .stack-row:last-child {
+      border-bottom: none;
+    }
+    .slide.pattern-stack-line .stack-row.bonus .stack-name::before {
+      content: "+ BONUS";
+      color: var(--accent);
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      font-size: 0.6em;
+      display: block;
+      margin-bottom: 0.4cqh;
+    }
+    .slide.pattern-stack-line .stack-name {
+      font-size: var(--small-size);
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+    .slide.pattern-stack-line .stack-description {
+      font-size: var(--tiny-size);
+      color: var(--muted);
+      font-weight: 400;
+      margin-top: 1cqh;
+    }
+    .slide.pattern-stack-line .stack-value {
+      font-size: var(--small-size);
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+    }
+
+    .slide.pattern-stack-total .total-label {
+      font-size: var(--small-size);
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 3cqh;
+    }
+    .slide.pattern-stack-total .total-amount {
+      font-size: var(--hero-size);
+      font-weight: 800;
+      letter-spacing: -0.05em;
+      line-height: 0.9;
+      color: var(--accent);
+    }
+
+    /* ============ Pattern: stack-anchor ============ */
+    .slide.pattern-stack-anchor .text {
+      font-size: var(--big-size);
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+      max-width: 20ch;
+      font-style: italic;
+      color: var(--muted);
+    }
+
+    /* ============ Pattern: price-reveal ============ */
+    .slide.pattern-price-reveal .label {
+      font-size: var(--small-size);
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 3cqh;
+    }
+    .slide.pattern-price-reveal .price {
+      font-size: var(--hero-size);
+      font-weight: 800;
+      letter-spacing: -0.05em;
+      line-height: 0.9;
+    }
+
+    /* ============ Pattern: payment-plan ============ */
+    .slide.pattern-payment-plan .separator {
+      font-size: var(--body-size);
+      color: var(--muted);
+      margin-bottom: 3cqh;
+    }
+    .slide.pattern-payment-plan .plan {
+      font-size: var(--big-size);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+    }
+
+    /* ============ Pattern: comparison-anchor ============ */
+    .slide.pattern-comparison-anchor {
+      align-items: stretch;
+      padding: 10cqh 10cqw;
+    }
+    .slide.pattern-comparison-anchor .compare-list {
+      display: flex;
+      flex-direction: column;
+      gap: 3cqh;
+    }
+    .slide.pattern-comparison-anchor .compare-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 4cqw;
+      align-items: baseline;
+      font-size: var(--body-size);
+      font-weight: 500;
+      padding-bottom: 2cqh;
+      border-bottom: 1px solid var(--divider);
+    }
+    .slide.pattern-comparison-anchor .compare-row:last-child {
+      border-bottom: none;
+    }
+    .slide.pattern-comparison-anchor .compare-row.this {
+      color: var(--accent);
+      font-weight: 700;
+    }
+    .slide.pattern-comparison-anchor .compare-value {
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+    }
+
+    /* ============ Pattern: roi-math ============ */
+    .slide.pattern-roi-math .roi-list {
+      display: flex;
+      flex-direction: column;
+      gap: 3cqh;
+    }
+    .slide.pattern-roi-math .roi-row {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 4cqw;
+      align-items: baseline;
+      font-size: var(--body-size);
+      font-weight: 600;
+    }
+    .slide.pattern-roi-math .roi-label {
+      color: var(--muted);
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      font-size: var(--small-size);
+    }
+    .slide.pattern-roi-math .roi-row.result .roi-value {
+      color: var(--accent);
+      font-weight: 800;
+    }
+
+    /* ============ Pattern: cost-of-not ============ */
+    .slide.pattern-cost-of-not {
+      align-items: flex-start;
+      text-align: left;
+    }
+    .slide.pattern-cost-of-not .label {
+      font-size: var(--small-size);
+      color: var(--accent);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 4cqh;
+    }
+    .slide.pattern-cost-of-not .consequences {
+      display: flex;
+      flex-direction: column;
+      gap: 3cqh;
+    }
+    .slide.pattern-cost-of-not .consequence {
+      font-size: var(--body-size);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+    }
+
+    /* ============ Pattern: guarantee-headline ============ */
+    .slide.pattern-guarantee-headline .guarantee {
+      font-size: var(--big-size);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+      max-width: 24ch;
+    }
+    .slide.pattern-guarantee-headline .guarantee .accent {
+      color: var(--accent);
+    }
+
+    /* ============ Pattern: guarantee-details ============ */
+    .slide.pattern-guarantee-details {
+      align-items: flex-start;
+      text-align: left;
+    }
+    .slide.pattern-guarantee-details .label {
+      font-size: var(--small-size);
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 4cqh;
+    }
+    .slide.pattern-guarantee-details .conditions {
+      display: flex;
+      flex-direction: column;
+      gap: 3cqh;
+    }
+    .slide.pattern-guarantee-details .condition {
+      font-size: var(--body-size);
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+      display: flex;
+      gap: 0.6em;
+      align-items: baseline;
+    }
+    .slide.pattern-guarantee-details .condition-number {
+      color: var(--accent);
+      font-weight: 800;
+    }
+
+    /* ============ Pattern: urgency-reason / deadline ============ */
+    .slide.pattern-urgency-reason .label,
+    .slide.pattern-deadline .label {
+      font-size: var(--small-size);
+      color: var(--accent);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 3cqh;
+    }
+    .slide.pattern-urgency-reason .reason,
+    .slide.pattern-deadline .deadline-text {
+      font-size: var(--big-size);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+      max-width: 24ch;
+    }
+
+    /* ============ Pattern: action-plan ============ */
+    .slide.pattern-action-plan {
+      align-items: flex-start;
+      text-align: left;
+    }
+    .slide.pattern-action-plan .label {
+      font-size: var(--small-size);
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 4cqh;
+    }
+    .slide.pattern-action-plan .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 3cqh;
+    }
+    .slide.pattern-action-plan .step {
+      font-size: var(--body-size);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      display: flex;
+      gap: 0.6em;
+      align-items: baseline;
+    }
+    .slide.pattern-action-plan .step-number {
+      color: var(--accent);
+      font-weight: 800;
+      min-width: 1.5em;
+    }
+
+    /* ============ Pattern: button / final-cta ============ */
+    .slide.pattern-button .url,
+    .slide.pattern-final-cta .url {
+      font-size: clamp(36px, 5cqw, 88px);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      color: var(--accent);
+      text-decoration: none;
+      max-width: 90cqw;
+      overflow-wrap: anywhere;
+    }
+    .slide.pattern-final-cta .signoff {
+      margin-top: 5cqh;
+      font-size: var(--body-size);
+      color: var(--muted);
+      font-weight: 400;
+      letter-spacing: -0.01em;
+    }
+
+    /* ============ Pattern: faq-grid ============ */
+    .slide.pattern-faq-grid {
+      align-items: stretch;
+      padding: 8cqh 8cqw;
+    }
+    .slide.pattern-faq-grid .faq-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4cqh 4cqw;
+      width: 100%;
+    }
+    .slide.pattern-faq-grid .faq-item {
+      display: flex;
+      flex-direction: column;
+      gap: 1cqh;
+      text-align: left;
+    }
+    .slide.pattern-faq-grid .faq-item.full-width {
+      grid-column: 1 / -1;
+    }
+    .slide.pattern-faq-grid .faq-q {
+      font-size: var(--small-size);
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: -0.01em;
+    }
+    .slide.pattern-faq-grid .faq-a {
+      font-size: var(--small-size);
+      font-weight: 400;
+      color: var(--fg);
+      letter-spacing: -0.01em;
+      line-height: 1.25;
+    }
+
+    /* ============ Pattern: image-split ============ */
+    .slide.pattern-image-split {
+      padding: 0;
+      flex-direction: row;
+      align-items: stretch;
+    }
+    .slide.pattern-image-split .split-image {
+      width: 42%;
+      height: 100%;
+      overflow: hidden;
+    }
+    .slide.pattern-image-split .split-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .slide.pattern-image-split .split-content {
+      width: 58%;
+      padding: 8cqh 6cqw;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      text-align: left;
+      gap: 3cqh;
+    }
+    .slide.pattern-image-split .title {
+      font-size: var(--big-size);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+    }
+    .slide.pattern-image-split .body {
+      font-size: var(--body-size);
+      color: var(--muted);
+      line-height: 1.25;
+      font-weight: 400;
+      letter-spacing: -0.01em;
+    }
+
+    /* ============ Pattern: image-hero ============ */
+    .slide.pattern-image-hero {
+      padding: 6cqh 6cqw;
+      gap: 3cqh;
+    }
+    .slide.pattern-image-hero .image-container {
+      max-width: 100%;
+      max-height: 72cqh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .slide.pattern-image-hero .image-container img {
+      max-width: 100%;
+      max-height: 72cqh;
+      object-fit: contain;
+      box-shadow: 0 8px 60px rgba(0, 0, 0, 0.6);
+      border: 1px solid var(--divider);
+    }
+    .slide.pattern-image-hero .caption {
+      font-size: var(--small-size);
+      color: var(--muted);
+      letter-spacing: 0.01em;
+    }
+
+    /* ============ Pattern: image-mosaic-above ============ */
+    .slide.pattern-image-mosaic-above {
+      gap: 6cqh;
+    }
+    .slide.pattern-image-mosaic-above .mosaic {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2.5cqw;
+    }
+    .slide.pattern-image-mosaic-above .mosaic-item {
+      width: clamp(110px, 15cqw, 240px);
+      height: clamp(110px, 15cqw, 240px);
+      object-fit: cover;
+      background: white;
+      padding: 8px 8px 24px 8px;
+      border-radius: 2px;
+      box-shadow: 0 16px 50px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    .slide.pattern-image-mosaic-above .mosaic-item:nth-child(1) {
+      transform: rotate(-5deg);
+    }
+    .slide.pattern-image-mosaic-above .mosaic-item:nth-child(2) {
+      transform: rotate(2deg) translateY(-1.5cqh);
+      z-index: 2;
+    }
+    .slide.pattern-image-mosaic-above .mosaic-item:nth-child(3) {
+      transform: rotate(6deg);
+    }
+    .slide.pattern-image-mosaic-above .mosaic-item:only-child {
+      transform: rotate(-2deg);
+    }
+    .slide.pattern-image-mosaic-above .title {
+      font-size: var(--big-size);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+      max-width: 22ch;
+    }
+    .slide.pattern-image-mosaic-above .title .accent {
+      color: var(--accent);
+    }
+    .slide.pattern-image-mosaic-above .subtitle {
+      font-size: var(--body-size);
+      color: var(--muted);
+      font-weight: 400;
+      line-height: 1.25;
+      max-width: 32ch;
+      letter-spacing: -0.01em;
+    }
+
+    /* ============ Pattern: testimonial-single ============ */
+    .slide.pattern-testimonial-single {
+      gap: 4cqh;
+    }
+    .slide.pattern-testimonial-single .avatar {
+      width: clamp(96px, 10cqw, 180px);
+      height: clamp(96px, 10cqw, 180px);
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--accent);
+    }
+    .slide.pattern-testimonial-single .quote {
+      font-size: var(--big-size);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      max-width: 24ch;
+      font-style: italic;
+    }
+    .slide.pattern-testimonial-single .attribution {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5cqh;
+    }
+    .slide.pattern-testimonial-single .name {
+      font-size: var(--body-size);
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--accent);
+    }
+    .slide.pattern-testimonial-single .role {
+      font-size: var(--small-size);
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    /* ============ Pattern: testimonial-grid ============ */
+    .slide.pattern-testimonial-grid {
+      padding: 6cqh 5cqw;
+    }
+    .slide.pattern-testimonial-grid .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2.5cqh 1.5cqw;
+      width: 100%;
+      max-width: 90cqw;
+    }
+    .slide.pattern-testimonial-grid .testimonial-card {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5cqh;
+      padding: 2.5cqh 1.5cqw;
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 12px;
+      border: 1px solid var(--divider);
+      text-align: left;
+    }
+    .slide.pattern-testimonial-grid .testimonial-card .card-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .slide.pattern-testimonial-grid .testimonial-card .card-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+    .slide.pattern-testimonial-grid .testimonial-card .card-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+    .slide.pattern-testimonial-grid .testimonial-card .card-quote {
+      font-size: clamp(14px, 1.2cqw, 22px);
+      line-height: 1.35;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+    }
+    .slide.pattern-testimonial-grid .testimonial-card .card-name {
+      font-size: clamp(13px, 1.1cqw, 20px);
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: -0.01em;
+      line-height: 1.1;
+    }
+    .slide.pattern-testimonial-grid .testimonial-card .card-role {
+      font-size: clamp(11px, 0.9cqw, 16px);
+      color: var(--muted);
+    }
+
+    /* ============ Pattern: testimonial-screenshot ============ */
+    .slide.pattern-testimonial-screenshot {
+      padding: 0;
+      flex-direction: row;
+      align-items: stretch;
+    }
+    .slide.pattern-testimonial-screenshot .screenshot-side {
+      width: 42%;
+      padding: 6cqh 4cqw;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .slide.pattern-testimonial-screenshot .screenshot-side img {
+      max-width: 100%;
+      max-height: 80cqh;
+      object-fit: contain;
+      box-shadow: 0 12px 50px rgba(0, 0, 0, 0.6);
+      border-radius: 8px;
+    }
+    .slide.pattern-testimonial-screenshot .quote-side {
+      width: 58%;
+      padding: 8cqh 5cqw;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      text-align: left;
+      gap: 3cqh;
+    }
+    .slide.pattern-testimonial-screenshot .quote-text {
+      font-size: var(--title-size);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      font-style: italic;
+    }
+    .slide.pattern-testimonial-screenshot .name {
+      font-size: var(--body-size);
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .slide.pattern-testimonial-screenshot .role {
+      font-size: var(--small-size);
+      color: var(--muted);
+      margin-top: -2cqh;
+    }
+
+    /* ============ Pattern: before-after ============ */
+    .slide.pattern-before-after {
+      padding: 0;
+      flex-direction: row;
+      align-items: stretch;
+    }
+    .slide.pattern-before-after .ba-side {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 4cqh;
+      padding: 8cqh 5cqw;
+    }
+    .slide.pattern-before-after .ba-side + .ba-side {
+      border-left: 1px solid var(--divider);
+    }
+    .slide.pattern-before-after .ba-before {
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .slide.pattern-before-after .ba-label {
+      font-size: var(--small-size);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 700;
+    }
+    .slide.pattern-before-after .ba-before .ba-label {
+      color: var(--muted);
+    }
+    .slide.pattern-before-after .ba-after .ba-label {
+      color: var(--accent);
+    }
+    .slide.pattern-before-after .ba-image {
+      width: 100%;
+      max-height: 44cqh;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+    .slide.pattern-before-after .ba-text {
+      font-size: var(--body-size);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      max-width: 16ch;
+    }
+    .slide.pattern-before-after .ba-before .ba-text {
+      color: var(--muted);
+    }
+
+    /* ============ Pattern: stat-row (dual / triple / quad stat) ============ */
+    .slide.pattern-stat-row .stat-group {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 7cqw;
+      flex-wrap: wrap;
+    }
+    .slide.pattern-stat-row .stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2cqh;
+    }
+    .slide.pattern-stat-row .stat-number {
+      font-size: var(--hero-size);
+      font-weight: 800;
+      letter-spacing: -0.05em;
+      line-height: 0.9;
+      color: var(--accent);
+    }
+    .slide.pattern-stat-row .stat-label {
+      font-size: var(--small-size);
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+      max-width: 14ch;
+    }
+
+    /* ============ Pattern: section-divider ============ */
+    .slide.pattern-section-divider .divider-eyebrow {
+      font-size: var(--small-size);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 3cqh;
+    }
+    .slide.pattern-section-divider .divider-title {
+      font-size: var(--hero-size);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 0.95;
+      max-width: 18ch;
+    }
+
+    /* ============ Pattern: timeline ============ */
+    .slide.pattern-timeline {
+      padding: 8cqh 7cqw;
+    }
+    .slide.pattern-timeline .timeline-track {
+      display: flex;
+      width: 100%;
+      align-items: flex-start;
+    }
+    .slide.pattern-timeline .timeline-node {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 2.5cqh;
+    }
+    .slide.pattern-timeline .timeline-date {
+      font-size: var(--title-size);
+      font-weight: 800;
+      color: var(--accent);
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+    .slide.pattern-timeline .timeline-bar {
+      width: 100%;
+      height: 3px;
+      background: var(--divider);
+      position: relative;
+    }
+    .slide.pattern-timeline .timeline-bar::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 4px solid var(--bg);
+    }
+    .slide.pattern-timeline .timeline-event {
+      font-size: var(--small-size);
+      font-weight: 500;
+      line-height: 1.25;
+      max-width: 18ch;
+    }
+
+    /* ============ Pattern: callout-box ============ */
+    .slide.pattern-callout-box .callout {
+      border: 1px solid var(--divider);
+      border-left: 4px solid var(--accent);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 6cqh 6cqw;
+      max-width: 72cqw;
+      display: flex;
+      flex-direction: column;
+      gap: 3cqh;
+      text-align: left;
+    }
+    .slide.pattern-callout-box .callout-text {
+      font-size: var(--title-size);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+    }
+    .slide.pattern-callout-box .callout-text .accent {
+      color: var(--accent);
+    }
+    .slide.pattern-callout-box .callout-source {
+      font-size: var(--small-size);
+      color: var(--muted);
+      font-weight: 500;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    /* ============ Pattern: offer-mockup ============ */
+    .slide.pattern-offer-mockup {
+      gap: 3cqh;
+    }
+    .slide.pattern-offer-mockup .tag {
+      font-size: var(--small-size);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .slide.pattern-offer-mockup .mockup-image {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      max-height: 58cqh;
+    }
+    .slide.pattern-offer-mockup .mockup-image img {
+      max-width: 86cqw;
+      max-height: 58cqh;
+      object-fit: contain;
+    }
+    .slide.pattern-offer-mockup .price-block {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 4cqw;
+    }
+    .slide.pattern-offer-mockup .struck {
+      font-size: var(--title-size);
+      font-weight: 600;
+      color: var(--muted);
+      text-decoration: line-through;
+      text-decoration-thickness: 0.05em;
+    }
+    .slide.pattern-offer-mockup .price {
+      font-size: var(--hero-size);
+      font-weight: 800;
+      letter-spacing: -0.05em;
+      line-height: 0.9;
+      color: var(--accent);
+    }
+
+    /* ============ Chrome: slide counter + progress bar ============ */
+    .chrome {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      transition: width 200ms ease;
+    }
+
+    .slide-counter {
+      position: absolute;
+      right: 24px;
+      bottom: 20px;
+      font-size: 14px;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+    }
+
+    /* ============ Help overlay ============ */
+    .help {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.9);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+    .help.visible {
+      display: flex;
+    }
+    .help .content {
+      max-width: 480px;
+      padding: 32px;
+    }
+    .help h2 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+    .help .key-list {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 12px 24px;
+      font-size: 15px;
+    }
+    .help .key {
+      font-family: 'SF Mono', Menlo, Consolas, monospace;
+      color: var(--accent);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="deck" id="deck">
+    <div class="slide-canvas">
+    <!-- BEGIN-SLIDES (render script replaces everything between these markers) -->
+
+    <section class="slide pattern-title">
+      <div class="deck-title">The 90-Minute Webinar Framework</div>
+      <div class="deck-meta"><span class="accent">Demo deck</span> · slide pattern showcase</div>
+    </section>
+
+    <section class="slide pattern-big-text">
+      <div class="text">How to <span class="accent">2x</span> your conversion rate without spending more on ads.</div>
+    </section>
+
+    <section class="slide pattern-mono-word">
+      <div class="text">Today.</div>
+    </section>
+
+    <section class="slide pattern-three-lines">
+      <div class="lines">
+        <div class="line"><span class="line-number">1.</span>Why most webinars convert at 2%</div>
+        <div class="line"><span class="line-number">2.</span>The 3 beliefs you have to install</div>
+        <div class="line"><span class="line-number">3.</span>How the stack actually works</div>
+      </div>
+    </section>
+
+    <section class="slide pattern-permission">
+      <div class="question">Will you commit to staying the full 90 minutes?</div>
+      <div class="hint">Drop a "yes" in the chat.</div>
+    </section>
+
+    <section class="slide pattern-instruction">
+      <div class="action">Grab a pen.</div>
+      <div class="reason">This works better when you take notes.</div>
+    </section>
+
+    <section class="slide pattern-proof-number">
+      <div class="number">$12.4M</div>
+      <div class="label">generated by students using this exact framework in 2024</div>
+    </section>
+
+    <section class="slide pattern-section-divider">
+      <div class="divider-eyebrow">Part 1</div>
+      <div class="divider-title">The Story</div>
+    </section>
+
+    <section class="slide pattern-image-mosaic-above">
+      <div class="mosaic">
+        <img class="mosaic-item" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop&q=80" alt="" />
+        <img class="mosaic-item" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&q=80" alt="" />
+        <img class="mosaic-item" src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&q=80" alt="" />
+      </div>
+      <div class="title"><span class="accent">200+</span> founders shipped their first webinar last quarter.</div>
+      <div class="subtitle">Average cohort conversion: 9.4%. Best in cohort: 23%.</div>
+    </section>
+
+    <section class="slide pattern-photo-full">
+      <img class="photo" src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=1920&h=1080&fit=crop&q=80" alt="" />
+    </section>
+
+    <section class="slide pattern-photo-text-overlay">
+      <img class="photo" src="https://images.unsplash.com/photo-1514565131-fce0801e5785?w=1920&h=1080&fit=crop&q=80" alt="" />
+      <div class="overlay">2019. Boise. Everything was about to change.</div>
+    </section>
+
+    <section class="slide pattern-timeline">
+      <div class="timeline-track">
+        <div class="timeline-node">
+          <div class="timeline-date">2019</div>
+          <div class="timeline-bar"></div>
+          <div class="timeline-event">Quit the job. $48k in credit card debt.</div>
+        </div>
+        <div class="timeline-node">
+          <div class="timeline-date">2021</div>
+          <div class="timeline-bar"></div>
+          <div class="timeline-event">First $10k month from one webinar.</div>
+        </div>
+        <div class="timeline-node">
+          <div class="timeline-date">2023</div>
+          <div class="timeline-bar"></div>
+          <div class="timeline-event">Crossed $1M in total sales.</div>
+        </div>
+        <div class="timeline-node">
+          <div class="timeline-date">2026</div>
+          <div class="timeline-bar"></div>
+          <div class="timeline-event">Taught the system to 200+ founders.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide pattern-before-after">
+      <div class="ba-side ba-before">
+        <div class="ba-label">Before</div>
+        <img class="ba-image" src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1000&h=900&fit=crop&q=80" alt="" />
+        <div class="ba-text">$0/mo. 60-hour weeks. No system.</div>
+      </div>
+      <div class="ba-side ba-after">
+        <div class="ba-label">After</div>
+        <img class="ba-image" src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1000&h=900&fit=crop&q=80" alt="" />
+        <div class="ba-text">$50k/mo. 20-hour weeks. Fully systemized.</div>
+      </div>
+    </section>
+
+    <section class="slide pattern-image-split">
+      <div class="split-image">
+        <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=900&h=1600&fit=crop&q=80" alt="" />
+      </div>
+      <div class="split-content">
+        <div class="title">The shift that changed everything.</div>
+        <div class="body">It wasn't about better slides. It was about better beliefs, installed before the offer reveal.</div>
+      </div>
+    </section>
+
+    <section class="slide pattern-callout-box">
+      <div class="callout">
+        <div class="callout-text">The webinar doesn't sell the product. It <span class="accent">installs the belief</span> that makes the product obvious.</div>
+        <div class="callout-source">Core principle</div>
+      </div>
+    </section>
+
+    <section class="slide pattern-image-hero">
+      <div class="image-container">
+        <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1600&h=900&fit=crop&q=80" alt="" />
+      </div>
+      <div class="caption">Live dashboard, conversion rate after applying the framework</div>
+    </section>
+
+    <section class="slide pattern-stat-row">
+      <div class="stat-group">
+        <div class="stat">
+          <div class="stat-number">47x</div>
+          <div class="stat-label">Average ROAS</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number">143</div>
+          <div class="stat-label">Students</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number">11</div>
+          <div class="stat-label">Industries</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide pattern-testimonial-single">
+      <img class="avatar" src="https://i.pravatar.cc/200?img=12" alt="" />
+      <div class="quote">"Restructured my entire offer. Went from 4% to 17% conversion on the next launch."</div>
+      <div class="attribution">
+        <div class="name">Marcus Chen</div>
+        <div class="role">Founder, RampUp SaaS</div>
+      </div>
+    </section>
+
+    <section class="slide pattern-testimonial-grid">
+      <div class="grid">
+        <div class="testimonial-card">
+          <div class="card-head">
+            <img class="card-avatar" src="https://i.pravatar.cc/200?img=5" alt="" />
+            <div class="card-meta">
+              <div class="card-name">Jess Park</div>
+              <div class="card-role">Course Creator</div>
+            </div>
+          </div>
+          <div class="card-quote">"Best webinar training I've taken. Implemented in a weekend and ran my first one within 2 weeks."</div>
+        </div>
+        <div class="testimonial-card">
+          <div class="card-head">
+            <img class="card-avatar" src="https://i.pravatar.cc/200?img=8" alt="" />
+            <div class="card-meta">
+              <div class="card-name">David Wu</div>
+              <div class="card-role">Agency Owner</div>
+            </div>
+          </div>
+          <div class="card-quote">"Converted at 11% on the first run. Previously was at 3% on a much smaller offer."</div>
+        </div>
+        <div class="testimonial-card">
+          <div class="card-head">
+            <img class="card-avatar" src="https://i.pravatar.cc/200?img=9" alt="" />
+            <div class="card-meta">
+              <div class="card-name">Sarah Tan</div>
+              <div class="card-role">Business Coach</div>
+            </div>
+          </div>
+          <div class="card-quote">"The stack section alone changed everything. Made $47k in my first run."</div>
+        </div>
+        <div class="testimonial-card">
+          <div class="card-head">
+            <img class="card-avatar" src="https://i.pravatar.cc/200?img=11" alt="" />
+            <div class="card-meta">
+              <div class="card-name">Lauren Harris</div>
+              <div class="card-role">Marketing Consultant</div>
+            </div>
+          </div>
+          <div class="card-quote">"Watched the proof slides and was sold. Then it actually worked."</div>
+        </div>
+        <div class="testimonial-card">
+          <div class="card-head">
+            <img class="card-avatar" src="https://i.pravatar.cc/200?img=15" alt="" />
+            <div class="card-meta">
+              <div class="card-name">James Okafor</div>
+              <div class="card-role">B2B Sales Lead</div>
+            </div>
+          </div>
+          <div class="card-quote">"Specific. Tactical. Worth 5x what I paid."</div>
+        </div>
+        <div class="testimonial-card">
+          <div class="card-head">
+            <img class="card-avatar" src="https://i.pravatar.cc/200?img=20" alt="" />
+            <div class="card-meta">
+              <div class="card-name">Priya Sharma</div>
+              <div class="card-role">SaaS Founder</div>
+            </div>
+          </div>
+          <div class="card-quote">"My first webinar pulled in $28k. Six months in we run them monthly."</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide pattern-testimonial-screenshot">
+      <div class="screenshot-side">
+        <img src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=900&h=1600&fit=crop&q=80" alt="" />
+      </div>
+      <div class="quote-side">
+        <div class="quote-text">"Implemented this on Monday. Ran the webinar Thursday. Closed $32,000 by Friday."</div>
+        <div>
+          <div class="name">Lauren Harris</div>
+          <div class="role">Marketing Consultant</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide pattern-case-study-headline">
+      <div class="headline">Lauren went from $0 <span class="arrow">→</span> $50k MRR in 6 months</div>
+    </section>
+
+    <section class="slide pattern-big-claim">
+      <div class="claim">The webinar isn't a sales pitch. <span class="accent">It's a belief installation system.</span></div>
+    </section>
+
+    <section class="slide pattern-vs-belief">
+      <div class="label">Most people believe</div>
+      <div class="belief">"Webinars are dead. Nobody watches the whole thing anymore."</div>
+    </section>
+
+    <section class="slide pattern-scene-setter">
+      <div class="scene">
+        <div class="scene-line">2019.</div>
+        <div class="scene-line">Boise.</div>
+      </div>
+    </section>
+
+    <section class="slide pattern-framework-named">
+      <div class="name">The <span class="accent">3-Secret</span> Framework</div>
+    </section>
+
+    <section class="slide pattern-framework-step">
+      <div class="step-number">1.</div>
+      <div class="step-name">The Vehicle</div>
+      <div class="step-description">Convince them the method works.</div>
+    </section>
+
+    <section class="slide pattern-misconception">
+      <div class="block">
+        <div class="label">Most people think</div>
+        <div class="text">You need better slides to convert better.</div>
+      </div>
+      <div class="block">
+        <div class="label">But actually</div>
+        <div class="text correct">You need better beliefs installed before the offer reveal.</div>
+      </div>
+    </section>
+
+    <section class="slide pattern-quote">
+      <div class="quote-text">"This restructured my entire offer. Went from 4% to 17% conversion on the next launch."</div>
+      <div class="quote-attribution">, Marcus, B2B SaaS founder</div>
+    </section>
+
+    <section class="slide pattern-avatar">
+      <div class="label">This is for</div>
+      <div class="items">
+        <div class="item">Course creators doing $10k-$100k/month</div>
+        <div class="item">Service businesses with a high-ticket offer</div>
+        <div class="item">Anyone running webinars below 8% conversion</div>
+      </div>
+    </section>
+
+    <section class="slide pattern-not-for">
+      <div class="label">This is NOT for</div>
+      <div class="items">
+        <div class="item">Brand-new beginners with no offer yet</div>
+        <div class="item">Anyone unwilling to test and iterate</div>
+        <div class="item">Companies selling below $497</div>
+      </div>
+    </section>
+
+    <section class="slide pattern-stack-line">
+      <div class="stack-list">
+        <div class="stack-row">
+          <div>
+            <div class="stack-name">The 90-Minute Webinar Framework</div>
+            <div class="stack-description">The complete 150-slide system with templates</div>
+          </div>
+          <div class="stack-value">$2,997</div>
+        </div>
+        <div class="stack-row bonus">
+          <div>
+            <div class="stack-name">First-30-Days Quick Start</div>
+            <div class="stack-description">Daily checklist to ship your first deck in a month</div>
+          </div>
+          <div class="stack-value">$497</div>
+        </div>
+        <div class="stack-row bonus">
+          <div>
+            <div class="stack-name">Done-For-You Slide Templates</div>
+            <div class="stack-description">All 40+ slide patterns pre-built in Figma</div>
+          </div>
+          <div class="stack-value">$1,497</div>
+        </div>
+        <div class="stack-row bonus">
+          <div>
+            <div class="stack-name">12 Months of Group Coaching</div>
+            <div class="stack-description">Weekly calls plus Slack support</div>
+          </div>
+          <div class="stack-value">$4,997</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide pattern-stack-total">
+      <div class="total-label">Total value</div>
+      <div class="total-amount">$9,988</div>
+    </section>
+
+    <section class="slide pattern-stack-anchor">
+      <div class="text">But you won't pay anywhere close to that.</div>
+    </section>
+
+    <section class="slide pattern-price-reveal">
+      <div class="label">Today's price</div>
+      <div class="price">$1,997</div>
+    </section>
+
+    <section class="slide pattern-payment-plan">
+      <div class="separator">or</div>
+      <div class="plan">3 payments of $697</div>
+    </section>
+
+    <section class="slide pattern-comparison-anchor">
+      <div class="compare-list">
+        <div class="compare-row">
+          <div>Hiring a webinar consultant</div>
+          <div class="compare-value">$15,000+</div>
+        </div>
+        <div class="compare-row">
+          <div>Doing it yourself for 18 months</div>
+          <div class="compare-value">$0 in lost revenue</div>
+        </div>
+        <div class="compare-row this">
+          <div>This. Once.</div>
+          <div class="compare-value">$1,997</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide pattern-roi-math">
+      <div class="roi-list">
+        <div class="roi-row">
+          <div class="roi-label">Investment</div>
+          <div class="roi-value">$1,997</div>
+        </div>
+        <div class="roi-row">
+          <div class="roi-label">One extra sale at average deal size</div>
+          <div class="roi-value">$3,000</div>
+        </div>
+        <div class="roi-row result">
+          <div class="roi-label">Return in year 1</div>
+          <div class="roi-value">50× minimum</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide pattern-cost-of-not">
+      <div class="label">If you don't fix this</div>
+      <div class="consequences">
+        <div class="consequence">Another 12 months at 3% conversion.</div>
+        <div class="consequence">Another $X in ad spend that doesn't return.</div>
+        <div class="consequence">Another year of the same problem.</div>
+      </div>
+    </section>
+
+    <section class="slide pattern-guarantee-headline">
+      <div class="guarantee">If you don't <span class="accent">2x your webinar conversion in 90 days</span>, I'll refund every dollar.</div>
+    </section>
+
+    <section class="slide pattern-urgency-reason">
+      <div class="label">Why now</div>
+      <div class="reason">This cohort closes Thursday. The next one isn't until Q3.</div>
+    </section>
+
+    <section class="slide pattern-deadline">
+      <div class="label">Doors close</div>
+      <div class="deadline-text">Thursday 11:59pm PT. After that the bonuses disappear.</div>
+    </section>
+
+    <section class="slide pattern-action-plan">
+      <div class="label">Right now</div>
+      <div class="steps">
+        <div class="step"><span class="step-number">1.</span>Click the link below</div>
+        <div class="step"><span class="step-number">2.</span>Fill out the 60-second application</div>
+        <div class="step"><span class="step-number">3.</span>Get instant access, start tonight</div>
+      </div>
+    </section>
+
+    <section class="slide pattern-faq-grid">
+      <div class="faq-list">
+        <div class="faq-item">
+          <div class="faq-q">Q: I'm just starting out, is this for me?</div>
+          <div class="faq-a">A: Only if you have an offer. If not, build the offer first.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">Q: What if I don't have time to implement?</div>
+          <div class="faq-a">A: ~6 hours total to deploy. Templates do the heavy lifting.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">Q: Can I share access with my team?</div>
+          <div class="faq-a">A: Yes, team seats included up to 5 people.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">Q: What if it doesn't work?</div>
+          <div class="faq-a">A: 90-day refund guarantee, full terms above.</div>
+        </div>
+        <div class="faq-item full-width">
+          <div class="faq-q">Q: Is there a payment plan?</div>
+          <div class="faq-a">A: 3 payments of $697. Click the link to see options.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide pattern-final-cta">
+      <a class="url" href="#">webinarframework.com/join</a>
+      <div class="signoff">See you on the other side.</div>
+    </section>
+
+    <!-- END-SLIDES -->
+    </div>
+  </div>
+
+  <div class="chrome">
+    <div class="progress-bar">
+      <div class="progress-bar-fill" id="progress"></div>
+    </div>
+    <div class="slide-counter" id="counter">1 / 150</div>
+  </div>
+
+  <div class="help" id="help">
+    <div class="content">
+      <h2>Keyboard shortcuts</h2>
+      <div class="key-list">
+        <span class="key">&rarr; / Space</span><span>Next slide</span>
+        <span class="key">&larr;</span><span>Previous slide</span>
+        <span class="key">Home</span><span>First slide</span>
+        <span class="key">End</span><span>Last slide</span>
+        <span class="key">G</span><span>Go to slide number</span>
+        <span class="key">F</span><span>Toggle fullscreen</span>
+        <span class="key">?</span><span>Toggle this help</span>
+        <span class="key">Esc</span><span>Close help / exit fullscreen</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const deck = document.getElementById('deck');
+      const slides = Array.from(deck.querySelectorAll('.slide'));
+      const progress = document.getElementById('progress');
+      const counter = document.getElementById('counter');
+      const help = document.getElementById('help');
+      let current = 0;
+      const total = slides.length;
+
+      function show(index) {
+        if (index < 0) index = 0;
+        if (index >= total) index = total - 1;
+        slides[current].classList.remove('active');
+        current = index;
+        slides[current].classList.add('active');
+        progress.style.width = ((current + 1) / total * 100) + '%';
+        counter.textContent = (current + 1) + ' / ' + total;
+        history.replaceState(null, '', '#' + (current + 1));
+      }
+
+      function next() { show(current + 1); }
+      function prev() { show(current - 1); }
+
+      // Hooks for the HTML-to-PPTX exporter (html_to_pptx.py)
+      window.__gotoSlide = show;
+      window.__slideCount = total;
+
+      function goto() {
+        const n = parseInt(prompt('Go to slide #'), 10);
+        if (!isNaN(n)) show(n - 1);
+      }
+
+      function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen();
+        } else {
+          document.exitFullscreen();
+        }
+      }
+
+      function toggleHelp() {
+        help.classList.toggle('visible');
+      }
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+          e.preventDefault(); next();
+        } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+          e.preventDefault(); prev();
+        } else if (e.key === 'Home') {
+          e.preventDefault(); show(0);
+        } else if (e.key === 'End') {
+          e.preventDefault(); show(total - 1);
+        } else if (e.key === 'g' || e.key === 'G') {
+          e.preventDefault(); goto();
+        } else if (e.key === 'f' || e.key === 'F') {
+          e.preventDefault(); toggleFullscreen();
+        } else if (e.key === '?' || e.key === '/') {
+          e.preventDefault(); toggleHelp();
+        } else if (e.key === 'Escape') {
+          if (help.classList.contains('visible')) {
+            help.classList.remove('visible');
+          }
+        }
+      });
+
+      document.addEventListener('click', (e) => {
+        if (e.target.closest('.help')) return;
+        if (e.target.tagName === 'A') return;
+        next();
+      });
+
+      const hash = parseInt(window.location.hash.slice(1), 10);
+      if (!isNaN(hash) && hash >= 1 && hash <= total) {
+        show(hash - 1);
+      } else {
+        show(0);
+      }
+    })();
+  </script>
+</body>
+</html>

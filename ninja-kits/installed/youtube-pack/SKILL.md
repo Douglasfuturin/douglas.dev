@@ -1,22 +1,28 @@
 ---
 name: youtube-pack
-description: Pacote completo YouTube: pesquisa → título → roteiro → descrição → thumbnail.
-category: youtube
-source: F:\\NINJA CURSOS\\youtube-pack.zip
+description: Pacote completo YouTube — analysis, audit, description, init, presentation, preview, research, script, thumbnail e title. Use quando o usuário pedir um kit YouTube unificado ou quiser orquestrar várias skills do ecossistema YT.
 ---
 
-# youtube-pack
+# YouTube Pack
 
-Pacote completo YouTube: pesquisa → título → roteiro → descrição → thumbnail.
+Bundle com as skills individuais do ecossistema YouTube. Cada subpasta tem o `SKILL.md` completo:
 
-## Como usar
+| Subskill | Pasta |
+| --- | --- |
+| YouTube Analysis | `youtube-analysis/` |
+| YouTube Audit | `youtube-audit/` |
+| YouTube Description | `youtube-description/` |
+| YouTube Init | `youtube-init/` |
+| YouTube Presentation | `youtube-presentation/` |
+| YouTube Preview | `youtube-preview/` |
+| YouTube Research | `youtube-research/` |
+| YouTube Script | `youtube-script/` |
+| YouTube Thumbnail | `youtube-thumbnail/` |
+| YouTube Title | `youtube-title/` |
 
-1. Peça o resultado desejado em português (ou no idioma do brief).
-2. Informe contexto mínimo: nicho, oferta, público, tom, prazo.
-3. Entregue artefatos prontos (roteiro, copy, checklist, prompts), não só conselhos.
-4. Se faltar dado crítico, assuma defaults razoáveis e declare-os.
+## Como operar
 
-## Origem
-
-ZIP esperado: `youtube-pack.zip`  
-Quando o ZIP original for instalado, este stub será substituído pelo SKILL.md completo do pacote.
+1. Identifique qual subskill resolve o pedido (pesquisa, título, roteiro, descrição, thumbnail, auditoria, etc.).
+2. Leia o `SKILL.md` da subpasta correspondente e siga o workflow dela.
+3. Se o pedido abranger várias frentes, encadeie as subskills e entregue um pacote único.
+4. Prefira as cópias standalone já instaladas em `ninja-kits/installed/<id>/` quando existirem — este pack é o bundle de origem.
