@@ -58,11 +58,40 @@ function readQueryAutosend(): boolean {
   return new URLSearchParams(window.location.search).get("autosend") === "1";
 }
 
+function readHandoff(): {
+  kitId?: string;
+  prompt?: string;
+  autosend?: boolean;
+} | null {
+  if (typeof window === "undefined") return null;
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("handoff") !== "1") return null;
+  try {
+    const raw = sessionStorage.getItem("grokish-skill-handoff");
+    if (!raw) return null;
+    sessionStorage.removeItem("grokish-skill-handoff");
+    return JSON.parse(raw) as {
+      kitId?: string;
+      prompt?: string;
+      autosend?: boolean;
+    };
+  } catch {
+    return null;
+  }
+}
+
 export function ChatApp() {
-  const [input, setInput] = useState(readQueryPrompt);
-  const [mode, setMode] = useState<AgentMode>(readQueryMode);
+  const [handoff] = useState(readHandoff);
+  const [input, setInput] = useState(
+    () => handoff?.prompt || readQueryPrompt(),
+  );
+  const [mode, setMode] = useState<AgentMode>(() =>
+    handoff?.kitId ? "kits" : readQueryMode(),
+  );
   const [researchDepth, setResearchDepth] = useState<ResearchDepth>("medium");
-  const [kitId, setKitId] = useState<string>(readQueryKitId);
+  const [kitId, setKitId] = useState<string>(
+    () => handoff?.kitId || readQueryKitId(),
+  );
   const [kitOptions, setKitOptions] = useState<Array<{ id: string; name: string }>>(
     [],
   );
@@ -70,7 +99,7 @@ export function ChatApp() {
     useState<VideoEditOptions>(DEFAULT_VIDEO_OPTIONS);
   const [uploadedPath, setUploadedPath] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
-  const autosendRef = useRef(readQueryAutosend());
+  const autosendRef = useRef(Boolean(handoff?.autosend) || readQueryAutosend());
 
   useEffect(() => {
     let alive = true;
@@ -126,21 +155,30 @@ export function ChatApp() {
   const busy = status === "submitted" || status === "streaming";
   const showVideoPanel = mode === "video" || mode === "auto";
 
-  // Dashboard → agent handoff: optional autosend once (prompt already in input from URL)
+  // Dashboard → agent handoff: autosend once (sessionStorage or ?q=)
   useEffect(() => {
     if (!autosendRef.current) return;
-    const prompt = readQueryPrompt().trim();
+    const prompt = (handoff?.prompt || readQueryPrompt()).trim();
     autosendRef.current = false;
     if (!prompt) return;
     try {
       const url = new URL(window.location.href);
       url.searchParams.delete("autosend");
+      url.searchParams.delete("handoff");
       window.history.replaceState({}, "", url.toString());
     } catch {
       /* ignore */
     }
-    void sendMessage({ text: prompt });
-  }, [sendMessage]);
+    void sendMessage(
+      { text: prompt },
+      {
+        body: {
+          mode: "kits",
+          kitId: kitId || undefined,
+        },
+      },
+    );
+  }, [handoff, kitId, sendMessage]);
 
   async function onUpload(file: File | null) {
     if (!file) return;

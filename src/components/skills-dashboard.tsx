@@ -3,8 +3,16 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState, startTransition } from "react";
+import { SkillRunner } from "@/components/skill-runner";
 import { VisualEditPanel } from "@/components/visual-edit-panel";
 import type { KitSourceZip, NinjaKit } from "@/lib/kits/types";
+
+type ActiveRun = {
+  kitId: string;
+  kitName: string;
+  prompt: string;
+  key: number;
+};
 
 type Starter = { label: string; prompt: string };
 
@@ -52,6 +60,7 @@ export function SkillsDashboard() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [activeRun, setActiveRun] = useState<ActiveRun | null>(null);
 
   const refresh = useCallback(async () => {
     const res = await fetch("/api/kits");
@@ -113,19 +122,40 @@ export function SkillsDashboard() {
     setBrief(item.starters[0]?.prompt ?? "");
   }
 
-  function runSkill(prompt: string, autosend = true) {
+  function runSkill(prompt: string, openInAgent = false) {
     if (!selected) return;
     const text =
       prompt.trim() ||
       selected.starters[0]?.prompt ||
       `Use a skill ${selected.name} (${selected.id}). Responda em português.`;
-    const params = new URLSearchParams({
-      mode: "kits",
-      kit: selected.id,
-      q: text,
-    });
-    if (autosend) params.set("autosend", "1");
-    router.push(`/?${params.toString()}`);
+
+    // Default: run visually inside the dashboard
+    if (!openInAgent) {
+      setActiveRun({
+        kitId: selected.id,
+        kitName: selected.name,
+        prompt: text,
+        key: Date.now(),
+      });
+      return;
+    }
+
+    // Optional: open standalone agent with prompt in sessionStorage (avoids URL truncation)
+    try {
+      sessionStorage.setItem(
+        "grokish-skill-handoff",
+        JSON.stringify({
+          kitId: selected.id,
+          prompt: text,
+          autosend: true,
+        }),
+      );
+    } catch {
+      /* ignore */
+    }
+    router.push(
+      `/?mode=kits&kit=${encodeURIComponent(selected.id)}&handoff=1`,
+    );
   }
 
   async function onUpload(file: File | null) {
@@ -256,12 +286,18 @@ export function SkillsDashboard() {
 
         <div
           className={`grid min-h-0 flex-1 gap-4 ${
-            selected?.visual
-              ? "lg:grid-cols-[minmax(0,0.9fr)_minmax(360px,460px)]"
-              : "lg:grid-cols-[minmax(0,1fr)_minmax(320px,400px)]"
+            activeRun
+              ? "lg:grid-cols-[minmax(240px,320px)_minmax(0,1fr)]"
+              : selected?.visual
+                ? "lg:grid-cols-[minmax(0,0.9fr)_minmax(360px,460px)]"
+                : "lg:grid-cols-[minmax(0,1fr)_minmax(320px,400px)]"
           }`}
         >
-          <section className="flex min-h-0 flex-col animate-rise">
+          <section
+            className={`flex min-h-0 flex-col animate-rise ${
+              activeRun ? "hidden md:flex" : ""
+            }`}
+          >
             <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center">
               <label className="relative min-w-0 flex-1">
                 <span className="sr-only">Buscar skills</span>
@@ -343,115 +379,128 @@ export function SkillsDashboard() {
             </ul>
           </section>
 
-          <aside className="flex min-h-0 flex-col rounded-2xl border border-[var(--line)] bg-[var(--panel)]/90 p-4 animate-rise backdrop-blur md:p-5">
-            {selected ? (
-              <>
-                <div className="mb-3 shrink-0">
-                  <p className="text-[10px] uppercase tracking-[0.16em] text-[var(--muted)]">
-                    {selected.categoryLabel}
-                  </p>
-                  <h2 className="mt-1 font-display text-2xl text-[var(--ink)]">
-                    {selected.name}
-                  </h2>
-                  <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">
-                    {selected.description}
-                  </p>
-                  <div className="mt-3 flex flex-wrap gap-2 text-[11px]">
-                    <StatusDot status={selected.status} withLabel />
-                    {selected.visual ? (
-                      <span className="rounded-md bg-[var(--chip)] px-2 py-0.5 text-[var(--accent-ink)]">
-                        Painel visual
-                      </span>
-                    ) : null}
-                    {selected.hasSkill ? (
-                      <span className="rounded-md bg-[var(--chip)] px-2 py-0.5 text-[var(--accent-ink)]">
-                        Skill instalada
-                      </span>
-                    ) : null}
-                    {selected.helpers > 0 ? (
-                      <span className="rounded-md bg-[var(--chip)] px-2 py-0.5 text-[var(--accent-ink)]">
-                        {selected.helpers} auxiliares
-                      </span>
-                    ) : null}
+          {activeRun ? (
+            <SkillRunner
+              key={activeRun.key}
+              runId={activeRun.key}
+              kitId={activeRun.kitId}
+              kitName={activeRun.kitName}
+              prompt={activeRun.prompt}
+              onClose={() => setActiveRun(null)}
+            />
+          ) : (
+            <aside className="flex min-h-0 flex-col rounded-2xl border border-[var(--line)] bg-[var(--panel)]/90 p-4 animate-rise backdrop-blur md:p-5">
+              {selected ? (
+                <>
+                  <div className="mb-3 shrink-0">
+                    <p className="text-[10px] uppercase tracking-[0.16em] text-[var(--muted)]">
+                      {selected.categoryLabel}
+                    </p>
+                    <h2 className="mt-1 font-display text-2xl text-[var(--ink)]">
+                      {selected.name}
+                    </h2>
+                    <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">
+                      {selected.description}
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-2 text-[11px]">
+                      <StatusDot status={selected.status} withLabel />
+                      {selected.visual ? (
+                        <span className="rounded-md bg-[var(--chip)] px-2 py-0.5 text-[var(--accent-ink)]">
+                          Painel visual
+                        </span>
+                      ) : null}
+                      {selected.hasSkill ? (
+                        <span className="rounded-md bg-[var(--chip)] px-2 py-0.5 text-[var(--accent-ink)]">
+                          Skill instalada
+                        </span>
+                      ) : null}
+                      {selected.helpers > 0 ? (
+                        <span className="rounded-md bg-[var(--chip)] px-2 py-0.5 text-[var(--accent-ink)]">
+                          {selected.helpers} auxiliares
+                        </span>
+                      ) : null}
+                    </div>
                   </div>
-                </div>
 
-                {selected.visual ? (
-                  <VisualEditPanel
-                    key={selected.id}
-                    kitId={selected.id}
-                    kitName={selected.name}
-                    extraBrief={brief}
-                    onExtraBriefChange={setBrief}
-                    onRun={(prompt, autosend) => runSkill(prompt, autosend)}
-                  />
-                ) : (
-                  <>
-                    <div className="mb-3">
-                      <p className="mb-1.5 text-[11px] uppercase tracking-[0.14em] text-[var(--muted)]">
-                        Atalhos
-                      </p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {selected.starters.map((s) => (
-                          <button
-                            key={s.label}
-                            type="button"
-                            onClick={() => setBrief(s.prompt)}
-                            className="rounded-lg border border-[var(--line)] bg-white/70 px-2.5 py-1 text-xs text-[var(--ink)] hover:border-[var(--accent)]"
-                          >
-                            {s.label}
-                          </button>
-                        ))}
+                  {selected.visual ? (
+                    <VisualEditPanel
+                      key={selected.id}
+                      kitId={selected.id}
+                      kitName={selected.name}
+                      extraBrief={brief}
+                      onExtraBriefChange={setBrief}
+                      onRun={(prompt, inDashboard) =>
+                        runSkill(prompt, !inDashboard)
+                      }
+                    />
+                  ) : (
+                    <>
+                      <div className="mb-3">
+                        <p className="mb-1.5 text-[11px] uppercase tracking-[0.14em] text-[var(--muted)]">
+                          Atalhos
+                        </p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {selected.starters.map((s) => (
+                            <button
+                              key={s.label}
+                              type="button"
+                              onClick={() => setBrief(s.prompt)}
+                              className="rounded-lg border border-[var(--line)] bg-white/70 px-2.5 py-1 text-xs text-[var(--ink)] hover:border-[var(--accent)]"
+                            >
+                              {s.label}
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                    </div>
 
-                    <label className="flex min-h-0 flex-1 flex-col">
-                      <span className="mb-1.5 text-[11px] uppercase tracking-[0.14em] text-[var(--muted)]">
-                        Pedido
-                      </span>
-                      <textarea
-                        value={activeBrief}
-                        onChange={(e) => setBrief(e.target.value)}
-                        rows={8}
-                        className="min-h-[140px] flex-1 resize-none rounded-xl border border-[var(--line)] bg-white/80 px-3 py-2.5 text-sm leading-relaxed text-[var(--ink)] outline-none ring-[var(--accent)] focus:ring-2"
-                        placeholder="Descreva o que precisa. Troque os [placeholders] pelos seus dados."
-                      />
-                    </label>
+                      <label className="flex min-h-0 flex-1 flex-col">
+                        <span className="mb-1.5 text-[11px] uppercase tracking-[0.14em] text-[var(--muted)]">
+                          Pedido
+                        </span>
+                        <textarea
+                          value={activeBrief}
+                          onChange={(e) => setBrief(e.target.value)}
+                          rows={8}
+                          className="min-h-[140px] flex-1 resize-none rounded-xl border border-[var(--line)] bg-white/80 px-3 py-2.5 text-sm leading-relaxed text-[var(--ink)] outline-none ring-[var(--accent)] focus:ring-2"
+                          placeholder="Descreva o que precisa. Troque os [placeholders] pelos seus dados."
+                        />
+                      </label>
 
-                    <div className="mt-3 flex flex-col gap-2">
-                      <button
-                        type="button"
-                        onClick={() => runSkill(activeBrief, true)}
-                        className="rounded-xl bg-[var(--ink)] px-4 py-3 text-sm font-semibold text-[var(--panel)] transition hover:brightness-110"
-                      >
-                        Executar skill →
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => runSkill(activeBrief, false)}
-                        className="rounded-xl border border-[var(--line)] px-4 py-2.5 text-sm text-[var(--ink)]"
-                      >
-                        Abrir no agente (sem enviar)
-                      </button>
-                    </div>
-                  </>
-                )}
+                      <div className="mt-3 flex flex-col gap-2">
+                        <button
+                          type="button"
+                          onClick={() => runSkill(activeBrief, false)}
+                          className="rounded-xl bg-[var(--ink)] px-4 py-3 text-sm font-semibold text-[var(--panel)] transition hover:brightness-110"
+                        >
+                          Executar no painel →
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => runSkill(activeBrief, true)}
+                          className="rounded-xl border border-[var(--line)] px-4 py-2.5 text-sm text-[var(--ink)]"
+                        >
+                          Abrir no agente completo
+                        </button>
+                      </div>
+                    </>
+                  )}
 
-                {selected.id.includes("video") || selected.kind === "video" ? (
-                  <Link
-                    href="/editor"
-                    className="mt-2 rounded-xl border border-[var(--line)] px-4 py-2.5 text-center text-sm text-[var(--ink)]"
-                  >
-                    Abrir Editor EDVD
-                  </Link>
-                ) : null}
-              </>
-            ) : (
-              <div className="flex flex-1 items-center justify-center text-sm text-[var(--muted)]">
-                Selecione uma skill à esquerda.
-              </div>
-            )}
-          </aside>
+                  {selected.id.includes("video") || selected.kind === "video" ? (
+                    <Link
+                      href="/editor"
+                      className="mt-2 rounded-xl border border-[var(--line)] px-4 py-2.5 text-center text-sm text-[var(--ink)]"
+                    >
+                      Abrir Editor EDVD
+                    </Link>
+                  ) : null}
+                </>
+              ) : (
+                <div className="flex flex-1 items-center justify-center text-sm text-[var(--muted)]">
+                  Selecione uma skill à esquerda.
+                </div>
+              )}
+            </aside>
+          )}
         </div>
       </div>
     </div>

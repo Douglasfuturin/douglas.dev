@@ -14,7 +14,8 @@ type Props = {
   kitName: string;
   extraBrief: string;
   onExtraBriefChange: (value: string) => void;
-  onRun: (prompt: string, autosend: boolean) => void;
+  /** inDashboard=true executa no painel; false abre o agente completo */
+  onRun: (prompt: string, inDashboard: boolean) => void;
 };
 
 const inputClass =
@@ -249,14 +250,14 @@ export function VisualEditPanel({
           onClick={() => onRun(previewPrompt, true)}
           className="rounded-xl bg-[var(--ink)] px-4 py-3 text-sm font-semibold text-[var(--panel)] transition hover:brightness-110"
         >
-          Gerar com este visual →
+          Gerar no painel →
         </button>
         <button
           type="button"
           onClick={() => onRun(previewPrompt, false)}
           className="rounded-xl border border-[var(--line)] px-4 py-2.5 text-sm text-[var(--ink)]"
         >
-          Abrir no agente (sem enviar)
+          Abrir no agente completo
         </button>
       </div>
     </div>
