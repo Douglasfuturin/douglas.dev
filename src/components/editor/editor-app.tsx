@@ -36,7 +36,7 @@ export function EditorApp() {
   const [busy, setBusy] = useState(false);
   const [logs, setLogs] = useState<AgentLogEntry[]>([]);
   const [uploading, setUploading] = useState(false);
-  const bootstrapped = useRef(false);
+  const bootstrapped = useRef<string | null>(null);
 
   const src = analysis ? mediaUrl(analysis.path) : null;
 
