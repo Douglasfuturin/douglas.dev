@@ -1,0 +1,23 @@
+{
+  "name": "screen-demo-renderer",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "render": "remotion render src/index.ts ScreenDemo"
+  },
+  "dependencies": {
+    "remotion": "4.0.427",
+    "@remotion/cli": "4.0.427",
+    "@remotion/renderer": "4.0.427",
+    "@remotion/bundler": "4.0.427",
+    "@remotion/transitions": "4.0.427",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "typescript": "^5.5.0"
+  }
+}
