@@ -247,15 +247,53 @@ export async function getKitById(id: string): Promise<NinjaKit | null> {
 }
 
 export async function catalogSummary() {
-  const [kits, zips] = await Promise.all([
+  const { loadManifest, CATEGORY_LABELS } = await import("./manifest");
+  const [kits, zips, manifest] = await Promise.all([
     listInstalledKits(),
     listSourceZips(),
+    loadManifest().catch(() => ({
+      source: "F:\\\\NINJA CURSOS",
+      updatedAt: "",
+      kits: [] as Array<{ id: string; filename: string; category: string }>,
+    })),
   ]);
+
+  const zipByName = new Map(zips.map((z) => [z.filename.toLowerCase(), z]));
+  const installedById = new Map(kits.map((k) => [k.id, k]));
+
+  const inventory = manifest.kits.map((m) => {
+    const zip = zipByName.get(m.filename.toLowerCase());
+    const installed = installedById.get(m.id);
+    let status: "installed" | "zip-ready" | "missing" = "missing";
+    if (installed) status = "installed";
+    else if (zip) status = "zip-ready";
+    return {
+      id: m.id,
+      filename: m.filename,
+      category: m.category,
+      categoryLabel: CATEGORY_LABELS[m.category] || m.category,
+      status,
+      zipPath: zip?.path,
+      installedPath: installed?.installPath,
+      helpers: installed?.helpers.length ?? 0,
+    };
+  });
+
+  const byCategory: Record<string, typeof inventory> = {};
+  for (const item of inventory) {
+    (byCategory[item.category] ||= []).push(item);
+  }
+
   return {
     installedCount: kits.length,
     sourceZipCount: zips.length,
+    manifestCount: manifest.kits.length,
+    missingCount: inventory.filter((i) => i.status === "missing").length,
+    zipReadyCount: inventory.filter((i) => i.status === "zip-ready").length,
     kits,
     zips,
+    inventory,
+    byCategory,
     roots: {
       sources: KITS_SOURCES,
       installed: KITS_INSTALLED,

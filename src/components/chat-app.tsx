@@ -65,12 +65,29 @@ export function ChatApp() {
     let alive = true;
     fetch("/api/kits")
       .then((r) => r.json())
-      .then((data: { kits?: Array<{ id: string; name: string }> }) => {
-        if (!alive) return;
-        setKitOptions(
-          (data.kits || []).map((k) => ({ id: k.id, name: k.name })),
-        );
-      })
+      .then(
+        (data: {
+          kits?: Array<{ id: string; name: string }>;
+          inventory?: Array<{ id: string; status: string }>;
+        }) => {
+          if (!alive) return;
+          const fromInventory = (data.inventory || []).map((k) => ({
+            id: k.id,
+            name: k.id,
+          }));
+          const fromInstalled = (data.kits || []).map((k) => ({
+            id: k.id,
+            name: k.name,
+          }));
+          const map = new Map<string, { id: string; name: string }>();
+          for (const k of [...fromInventory, ...fromInstalled]) {
+            map.set(k.id, k);
+          }
+          setKitOptions(
+            [...map.values()].sort((a, b) => a.id.localeCompare(b.id)),
+          );
+        },
+      )
       .catch(() => undefined);
     return () => {
       alive = false;

@@ -4,11 +4,25 @@ import Link from "next/link";
 import { useCallback, useEffect, useState, startTransition } from "react";
 import type { KitSourceZip, NinjaKit } from "@/lib/kits/types";
 
+type InventoryItem = {
+  id: string;
+  filename: string;
+  category: string;
+  categoryLabel: string;
+  status: "installed" | "zip-ready" | "missing";
+  helpers: number;
+};
+
 type Catalog = {
   installedCount: number;
   sourceZipCount: number;
+  manifestCount?: number;
+  missingCount?: number;
+  zipReadyCount?: number;
   kits: NinjaKit[];
   zips: KitSourceZip[];
+  inventory?: InventoryItem[];
+  byCategory?: Record<string, InventoryItem[]>;
   roots: {
     sources: string;
     installed: string;
@@ -24,6 +38,12 @@ const KIND_LABEL: Record<string, string> = {
   design: "Design",
   course: "Curso",
   unknown: "Kit",
+};
+
+const STATUS_LABEL: Record<InventoryItem["status"], string> = {
+  installed: "Instalado",
+  "zip-ready": "ZIP pronto",
+  missing: "Falta ZIP",
 };
 
 export function KitsHub() {
@@ -187,21 +207,88 @@ export function KitsHub() {
           </p>
         ) : null}
 
-        <section className="mb-8 grid gap-3 sm:grid-cols-3">
+        <section className="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <Stat
-            label="Kits instalados"
+            label="No manifesto"
+            value={String(catalog?.manifestCount ?? "—")}
+          />
+          <Stat
+            label="Instalados"
             value={String(catalog?.installedCount ?? "—")}
           />
           <Stat
-            label="ZIPs na fila"
-            value={String(catalog?.sourceZipCount ?? "—")}
+            label="ZIP pronto"
+            value={String(catalog?.zipReadyCount ?? catalog?.sourceZipCount ?? "—")}
           />
           <Stat
-            label="Pasta Windows"
-            value={catalog?.roots.windowsHint ?? "F:\\NINJA CURSOS"}
-            small
+            label="Faltando upload"
+            value={String(catalog?.missingCount ?? "—")}
           />
         </section>
+
+        {catalog?.byCategory && Object.keys(catalog.byCategory).length ? (
+          <section className="mb-10">
+            <h2 className="mb-3 text-xs uppercase tracking-[0.18em] text-[var(--muted)]">
+              Inventário F:\NINJA CURSOS ({catalog.manifestCount} kits)
+            </h2>
+            <p className="mb-4 text-sm text-[var(--muted)]">
+              Kits com status <strong className="text-[var(--ink)]">Falta ZIP</strong> precisam
+              ser anexados no chat ou copiados para{" "}
+              <code className="text-[var(--ink)]">ninja-kits/sources/</code>. Mesmo sem ZIP, o
+              agente já opera cada skill pelo nome.
+            </p>
+            <div className="space-y-6">
+              {Object.entries(catalog.byCategory)
+                .sort(([a], [b]) => a.localeCompare(b))
+                .map(([cat, items]) => (
+                  <div key={cat}>
+                    <h3 className="mb-2 text-sm font-semibold text-[var(--ink)]">
+                      {items[0]?.categoryLabel || cat}{" "}
+                      <span className="font-normal text-[var(--muted)]">
+                        ({items.length})
+                      </span>
+                    </h3>
+                    <ul className="grid gap-2 sm:grid-cols-2">
+                      {items.map((item) => (
+                        <li
+                          key={item.id}
+                          className="flex items-center justify-between gap-2 rounded-xl border border-[var(--line)] bg-[var(--panel)]/70 px-3 py-2"
+                        >
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-medium text-[var(--ink)]">
+                              {item.id}
+                            </p>
+                            <p className="truncate font-mono text-[10px] text-[var(--muted)]">
+                              {item.filename}
+                            </p>
+                          </div>
+                          <div className="flex shrink-0 items-center gap-2">
+                            <span
+                              className={`rounded-md px-2 py-0.5 text-[10px] ${
+                                item.status === "installed"
+                                  ? "bg-emerald-100 text-emerald-800"
+                                  : item.status === "zip-ready"
+                                    ? "bg-amber-100 text-amber-900"
+                                    : "bg-[var(--chip)] text-[var(--muted)]"
+                              }`}
+                            >
+                              {STATUS_LABEL[item.status]}
+                            </span>
+                            <Link
+                              href={`/?mode=kits&kit=${encodeURIComponent(item.id)}`}
+                              className="rounded-md bg-[var(--ink)] px-2 py-1 text-[10px] font-semibold text-[var(--panel)]"
+                            >
+                              Usar
+                            </Link>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+            </div>
+          </section>
+        ) : null}
 
         <section className="mb-10">
           <h2 className="mb-3 text-xs uppercase tracking-[0.18em] text-[var(--muted)]">

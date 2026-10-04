@@ -100,9 +100,9 @@ ${JSON.stringify(videoOptions, null, 2)}
   }
 
   if (mode === "kits") {
-    const kit = input.kitId ? await getKitById(input.kitId) : null;
-    const instructions = kit
-      ? kitPersona(kit.id, kit.skillBody, kit.name)
+    const installed = input.kitId ? await getKitById(input.kitId) : null;
+    const instructions = input.kitId
+      ? kitPersona(input.kitId, installed?.skillBody, installed?.name)
       : KITS_PERSONA;
 
     const tools: Record<string, unknown> = {
@@ -110,7 +110,7 @@ ${JSON.stringify(videoOptions, null, 2)}
       ...grokBotTools(),
     };
 
-    if (kit?.kind === "video") {
+    if (installed?.kind === "video" || input.kitId === "editar-video") {
       Object.assign(
         tools,
         videoEditorTools({
@@ -125,7 +125,8 @@ ${JSON.stringify(videoOptions, null, 2)}
       model: chatModel,
       instructions: `${instructions}
 
-Active kitId: ${kit?.id || "(none — list/install first)"}
+Active kitId: ${input.kitId || "(none — list/install first)"}
+Installed ZIP/SKILL: ${installed ? "yes" : "no — still deliver the kit's job with tools"}
 `,
       tools,
     };

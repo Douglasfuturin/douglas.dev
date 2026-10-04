@@ -7,42 +7,49 @@ import {
   listSourceZips,
 } from "@/lib/kits/discover";
 import { installAllSourceZips, installKitFromZip } from "@/lib/kits/install";
+import { loadManifest } from "@/lib/kits/manifest";
+import { KIT_PERSONAS, personaForKit } from "@/lib/kits/skill-personas";
 import { runKitHelper } from "@/lib/kits/runner";
 
 export function ninjaKitTools() {
   return {
     list_ninja_kits: tool({
       description:
-        "Lista kits Ninja instalados e ZIPs disponíveis (sources/uploads). Use para inventariar F:\\NINJA CURSOS após upload.",
+        "Lista o inventário completo de kits Ninja (manifesto F:\\NINJA CURSOS): instalados, ZIP pronto ou faltando.",
       inputSchema: z.object({}),
       execute: async () => catalogSummary(),
     }),
 
     describe_ninja_kit: tool({
       description:
-        "Mostra detalhes de um kit instalado: descrição, helpers, assets, trecho do SKILL.md.",
+        "Mostra detalhes de um kit (instalado ou do manifesto): persona, SKILL.md se houver, helpers.",
       inputSchema: z.object({
         kitId: z.string(),
       }),
       execute: async ({ kitId }) => {
         const kit = await getKitById(kitId);
-        if (!kit) {
-          const available = (await listInstalledKits()).map((k) => k.id);
+        const manifest = await loadManifest().catch(() => null);
+        const meta = manifest?.kits.find((k) => k.id === kitId);
+        if (!kit && !meta && !KIT_PERSONAS[kitId]) {
+          const available = [
+            ...(await listInstalledKits()).map((k) => k.id),
+            ...(manifest?.kits.map((k) => k.id) || []),
+          ];
           return { ok: false, error: "Kit não encontrado", available };
         }
         return {
           ok: true,
           kit: {
-            id: kit.id,
-            name: kit.name,
-            description: kit.description,
-            kind: kit.kind,
-            helpers: kit.helpers.map((h) => h.name),
-            hasPythonVenv: kit.hasPythonVenv,
-            hasPreferences: kit.hasPreferences,
-            assets: kit.assets.slice(0, 20),
-            tags: kit.tags,
-            skillPreview: kit.skillBody?.slice(0, 4000),
+            id: kitId,
+            name: kit?.name || meta?.id || kitId,
+            category: meta?.category,
+            filename: meta?.filename,
+            description: kit?.description || KIT_PERSONAS[kitId] || "",
+            kind: kit?.kind || "skill",
+            helpers: kit?.helpers.map((h) => h.name) || [],
+            installed: Boolean(kit),
+            persona: personaForKit(kitId, kit?.name),
+            skillPreview: kit?.skillBody?.slice(0, 4000),
           },
         };
       },
@@ -113,12 +120,11 @@ export function ninjaKitTools() {
 }
 
 export function kitPersona(kitId: string, skillBody?: string, name?: string) {
-  return `You are the Grokish specialist for the Ninja kit "${name || kitId}".
+  const base = personaForKit(kitId, name);
+  if (!skillBody) return base;
+  return `${base}
 
-You operate the installed kit tools via list_ninja_kits / describe_ninja_kit / run_ninja_kit_helper.
-Follow the skill instructions below. Prefer Portuguese answers. Never invent file paths.
-
---- SKILL ---
-${(skillBody || "Sem SKILL.md — inspecione helpers e guie o usuário.").slice(0, 10000)}
+--- SKILL.md instalado ---
+${skillBody.slice(0, 10000)}
 `;
 }
