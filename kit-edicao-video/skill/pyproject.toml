@@ -1,0 +1,37 @@
+[project]
+name = "video-use"
+version = "0.1.0"
+description = "Conversation-driven video editor skill for Claude Code"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+dependencies = [
+    "requests",
+    "librosa",
+    "matplotlib",
+    "pillow",
+    "numpy",
+    "faster-whisper>=1.2.1",
+    # o faster-whisper 1.2.1 abre o áudio com `av.open(..., metadata_errors=)`, que o av 19
+    # tirou: sem o teto, a primeira transcrição de quem instala do zero quebra (03/10/2026)
+    "av<19",
+    # o onnxruntime 1.29+ (VAD do faster-whisper e rembg) traz a telemetria da Microsoft ligada
+    # no macOS, e a thread dela disputa a saída do processo: a transcrição abortava com
+    # `recursive_mutex lock failed` depois de escrever o JSON, uma vez em três (03/10/2026)
+    "onnxruntime<1.29",
+    # explicadores do lesson_overlays. Sem o Chromium (`playwright install chromium`),
+    # ele cai no Chrome avulso.
+    "playwright>=1.60.0",
+    # recorte da pessoa no card `atras` do captions_viral. Sem o [cpu] não vem o
+    # onnxruntime, e o rembg não roda.
+    "rembg[cpu]>=2.0.69",      # a 2.0.76+ pede Python 3.11; no 3.10 o uv fica na 2.0.69
+]
+
+[project.optional-dependencies]
+animations = ["manim"]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+py-modules = []
