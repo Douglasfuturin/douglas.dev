@@ -3,7 +3,7 @@
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import Link from "next/link";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { AgentMode, ResearchDepth } from "@/lib/agents/models";
 import {
   DEFAULT_VIDEO_OPTIONS,
@@ -48,8 +48,18 @@ function readQueryKitId(): string {
   return new URLSearchParams(window.location.search).get("kit") || "";
 }
 
+function readQueryPrompt(): string {
+  if (typeof window === "undefined") return "";
+  return new URLSearchParams(window.location.search).get("q") || "";
+}
+
+function readQueryAutosend(): boolean {
+  if (typeof window === "undefined") return false;
+  return new URLSearchParams(window.location.search).get("autosend") === "1";
+}
+
 export function ChatApp() {
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState(readQueryPrompt);
   const [mode, setMode] = useState<AgentMode>(readQueryMode);
   const [researchDepth, setResearchDepth] = useState<ResearchDepth>("medium");
   const [kitId, setKitId] = useState<string>(readQueryKitId);
@@ -60,6 +70,7 @@ export function ChatApp() {
     useState<VideoEditOptions>(DEFAULT_VIDEO_OPTIONS);
   const [uploadedPath, setUploadedPath] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const autosendRef = useRef(readQueryAutosend());
 
   useEffect(() => {
     let alive = true;
@@ -68,12 +79,12 @@ export function ChatApp() {
       .then(
         (data: {
           kits?: Array<{ id: string; name: string }>;
-          inventory?: Array<{ id: string; status: string }>;
+          inventory?: Array<{ id: string; name?: string; status: string }>;
         }) => {
           if (!alive) return;
           const fromInventory = (data.inventory || []).map((k) => ({
             id: k.id,
-            name: k.id,
+            name: k.name || k.id,
           }));
           const fromInstalled = (data.kits || []).map((k) => ({
             id: k.id,
@@ -114,6 +125,22 @@ export function ChatApp() {
 
   const busy = status === "submitted" || status === "streaming";
   const showVideoPanel = mode === "video" || mode === "auto";
+
+  // Dashboard → agent handoff: optional autosend once (prompt already in input from URL)
+  useEffect(() => {
+    if (!autosendRef.current) return;
+    const prompt = readQueryPrompt().trim();
+    autosendRef.current = false;
+    if (!prompt) return;
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("autosend");
+      window.history.replaceState({}, "", url.toString());
+    } catch {
+      /* ignore */
+    }
+    void sendMessage({ text: prompt });
+  }, [sendMessage]);
 
   async function onUpload(file: File | null) {
     if (!file) return;
@@ -165,7 +192,7 @@ export function ChatApp() {
               href="/kits"
               className="inline-flex rounded-lg bg-[var(--ink)] px-3 py-1.5 text-xs font-semibold text-[var(--panel)]"
             >
-              Hub Ninja Kits →
+              Skills Dashboard →
             </Link>
             <Link
               href="/editor"
@@ -649,9 +676,9 @@ function EmptyState({
         ]
       : mode === "kits"
         ? [
-            "Lista todos os kits Ninja instalados e ZIPs na fila",
-            "Instala todos os ZIPs de ninja-kits/sources e da inbox de uploads",
-            "Descreve o kit editar-video e lista os helpers",
+            "Abra o dashboard em /kits e escolha uma skill para executar",
+            "Lista todas as skills Ninja disponíveis e o que cada uma faz",
+            "Descreve a skill ativa e entregue um resultado de exemplo",
           ]
         : [
             "O que é o modelo grok-4.20-multi-agent e quando usar?",
@@ -665,7 +692,7 @@ function EmptyState({
         {mode === "video"
           ? "Upload um MP4, escolha estilo/opções e peça a edição automática."
           : mode === "kits"
-            ? "Importe ZIPs de F:\\NINJA CURSOS em /kits e opere cada skill pelo agente."
+            ? "Skill ativa via dashboard /kits — descreva o pedido ou use um atalho."
             : "Chat, research, kits Ninja ou editor de vídeo."}
       </p>
       <ul className="space-y-2">

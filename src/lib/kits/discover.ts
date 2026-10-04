@@ -261,14 +261,24 @@ export async function catalogSummary() {
   const zipByName = new Map(zips.map((z) => [z.filename.toLowerCase(), z]));
   const installedById = new Map(kits.map((k) => [k.id, k]));
 
+  const { startersForKit, displayNameForKit } = await import("./starters");
+  const { KIT_PERSONAS } = await import("./skill-personas");
+
   const inventory = manifest.kits.map((m) => {
     const zip = zipByName.get(m.filename.toLowerCase());
     const installed = installedById.get(m.id);
     let status: "installed" | "zip-ready" | "missing" = "missing";
     if (installed) status = "installed";
     else if (zip) status = "zip-ready";
+    const name = displayNameForKit(m.id, installed?.name);
+    const description =
+      installed?.description ||
+      KIT_PERSONAS[m.id] ||
+      `Skill ${name} pronta para uso no agente.`;
     return {
       id: m.id,
+      name,
+      description,
       filename: m.filename,
       category: m.category,
       categoryLabel: CATEGORY_LABELS[m.category] || m.category,
@@ -276,6 +286,9 @@ export async function catalogSummary() {
       zipPath: zip?.path,
       installedPath: installed?.installPath,
       helpers: installed?.helpers.length ?? 0,
+      hasSkill: Boolean(installed?.skillPath),
+      kind: installed?.kind ?? "skill",
+      starters: startersForKit(m.id, name),
     };
   });
 

@@ -1,5 +1,5 @@
-import { KitsHub } from "@/components/kits-hub";
+import { SkillsDashboard } from "@/components/skills-dashboard";
 
 export default function KitsPage() {
-  return <KitsHub />;
+  return <SkillsDashboard />;
 }
