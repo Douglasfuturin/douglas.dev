@@ -1,0 +1,26 @@
+[project]
+name = "fabrica-de-conteudo"
+version = "0.1.0"
+description = "Fábrica de Conteúdo com IA: reels editados pelo seu agente de IA"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+    "pillow",
+    "scipy",
+    # transcrição: o large-v3 (~3 GB) baixa no primeiro vídeo
+    "faster-whisper>=1.2.1",
+    # o faster-whisper 1.2.1 abre o áudio com `av.open(..., metadata_errors=)`, que o av 19
+    # tirou: sem o teto, a primeira transcrição de quem instala do zero quebra (03/10/2026)
+    "av<19",
+    # o onnxruntime 1.29+ (VAD do faster-whisper e rembg) traz a telemetria da Microsoft ligada
+    # no macOS, e a thread dela disputa a saída do processo: a transcrição abortava com
+    # `recursive_mutex lock failed` depois de escrever o JSON, uma vez em três (03/10/2026)
+    "onnxruntime<1.29",
+    # render das peças de tools/v2. O Chromium vem à parte: `playwright install chromium`
+    "playwright>=1.60.0",
+    # recorte da pessoa no card `atras` da legenda. Sem o [cpu] não vem o onnxruntime
+    "rembg[cpu]>=2.0.69",
+]
+
+[tool.uv]
+package = false

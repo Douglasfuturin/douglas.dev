@@ -1,0 +1,34 @@
+/* Escuro tech: chão quase preto com grade fina, letra monoespaçada, bloco e marcador em cor
+   viva, canto pequeno e sombra dura na cor do bloco. Os objetos são claros, como no noturno:
+   a letra escura (--ink) é a mesma que senta no marcador, e assim fica legível em toda peça.
+   Copie para marca/tema.css e troque as quatro cores e a letra (docs/guia-de-estilos.md).
+   A letra: JetBrains Mono (Google Fonts, OFL), em marca/fontes/JetBrainsMono.ttf. */
+
+@font-face{font-family:'Marca';font-weight:100 900;src:url(fontes/JetBrainsMono.ttf) format('truetype')}
+
+html.marca{
+  /* as cores: chão (escuro), letra e borda dos objetos, bloco, marcador */
+  --pp:#0A0F1C; --ink:#0A0F1C; --ac:#0072E5; --mk:#7CFF6B;
+  --ink9:var(--ink); --sur:#EAF2FF;
+  --ac2:color-mix(in srgb,var(--ac) 16%,white); --act:color-mix(in srgb,var(--ac) 26%,white);
+  --fd:'Marca',ui-monospace,monospace; --fm:'Marca',ui-monospace,monospace; --ls:-.04em;
+
+  /* a forma: borda média, sombra dura na cor do bloco, canto pequeno, chão em grade */
+  --bw:3px; --sh:8px; --sombra:var(--ac); --raio:6px; --raio-s:4px;
+  --tex:linear-gradient(color-mix(in srgb,var(--ac) 14%,transparent) 1px,transparent 1px) 0 0/48px 48px,
+        linear-gradient(90deg,color-mix(in srgb,var(--ac) 14%,transparent) 1px,transparent 1px) 0 0/48px 48px;
+
+  /* o reel editorial e a capa: o painel também escurece */
+  --ed-sans:'Marca',ui-monospace,monospace;
+  --ed-pp:var(--pp); --ed-pp-luz:color-mix(in srgb,var(--pp) 85%,var(--ac)); --ed-folha:transparent;
+  --ed-tx:#FFFFFF;
+  --ed-dg-apaga-tx:linear-gradient(180deg,#FFFFFF 0%,rgba(255,255,255,.82) 42%,rgba(255,255,255,.2) 95%);
+  --ed-dg-azul:linear-gradient(180deg,color-mix(in srgb,var(--ac) 40%,white) 0%,var(--ac) 70%);
+  --ed-dg-ouro:linear-gradient(180deg,color-mix(in srgb,var(--mk) 30%,white) 8%,var(--mk) 58%,color-mix(in srgb,var(--mk) 80%,black) 100%);
+  --ed-dg-some-azul:linear-gradient(180deg,var(--ac) 0%,color-mix(in srgb,var(--ac) 55%,transparent) 55%,color-mix(in srgb,var(--ac) 6%,transparent) 100%);
+  --ed-dg-some-ouro:linear-gradient(180deg,var(--mk) 0%,color-mix(in srgb,var(--mk) 55%,transparent) 55%,color-mix(in srgb,var(--mk) 6%,transparent) 100%);
+}
+/* texto solto no chão escuro fica branco; a palavra grifada continua escura sobre o marcador */
+html.marca .hd,html.marca .big{color:#FFFFFF}
+html.marca .hd b,html.marca .mkr{color:var(--ink)}
+html.marca .nb.cor-ink{border-color:color-mix(in srgb,var(--pp) 70%,white)}

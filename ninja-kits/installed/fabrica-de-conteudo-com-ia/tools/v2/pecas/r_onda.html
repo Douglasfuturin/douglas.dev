@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<!-- PROVA — forma de onda: "a voz é minha". 1080x1920, --alpha.
+     As barras nascem da esquerda pra direita e a agulha corre por cima;
+     o que já tocou fica azul. Com ?picos=0.2,0.8,… (sai do áudio real, ex.
+     ffmpeg astats) a forma é a da voz; sem, uma forma neutra de fala.
+       ?rot=minha voz&hd=A voz é <b>minha</b>.&picos=…&pos=centro&t=0.2&dur=4 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block}
+.zona{position:absolute;left:56px;right:70px}
+.zona.topo{top:240px}
+.zona.centro{top:720px}
+.zona.base{top:1180px}
+.bx{display:flex;flex-direction:column;gap:22px;padding:28px 30px 34px;opacity:0}
+.cab{display:flex;align-items:center;gap:18px}
+.cab .rt{padding:12px 18px;font:700 30px/1 var(--fm);letter-spacing:.1em;text-transform:uppercase;border-radius:var(--raio-s)}
+.cab .tm{margin-left:auto;font:700 34px/1 var(--fm);color:var(--ink6)}
+.bx .hd{font-size:70px;margin:0}
+.bx .hd:empty{display:none}
+.ond{position:relative;height:230px;display:flex;align-items:center;gap:6px}
+.br{flex:1;height:100%;border-radius:4px;background:var(--ink2);transform-origin:50% 50%}
+.br.on{background:var(--ac)}
+.ag{position:absolute;top:-16px;bottom:-16px;left:0;width:6px;margin-left:-3px;background:var(--ink);opacity:0}
+.ag i{position:absolute;top:-14px;left:-10px;width:26px;height:26px;border-radius:50%;background:var(--mk);border:4px solid var(--ink)}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="zona" id="z">
+    <div class="bx nb" id="bx">
+      <div class="cab"><span class="rt nb cor-ac" id="rt"></span><span class="tm" id="tm">00:00</span></div>
+      <div class="hd" id="h"></div>
+      <div class="ond" id="on"><span class="ag" id="ag"><i></i></span></div>
+    </div>
+  </div>
+</div>
+<script>
+const dur = D.n('dur', '4'), t0 = D.n('t', '0.2');
+document.getElementById('z').classList.add(['topo', 'centro', 'base'].includes(D.q('pos')) ? D.q('pos') : 'centro');
+document.getElementById('rt').textContent = D.q('rot', 'minha voz');
+document.getElementById('h').innerHTML = D.q('hd', '');
+const N = 56;
+let picos = D.q('picos', '').split(',').map(Number).filter(n => !isNaN(n) && D.q('picos'));
+const onda = [];
+for (let i = 0; i < N; i++) {
+  let v;
+  if (picos.length) v = picos[Math.floor(i * picos.length / N)];
+  else v = .18 + .82 * Math.abs(Math.sin(i * .61) * Math.cos(i * .173) * (.6 + .4 * Math.sin(i * 1.7)));
+  onda.push(Math.max(.08, Math.min(1, v)));
+}
+const on = document.getElementById('on');
+onda.forEach((v, i) => on.insertAdjacentHTML('beforeend', `<span class="br" id="b${i}"></span>`));
+
+D.monta(tl => {
+  D.cabe('.bx .hd', 40, '.bx');
+  D.pousa('#bx', t0, {rot: D.P.ROT * .5, s: 1.05, som: 'pop'});
+  if (D.q('hd')) D.titulo('#h', t0 + .15);
+  onda.forEach((v, i) => tl.fromTo('#b' + i, {scaleY: 0}, {scaleY: v, duration: .4, ease: 'back.out(2)'}, D.at(t0) + .2 + i * .012));
+  // a agulha corre do início ao fim; o que ela já passou fica azul
+  const bars = [...on.querySelectorAll('.br')], W = on.clientWidth, a0 = t0 + .9, a1 = dur - .6;
+  const o = {p: 0};
+  const pinta = () => {
+    document.getElementById('ag').style.left = (o.p * W) + 'px';
+    const k = Math.floor(o.p * N);
+    bars.forEach((b, i) => b.classList.toggle('on', i < k));
+    const s = Math.floor(o.p * (a1 - a0));
+    document.getElementById('tm').textContent = '00:' + String(s).padStart(2, '0');
+  };
+  pinta();
+  tl.fromTo('#ag', {opacity: 0}, {opacity: 1, duration: .2}, a0 - .1);
+  tl.fromTo(o, {p: 0}, {p: 1, duration: a1 - a0, ease: 'none', onUpdate: pinta}, a0);
+  D.sai('#bx', dur - .45);
+  return dur;
+});
+</script>
+</body>
+</html>

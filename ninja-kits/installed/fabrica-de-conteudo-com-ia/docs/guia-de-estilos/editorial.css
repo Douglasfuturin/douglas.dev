@@ -1,0 +1,28 @@
+/* Editorial: papel quase branco e liso, letra sem serifa apertada com o itálico serifado de
+   acento, canto redondo, borda fina e nenhuma sombra. A cara de revista do reel editorial.
+   Copie para marca/tema.css e troque as quatro cores e a letra (docs/guia-de-estilos.md).
+   A letra: Inter, que já vem na fábrica (tools/v2/nucleo/fontes/Inter-opsz-wght.ttf);
+   copie para marca/fontes/Inter.ttf. O itálico (Instrument Serif) já vem no reel editorial. */
+
+@font-face{font-family:'Marca';font-weight:100 900;src:url(fontes/Inter.ttf) format('truetype')}
+
+html.marca{
+  /* as cores: chão, letra e borda, bloco, marcador */
+  --pp:#F1F0EC; --ink:#121316; --ac:#1F3A5F; --mk:#E9C46A;
+  --ink9:var(--ink); --sur:#FBFAF7;
+  --ac2:color-mix(in srgb,var(--ac) 16%,white); --act:color-mix(in srgb,var(--ac) 26%,white);
+  --fd:'Marca',system-ui,sans-serif; --ls:-.025em;
+
+  /* a forma: borda fina, sem sombra, canto redondo, chão liso */
+  --bw:2px; --sh:0px; --sombra:transparent; --raio:22px; --raio-s:12px;
+  --tex:none;
+
+  /* o reel editorial e a capa */
+  --ed-sans:'Marca',system-ui,sans-serif;
+  --ed-pp:var(--pp); --ed-pp-luz:color-mix(in srgb,var(--pp) 40%,white);
+  --ed-tx:var(--ink);
+  --ed-dg-azul:linear-gradient(180deg,color-mix(in srgb,var(--ac) 50%,white) 0%,var(--ac) 70%);
+  --ed-dg-ouro:linear-gradient(180deg,color-mix(in srgb,var(--mk) 30%,white) 8%,var(--mk) 58%,color-mix(in srgb,var(--mk) 80%,black) 100%);
+  --ed-dg-some-azul:linear-gradient(180deg,var(--ac) 0%,color-mix(in srgb,var(--ac) 55%,transparent) 55%,color-mix(in srgb,var(--ac) 6%,transparent) 100%);
+  --ed-dg-some-ouro:linear-gradient(180deg,var(--mk) 0%,color-mix(in srgb,var(--mk) 55%,transparent) 55%,color-mix(in srgb,var(--mk) 6%,transparent) 100%);
+}

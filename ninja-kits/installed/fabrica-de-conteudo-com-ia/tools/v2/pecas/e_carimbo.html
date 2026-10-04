@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<!-- EFEITO — carimbo do freeze. 1080x1920, --alpha.
+     Entra junto com o `freeze` do efeitos.py: o rosto congela e um selo BATE
+     por cima — grande, torto, com um quadro de clarão e um tranco. O selo é
+     texto curto (uma ou duas palavras).
+       larg  a largura máxima do texto, fração do palco (0.86; no anúncio, 0.74 cabe na zona segura)
+       ?txt=ISSO AQUI&cor=no&x=540&y=1250&rot=-8&flash=1&t=0.05&dur=1.2 -->
+<html lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block}
+.cb{position:absolute;padding:22px 40px;font:700 var(--tc,118px)/1 var(--fm);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;
+  border:14px solid currentColor;border-radius:var(--raio);background:rgba(255,255,255,.94);box-shadow:14px 14px 0 var(--ink);opacity:0}
+.cl{position:absolute;inset:0;background:#fff;opacity:0}
+</style>
+</head>
+<body>
+<div id="stage"><div class="cl" id="cl"></div><div class="cb" id="cb"></div></div>
+<script>
+const dur = D.n('dur', '1.2'), t0 = D.n('t', '0.05'), rot = D.n('rot', '-8');
+const cores = {no: '--no', ac: '--ac', mk: '--ink', ok: '--ok', ink: '--ink'};
+const cb = document.getElementById('cb');
+cb.textContent = D.q('txt', 'ISSO AQUI');
+cb.style.color = `var(${cores[D.q('cor', 'no')] || '--no'})`;
+if (D.q('cor') === 'mk') cb.style.background = 'var(--mk)';
+
+D.monta(tl => {
+  D.cabe('.cb', 60, D.n('larg', '.86'));
+  const w = cb.offsetWidth, h = cb.offsetHeight;
+  cb.style.left = Math.max(30, Math.min(1080 - 30 - w, D.n('x', '540') - w / 2)) + 'px';
+  cb.style.top = Math.max(60, Math.min(1920 - 60 - h, D.n('y', '1250') - h / 2)) + 'px';
+  tl.fromTo(cb, {opacity: 0, scale: 2.6, rotation: rot - 22}, {opacity: 1, scale: 1, rotation: rot, duration: .22, ease: 'power4.in'}, D.at(t0));
+  // o tranco: bate e quica de leve
+  tl.to(cb, {scale: 1.06, duration: .06, ease: 'power2.out', yoyo: true, repeat: 1}, D.at(t0) + .22);
+  tl.to(cb, {x: 8, duration: .03, yoyo: true, repeat: 3, ease: 'none'}, D.at(t0) + .22);
+  if (D.q('flash', '1') !== '0') tl.fromTo('#cl', {opacity: .85}, {opacity: 0, duration: .1, immediateRender: false}, D.at(t0) + .22);
+  D.cue(t0 + .04, 'stamp');
+  if (D.q('sai', '1') !== '0') tl.to(cb, {opacity: 0, scale: .9, duration: .16, ease: 'power2.in'}, dur - .2);
+  return dur;
+});
+</script>
+</body>
+</html>
