@@ -1365,12 +1365,15 @@ def _cadeia(plano: dict, e: es.Estilo, edl_path: Path, trabalho: Path,
     if inicio <= ETAPAS.index("composicao") and e.tem("emenda"):
         ef = e.eixos["efeito"]
         saida = trabalho / "com_emenda.mp4"
-        # O glitch toca poucos quadros por emenda. O número declarado é o que
+        modo = ef.get("emenda") or "glitch"
+        if modo not in ("glitch", "flash", "whip"):
+            modo = "glitch"
+        # O efeito toca poucos quadros por emenda. O número declarado é o que
         # faz o modo seco marcar este passo quando ele custa o vídeo inteiro.
-        cmds.append(Passo("glitch de emenda",
+        cmds.append(Passo(f"{modo} de emenda",
                           [PY, str(AQUI / "glitch_cuts.py"), str(corrente), str(edl_path),
                            "-o", str(saida), "--min-gap", str(ef["emenda_min"]),
-                           "--intensity", ef["emenda_forca"]],
+                           "--intensity", ef["emenda_forca"], "--mode", modo],
                           saida, [corrente, edl_path], toca=0.4, extra=edl_texto))
         corrente = saida
 

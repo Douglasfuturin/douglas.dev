@@ -62,6 +62,55 @@ PRESETS: dict[str, str] = {
 
     # Flat — no grade. Useful as a sentinel for "skip grading this source".
     "none": "",
+
+    # Cool blue night look — interviews, tech, cold open.
+    "cool_night": (
+        "eq=contrast=1.08:brightness=-0.015:saturation=0.92,"
+        "colorbalance="
+        "rs=-0.03:gs=0.0:bs=0.04:"
+        "rm=-0.02:gm=0.0:bm=0.03:"
+        "rh=-0.01:gh=0.01:bh=0.05,"
+        "curves=master='0/0 0.3/0.27 0.7/0.74 1/1'"
+    ),
+
+    # Mild teal/orange split for ads and pitch.
+    "teal_orange": (
+        "eq=contrast=1.1:saturation=1.05,"
+        "colorbalance="
+        "rs=0.03:gs=0.0:bs=-0.04:"
+        "rm=0.02:gm=0.01:bm=-0.02:"
+        "rh=0.06:gh=0.01:bh=-0.04"
+    ),
+
+    # Punchy contrast for hooks and teasers.
+    "high_contrast": (
+        "eq=contrast=1.18:brightness=-0.01:saturation=1.08,"
+        "curves=master='0/0 0.2/0.16 0.8/0.84 1/1'"
+    ),
+
+    # Soft pastel for stories and lifestyle.
+    "soft_pastel": (
+        "eq=contrast=0.96:brightness=0.02:saturation=0.9,"
+        "curves=master='0/0.02 0.5/0.52 1/0.98'"
+    ),
+
+    # Near-monochrome documentary.
+    "noir": (
+        "eq=contrast=1.14:brightness=-0.03:saturation=0.35,"
+        "curves=master='0/0 0.25/0.2 0.75/0.78 1/1'"
+    ),
+
+    # Bright social feed look.
+    "vivid_social": (
+        "eq=contrast=1.1:brightness=0.01:saturation=1.2,"
+        "curves=master='0/0 0.3/0.28 0.7/0.75 1/1'"
+    ),
+
+    # Natural documentary cleanup.
+    "documentary": (
+        "eq=contrast=1.05:saturation=0.97,"
+        "curves=master='0/0 0.25/0.24 0.75/0.76 1/1'"
+    ),
 }
 
 

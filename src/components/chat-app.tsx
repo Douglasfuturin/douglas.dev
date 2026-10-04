@@ -7,9 +7,19 @@ import { useMemo, useState, type ReactNode } from "react";
 import type { AgentMode, ResearchDepth } from "@/lib/agents/models";
 import {
   DEFAULT_VIDEO_OPTIONS,
+  FONT_LABELS,
+  SOUND_LABELS,
   STYLE_LABELS,
+  VIDEO_FONTS,
+  VIDEO_FORMATS,
+  VIDEO_GRADES,
+  VIDEO_SOUNDS,
   VIDEO_STYLES,
   type VideoEditOptions,
+  type VideoFont,
+  type VideoFormat,
+  type VideoGrade,
+  type VideoSound,
   type VideoStyle,
   type WhisperModel,
 } from "@/lib/video/options";
@@ -270,6 +280,99 @@ export function ChatApp() {
                   value={videoOptions.projeto}
                   onChange={(e) => patchVideo("projeto", e.target.value)}
                 />
+              </Field>
+
+              <Field label="Formato">
+                <select
+                  value={videoOptions.formato}
+                  onChange={(e) =>
+                    patchVideo("formato", e.target.value as VideoFormat)
+                  }
+                >
+                  {VIDEO_FORMATS.map((f) => (
+                    <option key={f} value={f}>
+                      {f}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+
+              <Field label="Fonte">
+                <select
+                  value={videoOptions.fonte}
+                  onChange={(e) =>
+                    patchVideo("fonte", e.target.value as VideoFont)
+                  }
+                >
+                  {VIDEO_FONTS.map((f) => (
+                    <option key={f} value={f}>
+                      {FONT_LABELS[f]}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+
+              <Field label="Grade de cor">
+                <select
+                  value={videoOptions.grade}
+                  onChange={(e) =>
+                    patchVideo("grade", e.target.value as VideoGrade)
+                  }
+                >
+                  {VIDEO_GRADES.map((g) => (
+                    <option key={g} value={g}>
+                      {g}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+
+              <Field label="Efeito emenda">
+                <select
+                  value={videoOptions.efeitoEmenda}
+                  onChange={(e) =>
+                    patchVideo(
+                      "efeitoEmenda",
+                      e.target.value as VideoEditOptions["efeitoEmenda"],
+                    )
+                  }
+                >
+                  <option value="none">Nenhum</option>
+                  <option value="glitch">Glitch CRT/VHS</option>
+                  <option value="flash">Flash branco</option>
+                  <option value="whip">Whip pan</option>
+                </select>
+              </Field>
+
+              <Field label="Intensidade">
+                <select
+                  value={videoOptions.intensidade}
+                  onChange={(e) =>
+                    patchVideo(
+                      "intensidade",
+                      e.target.value as VideoEditOptions["intensidade"],
+                    )
+                  }
+                >
+                  <option value="subtle">Subtle</option>
+                  <option value="medium">Medium</option>
+                  <option value="strong">Strong</option>
+                </select>
+              </Field>
+
+              <Field label="Som / SFX">
+                <select
+                  value={videoOptions.som}
+                  onChange={(e) =>
+                    patchVideo("som", e.target.value as VideoSound)
+                  }
+                >
+                  {VIDEO_SOUNDS.map((s) => (
+                    <option key={s} value={s}>
+                      {SOUND_LABELS[s]}
+                    </option>
+                  ))}
+                </select>
               </Field>
             </div>
 

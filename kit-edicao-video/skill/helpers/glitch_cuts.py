@@ -32,15 +32,37 @@ def cuts_from_edl(edl_path, min_gap):
     return cuts
 
 
-def build_filter(cuts, intensity, fps):
+def build_filter(cuts, intensity, fps, mode="glitch"):
     half = 0.20                                   # glitch half-width (s)
     hit = 1.0 / fps * 1.5                         # hard-seam half-width (~1.5 frames)
     win = "+".join(f"between(t,{t-half:.3f},{t+half:.3f})" for t in cuts)
     seam = "+".join(f"between(t,{t-hit:.3f},{t+hit:.3f})" for t in cuts)
     if intensity == "strong":
         rh, rh2, noise, bri = 14, 30, 55, 0.10
+    elif intensity == "medium":
+        rh, rh2, noise, bri = 10, 24, 42, 0.07
     else:                                          # subtle (default)
         rh, rh2, noise, bri = 7, 18, 30, 0.05
+
+    if mode == "flash":
+        # Flash branco rápido na emenda — sem noise/RGB shift.
+        flash = 0.55 if intensity == "strong" else 0.35 if intensity == "medium" else 0.22
+        return (
+            f"eq=brightness={flash}:saturation=0.7:enable='{seam}',"
+            f"eq=brightness={flash * 0.45}:enable='{win}'"
+        )
+
+    if mode == "whip":
+        # Whip pan sintético: rgbashift horizontal forte + blur direcional leve.
+        whip = rh * 3
+        whip2 = rh2 * 2
+        return (
+            f"rgbashift=rh={whip}:bh=-{whip}:gv=2:enable='{win}',"
+            f"gblur=sigma=2.5:enable='{win}',"
+            f"eq=brightness={bri}:saturation=1.15:enable='{win}',"
+            f"rgbashift=rh={whip2}:bh=-{whip2}:gv=8:enable='{seam}'"
+        )
+
     return (
         f"rgbashift=rh={rh}:bh=-{rh}:enable='{win}',"
         f"noise=alls={noise}:allf=t:enable='{win}',"
@@ -56,7 +78,8 @@ def main():
     ap.add_argument("-o", "--output", type=Path, required=True)
     ap.add_argument("--min-gap", type=float, default=30.0)
     ap.add_argument("--at", type=float, action="append", default=[], help="explicit output time(s) to glitch")
-    ap.add_argument("--intensity", choices=["subtle", "strong"], default="subtle")
+    ap.add_argument("--intensity", choices=["subtle", "medium", "strong"], default="subtle")
+    ap.add_argument("--mode", choices=["glitch", "flash", "whip"], default="glitch")
     args = ap.parse_args()
 
     fps = ff.probe(args.video).fps
@@ -65,7 +88,7 @@ def main():
         print("no big cuts found — copying through");
         ff.run(["ffmpeg", "-y", "-i", str(args.video), "-c", "copy", str(args.output)], quiet=True)
         return
-    print("glitching seams at (s):", ", ".join(f"{c:.2f}" for c in cuts))
+    print(f"{args.mode} seams at (s):", ", ".join(f"{c:.2f}" for c in cuts))
 
     # Cada emenda muda poucos quadros. Antes disto o filtro passava no vídeo
     # inteiro e recodificava 54 s para trocar 12 quadros — 16,5 s medidos, com
@@ -86,7 +109,7 @@ def main():
         dentro = [c - pedaco.inicio for c in cuts
                   if pedaco.inicio <= c <= pedaco.fim]
         alvo = trab / f"{pedaco.nome}.mp4"
-        vf = build_filter(dentro or [pedaco.dur / 2], args.intensity, fps)
+        vf = build_filter(dentro or [pedaco.dur / 2], args.intensity, fps, args.mode)
         ff.run(["ffmpeg", "-y", "-v", "error",
                 "-ss", f"{pedaco.inicio:.3f}", "-to", f"{pedaco.fim:.3f}",
                 "-i", str(args.video), "-vf", vf,

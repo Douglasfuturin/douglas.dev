@@ -92,9 +92,9 @@ EIXOS: dict[str, dict[str, Any]] = {
         # Nível dos sons das peças contra a voz, em dB. Medido na VSL em 24/09:
         # com -8 o tick-roll ficava 17 dB debaixo da voz, inaudível.
         "sfx_db": -2.0,
-        "emenda": None,            # glitch | None
+        "emenda": None,            # glitch | flash | whip | None
         "emenda_min": 30.0,        # vão de origem que merece glitch, em s
-        "emenda_forca": "subtle",
+        "emenda_forca": "subtle",  # subtle | medium | strong
     },
     # O que é desenhado por cima. Cor, letra e movimento NÃO moram aqui: são do
     # núcleo de tools/v2, e o estilo só escolhe entre os dois chãos dele. A
@@ -445,6 +445,176 @@ ESTILOS: dict[str, dict[str, Any]] = {
     "reel-mono-claro": {
         "herda": "reel-mono",
         "desenho": {"tema": "claro"},
+    },
+
+    # ---- novos estilos do kit Grokish ---------------------------------------
+
+    # Podcast/videocast deitado: corte por silêncio, voz realçada, sem CRT.
+    "podcast": {
+        "bruto": "live",
+        "corte": {"afinacao": "silencio", "ajuste": {"sil_cut": 1.2, "pause_keep": 0.45}},
+        "voz": {"tratamento": "realce"},
+        "imagem": {"orientacao": "16:9", "fps": 30},
+        "graduacao": {"preset": "documentary"},
+        "efeito": {"abertura": None, "emenda": None},
+        "desenho": {"tema": "claro", "fonte": "outfit"},
+        "entrega": {"pasta": "videos/podcast"},
+        "recursos": ["legenda", "trilha"],
+        "adaptadores": {"legenda": "liso", "trilha": "cama"},
+    },
+    # Shorts rápidos: corte apertado, glitch forte, grade vivida.
+    "shorts-rapido": {
+        "herda": "reel-camera",
+        "corte": {"afinacao": "tight", "ajuste": {"sil_cut": 0.25, "pause_keep": 0.15}},
+        "imagem": {"fps": 30},
+        "graduacao": {"preset": "vivid_social"},
+        "efeito": {"abertura": None, "emenda": "glitch", "emenda_min": 8.0, "emenda_forca": "strong"},
+        "desenho": {"tema": "tinta", "fonte": "bebas", "atras": True, "ritmo": [0.12, 0.03]},
+        "entrega": {"pasta": "videos/shorts"},
+        "recursos": ["legenda", "emenda", "trilha"],
+    },
+    # Teaser / trailer curto com riser e impacto.
+    "teaser": {
+        "herda": "reel-mono",
+        "corte": {"afinacao": "tight"},
+        "graduacao": {"preset": "high_contrast"},
+        "efeito": {"abertura": "crt", "emenda": "glitch", "emenda_forca": "strong", "sfx_db": -1.0},
+        "desenho": {"fonte": "anton", "tema": "tinta"},
+        "trilha": {"sob_fala": 0.06, "subida": 1.8, "antes_do_fecho": 0.6},
+        "entrega": {"pasta": "videos/teasers"},
+        "recursos": ["legenda", "emenda", "abertura", "trilha"],
+    },
+    # Story 9:16 ultracurto para Instagram/WhatsApp Status.
+    "story-rapido": {
+        "herda": "reel-camera",
+        "corte": {"afinacao": "tight", "ajuste": {"sil_cut": 0.2}},
+        "graduacao": {"preset": "soft_pastel"},
+        "desenho": {"fonte": "syne", "legenda_layout": "faixa", "ritmo": [0.1, 0.025]},
+        "efeito": {"abertura": None, "emenda": None},
+        "entrega": {"pasta": "videos/stories"},
+        "recursos": ["legenda"],
+    },
+    # Webinar / aula ao vivo limpa, 16:9, fade sem glitch.
+    "webinar": {
+        "herda": "aula-ccnp",
+        "corte": {"afinacao": "aula", "ajuste": {"pause_keep": 1.1}},
+        "graduacao": {"preset": "neutral_punch"},
+        "efeito": {"abertura": None, "emenda": None},
+        "desenho": {"tema": "claro", "fonte": "space"},
+        "recursos": ["explicador", "legenda"],
+        "adaptadores": {"legenda": "liso"},
+        "entrega": {"pasta": "videos/webinar"},
+    },
+    # Entrevista: dois falantes, silêncio mais tolerante, grade documental.
+    "entrevista": {
+        "bruto": "camera",
+        "corte": {"afinacao": "aula", "ajuste": {"sil_cut": 1.6, "pause_keep": 0.7}},
+        "voz": {"tratamento": "realce", "por_bloco": True},
+        "imagem": {"orientacao": "16:9"},
+        "graduacao": {"preset": "documentary"},
+        "efeito": {"abertura": None, "emenda": None},
+        "desenho": {"fonte": "rubik", "tema": "claro"},
+        "entrega": {"pasta": "videos/entrevista"},
+        "recursos": ["legenda", "trilha"],
+        "adaptadores": {"legenda": "liso", "trilha": "cama"},
+    },
+    # Documentário vertical: noir suave + legenda discreta.
+    "doc-vertical": {
+        "herda": "reel-camera",
+        "corte": {"afinacao": "silencio"},
+        "graduacao": {"preset": "noir"},
+        "desenho": {"fonte": "oswald", "tema": "tinta"},
+        "efeito": {"abertura": None, "emenda": None, "sfx_db": -4.0},
+        "entrega": {"pasta": "videos/doc"},
+        "recursos": ["legenda", "broll", "trilha"],
+        "adaptadores": {"trilha": "cama"},
+    },
+    # Feed 1:1 (quadrado) a partir de câmera.
+    "feed-quadrado": {
+        "bruto": "camera",
+        "corte": {"afinacao": "tight"},
+        "imagem": {"orientacao": "16:9", "canvas": "1080x1080", "qualidade": "reel"},
+        "graduacao": {"preset": "vivid_social"},
+        "desenho": {"fonte": "barlow", "tema": "claro"},
+        "efeito": {"abertura": None, "emenda": "glitch", "emenda_min": 12.0, "emenda_forca": "subtle"},
+        "entrega": {"pasta": "videos/feed"},
+        "recursos": ["legenda", "trilha"],
+    },
+    # Pitch / elevador: 30–60s, punch alto, fonte display.
+    "pitch": {
+        "herda": "vsl",
+        "corte": {"afinacao": "tight", "ajuste": {"sil_cut": 0.05}},
+        "graduacao": {"preset": "teal_orange"},
+        "desenho": {"fonte": "archivo", "ritmo": [0.14, 0.03]},
+        "efeito": {"abertura": None, "emenda": "glitch", "emenda_forca": "medium"},
+        "entrega": {"pasta": "videos/pitch"},
+        "recursos": ["legenda", "trilha", "emenda"],
+        "adaptadores": {"legenda": "viral", "trilha": "cama"},
+    },
+    # Cold open cinematico 21:9-ish via canvas wide.
+    "cold-open": {
+        "bruto": "live",
+        "corte": {"afinacao": "tight"},
+        "imagem": {"orientacao": "16:9", "canvas": "2560x1080", "qualidade": "final"},
+        "graduacao": {"preset": "cool_night"},
+        "efeito": {"abertura": "crt", "emenda": "glitch", "emenda_forca": "strong"},
+        "desenho": {"fonte": "anton", "tema": "tinta"},
+        "entrega": {"pasta": "videos/cold-open"},
+        "recursos": ["abertura", "emenda", "trilha"],
+    },
+    # Tutorial vertical passo a passo (how-to).
+    "tutorial": {
+        "herda": "reel-camera",
+        "corte": {"afinacao": "aula", "ajuste": {"pause_keep": 0.55, "sil_cut": 0.8}},
+        "graduacao": {"preset": "neutral_punch"},
+        "desenho": {"fonte": "rajdhani", "tema": "claro", "legenda_layout": "faixa"},
+        "efeito": {"abertura": None, "emenda": "flash", "emenda_min": 10.0, "emenda_forca": "subtle"},
+        "entrega": {"pasta": "videos/tutorial"},
+        "recursos": ["legenda", "emenda", "explicador"],
+        "adaptadores": {"legenda": "liso"},
+    },
+    # Unboxing / hands-on: close-ups, whip nas trocas.
+    "unboxing": {
+        "bruto": "camera",
+        "corte": {"afinacao": "tight", "ajuste": {"sil_cut": 0.35}},
+        "imagem": {"orientacao": "9:16", "qualidade": "reel"},
+        "graduacao": {"preset": "vivid_social"},
+        "desenho": {"fonte": "kanit", "tema": "tinta", "ritmo": [0.11, 0.03]},
+        "efeito": {"abertura": None, "emenda": "whip", "emenda_min": 6.0, "emenda_forca": "medium"},
+        "entrega": {"pasta": "videos/unboxing"},
+        "recursos": ["legenda", "emenda", "trilha"],
+    },
+    # Hook de 15s: abertura CRT + glitch forte + riser.
+    "hook-15s": {
+        "herda": "teaser",
+        "corte": {"afinacao": "tight", "ajuste": {"sil_cut": 0.1, "pause_keep": 0.1}},
+        "graduacao": {"preset": "high_contrast"},
+        "efeito": {"abertura": "crt", "emenda": "flash", "emenda_forca": "strong", "sfx_db": 0.0},
+        "desenho": {"fonte": "blackops", "tema": "tinta", "ritmo": [0.08, 0.02]},
+        "entrega": {"pasta": "videos/hooks"},
+        "recursos": ["legenda", "emenda", "abertura", "trilha"],
+    },
+    # Destaque de live: corta gordura, mantém energia do ao vivo.
+    "live-highlight": {
+        "herda": "aula-ccnp",
+        "corte": {"afinacao": "tight", "ajuste": {"sil_cut": 0.5, "pause_keep": 0.35}},
+        "graduacao": {"preset": "warm_cinematic"},
+        "efeito": {"abertura": None, "emenda": "glitch", "emenda_min": 15.0, "emenda_forca": "subtle"},
+        "desenho": {"fonte": "teko", "tema": "claro"},
+        "entrega": {"pasta": "videos/live"},
+        "recursos": ["legenda", "emenda", "trilha"],
+    },
+    # Carrossel / feed 4:5 Instagram.
+    "carrossel": {
+        "bruto": "camera",
+        "corte": {"afinacao": "tight"},
+        "imagem": {"orientacao": "16:9", "canvas": "1080x1350", "qualidade": "reel"},
+        "graduacao": {"preset": "soft_pastel"},
+        "desenho": {"fonte": "outfit", "tema": "claro", "legenda_layout": "faixa"},
+        "efeito": {"abertura": None, "emenda": None},
+        "entrega": {"pasta": "videos/carrossel"},
+        "recursos": ["legenda", "trilha"],
+        "adaptadores": {"legenda": "liso", "trilha": "cama"},
     },
 }
 

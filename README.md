@@ -93,16 +93,18 @@ Abra [http://localhost:3000/editor](http://localhost:3000/editor):
 - Painel do agente: material analisado, transcript, gordura
 - Comandos + automação no rodapé
 
-### Opções na UI do chat
+### Opções na UI do chat e do editor EDVD
 
-- Estilos: `aula-ccnp`, `reel-mono`, `reel-camera`, `quadro`, `vsl`, etc.
-- Resolução, idioma, modelo Whisper
-- Legendas, intro/outro, crop 9:16, `pause_keep`, `sil_cut`
+- **30 estilos**: aula, reel, quadro, VSL, podcast, shorts, teaser, story, webinar, entrevista, doc, feed, pitch, cold-open, tutorial, unboxing, hook-15s, live-highlight, carrossel, etc.
+- **16 fontes OFL** no kit (Montserrat, Bebas, Anton, Rajdhani, Teko, …)
+- **5 formatos**: 16:9, 9:16, 1:1, 4:5, 21:9
+- **11 grades** de cor + **10 SFX** sintéticos + emendas `glitch` / `flash` / `whip`
+- Resolução, idioma, Whisper, legendas, intro/outro, crop, `pause_keep`, `sil_cut`
 - Auto-confirmar plano + render automático
 
 ### Tools do agente
 
-`list_video_styles`, `describe_video_style`, `transcribe_video`, `create_edit_plan`, `dry_run_edit`, `render_edit`, `burn_captions`, `measure_breathing`, `auto_edit_video`
+`list_video_styles`, `list_edit_catalog`, `describe_video_style`, `transcribe_video`, `create_edit_plan`, `dry_run_edit`, `render_edit`, `burn_captions`, `measure_breathing`, `auto_edit_video`
 
 Pipeline automático: **transcreve → plano → dry-run → render**.
 

@@ -9,7 +9,23 @@ import type {
   MediaAnalysis,
   TakeWindow,
 } from "@/lib/editor/types";
-import { DEFAULT_VIDEO_OPTIONS } from "@/lib/video/options";
+import {
+  DEFAULT_VIDEO_OPTIONS,
+  FONT_LABELS,
+  SOUND_LABELS,
+  STYLE_LABELS,
+  VIDEO_FONTS,
+  VIDEO_FORMATS,
+  VIDEO_GRADES,
+  VIDEO_SOUNDS,
+  VIDEO_STYLES,
+  type VideoEditOptions,
+  type VideoFont,
+  type VideoFormat,
+  type VideoGrade,
+  type VideoSound,
+  type VideoStyle,
+} from "@/lib/video/options";
 import { CodeWorkspace } from "./code-workspace";
 import { Timeline } from "./timeline";
 import { VideoPreview } from "./video-preview";
@@ -36,7 +52,17 @@ export function EditorApp() {
   const [busy, setBusy] = useState(false);
   const [logs, setLogs] = useState<AgentLogEntry[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [editOptions, setEditOptions] = useState<VideoEditOptions>(
+    DEFAULT_VIDEO_OPTIONS,
+  );
   const bootstrapped = useRef<string | null>(null);
+
+  function patchEdit<K extends keyof VideoEditOptions>(
+    key: K,
+    value: VideoEditOptions[K],
+  ) {
+    setEditOptions((prev) => ({ ...prev, [key]: value }));
+  }
 
   const src = analysis ? mediaUrl(analysis.path) : null;
 
@@ -209,10 +235,12 @@ export function EditorApp() {
           body: JSON.stringify({
             mode: "video",
             videoOptions: {
-              ...DEFAULT_VIDEO_OPTIONS,
+              ...editOptions,
               autoConfirm: true,
               autoRender: true,
-              estilo: analysis.orientation === "vertical" ? "reel-mono" : "aula-ccnp",
+              estilo:
+                editOptions.estilo ||
+                (analysis.orientation === "vertical" ? "reel-mono" : "aula-ccnp"),
             },
             messages: [
               {
@@ -435,32 +463,132 @@ export function EditorApp() {
       </main>
 
       <footer className="border-t border-white/10 px-4 py-3">
-        <div className="mx-auto flex w-full max-w-5xl items-center gap-2">
-          <input
-            value={command}
-            onChange={(e) => setCommand(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") void runCommand();
-            }}
-            placeholder="Digite para comandos — ex: corta gordura · transcreve · edita automaticamente"
-            className="flex-1 rounded-xl border border-white/10 bg-[#12151a] px-3 py-3 text-sm text-white outline-none ring-[#ff7a1a] placeholder:text-white/30 focus:ring-2"
-          />
-          <label className="flex items-center gap-2 rounded-xl border border-white/10 px-3 py-3 text-xs text-white/60">
+        <div className="mx-auto flex w-full max-w-5xl flex-col gap-2">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+            <label className="flex flex-col gap-1 text-[10px] uppercase tracking-wider text-white/40">
+              Estilo
+              <select
+                value={editOptions.estilo}
+                onChange={(e) =>
+                  patchEdit("estilo", e.target.value as VideoStyle)
+                }
+                className="rounded-lg border border-white/10 bg-[#12151a] px-2 py-1.5 text-xs text-white"
+              >
+                {VIDEO_STYLES.map((s) => (
+                  <option key={s} value={s}>
+                    {STYLE_LABELS[s]}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-1 text-[10px] uppercase tracking-wider text-white/40">
+              Formato
+              <select
+                value={editOptions.formato}
+                onChange={(e) =>
+                  patchEdit("formato", e.target.value as VideoFormat)
+                }
+                className="rounded-lg border border-white/10 bg-[#12151a] px-2 py-1.5 text-xs text-white"
+              >
+                {VIDEO_FORMATS.map((f) => (
+                  <option key={f} value={f}>
+                    {f}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-1 text-[10px] uppercase tracking-wider text-white/40">
+              Fonte
+              <select
+                value={editOptions.fonte}
+                onChange={(e) =>
+                  patchEdit("fonte", e.target.value as VideoFont)
+                }
+                className="rounded-lg border border-white/10 bg-[#12151a] px-2 py-1.5 text-xs text-white"
+              >
+                {VIDEO_FONTS.map((f) => (
+                  <option key={f} value={f}>
+                    {FONT_LABELS[f]}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-1 text-[10px] uppercase tracking-wider text-white/40">
+              Grade
+              <select
+                value={editOptions.grade}
+                onChange={(e) =>
+                  patchEdit("grade", e.target.value as VideoGrade)
+                }
+                className="rounded-lg border border-white/10 bg-[#12151a] px-2 py-1.5 text-xs text-white"
+              >
+                {VIDEO_GRADES.map((g) => (
+                  <option key={g} value={g}>
+                    {g}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex flex-col gap-1 text-[10px] uppercase tracking-wider text-white/40">
+              Emenda
+              <select
+                value={editOptions.efeitoEmenda}
+                onChange={(e) =>
+                  patchEdit(
+                    "efeitoEmenda",
+                    e.target.value as VideoEditOptions["efeitoEmenda"],
+                  )
+                }
+                className="rounded-lg border border-white/10 bg-[#12151a] px-2 py-1.5 text-xs text-white"
+              >
+                <option value="none">Nenhum</option>
+                <option value="glitch">Glitch</option>
+                <option value="flash">Flash</option>
+                <option value="whip">Whip</option>
+              </select>
+            </label>
+            <label className="flex flex-col gap-1 text-[10px] uppercase tracking-wider text-white/40">
+              Som
+              <select
+                value={editOptions.som}
+                onChange={(e) => patchEdit("som", e.target.value as VideoSound)}
+                className="rounded-lg border border-white/10 bg-[#12151a] px-2 py-1.5 text-xs text-white"
+              >
+                {VIDEO_SOUNDS.map((s) => (
+                  <option key={s} value={s}>
+                    {SOUND_LABELS[s]}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+          <div className="flex items-center gap-2">
             <input
-              type="checkbox"
-              checked={automation}
-              onChange={(e) => setAutomation(e.target.checked)}
+              value={command}
+              onChange={(e) => setCommand(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") void runCommand();
+              }}
+              placeholder="Digite para comandos — ex: corta gordura · transcreve · edita automaticamente"
+              className="flex-1 rounded-xl border border-white/10 bg-[#12151a] px-3 py-3 text-sm text-white outline-none ring-[#ff7a1a] placeholder:text-white/30 focus:ring-2"
             />
-            Automação
-          </label>
-          <button
-            type="button"
-            disabled={!command.trim() || busy || !analysis}
-            onClick={() => void runCommand()}
-            className="rounded-xl bg-[#ff7a1a] px-4 py-3 text-sm font-semibold text-black disabled:opacity-40"
-          >
-            Enviar
-          </button>
+            <label className="flex items-center gap-2 rounded-xl border border-white/10 px-3 py-3 text-xs text-white/60">
+              <input
+                type="checkbox"
+                checked={automation}
+                onChange={(e) => setAutomation(e.target.checked)}
+              />
+              Automação
+            </label>
+            <button
+              type="button"
+              disabled={!command.trim() || busy || !analysis}
+              onClick={() => void runCommand()}
+              className="rounded-xl bg-[#ff7a1a] px-4 py-3 text-sm font-semibold text-black disabled:opacity-40"
+            >
+              Enviar
+            </button>
+          </div>
         </div>
       </footer>
     </div>

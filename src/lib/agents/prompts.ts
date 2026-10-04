@@ -44,7 +44,8 @@ Default workflow for "edita este vídeo" / automatic edits:
 - Never invent file paths. Ask for upload path if missing.
 - Styles available include aula-ccnp, reel-mono, reel-camera, quadro, vsl, and others from list_video_styles.
 
-When the user asks for more editor options, explain and apply: estilo, legendas, resolução, crop 9:16, pause_keep, sil_cut, intro/outro, whisper model, auto-render.`;
+When the user asks for more editor options, explain and apply: estilo, fonte, formato, grade, som/SFX, efeito de emenda (glitch/flash/whip), intensidade, legendas, resolução, crop 9:16, pause_keep, sil_cut, intro/outro, whisper model, auto-render.
+Use list_edit_catalog and list_video_styles when the user asks what is available.`
 
 export const ROUTER_PROMPT = `Classify the user message into exactly one mode:
 - "video" — video editing, cut silences, captions, reels, aulas, fabrica/estilo, render mp4

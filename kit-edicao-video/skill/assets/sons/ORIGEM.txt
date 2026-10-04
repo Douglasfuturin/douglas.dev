@@ -1,0 +1,13 @@
+Sons sintetizados no próprio kit com ffmpeg (sine/noise + fades).
+Sem amostra de terceiros. Livres para uso no pipeline de edição.
+
+tick.wav       — marcação curta
+click.wav      — clique seco
+impacto.wav     — hit baixo
+whoosh.wav     — passagem
+transicao.wav   — transição suave
+riser.wav      — subida para CTA
+pop.wav        — pop curto
+bass.wav       — thump grave
+swoosh.wav     — varredura pink noise
+glitch.wav     — estalo digital

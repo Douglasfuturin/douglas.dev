@@ -254,8 +254,27 @@ _cache_fonte: dict[tuple[str, int], ImageFont.FreeTypeFont] = {}
 # cai nela: antes, a primeira legenda do aluno dava OSError, porque o padrão
 # (`creato`) só existe no ~/Library/Fonts do Matheus. Mesmo caminho relativo no
 # tronco (tools/video-use/assets) e no kit (skill/assets).
-LIVRE = (str(Path(__file__).resolve().parents[1] / "assets/fontes/Montserrat[wght].ttf"), 0, "Black")
+_KIT_FONTES = Path(__file__).resolve().parents[1] / "assets/fontes"
+LIVRE = (str(_KIT_FONTES / "Montserrat[wght].ttf"), 0, "Black")
 FONTES["montserrat"] = LIVRE
+# Fontes OFL que viajam no kit (não dependem de ~/Library/Fonts do macOS).
+FONTES.update({
+    "ibm": (str(_KIT_FONTES / "IBMPlexMono-Regular.ttf"), 0, None),
+    "bebas": (str(_KIT_FONTES / "BebasNeue-Regular.ttf"), 0, None),
+    "oswald": (str(_KIT_FONTES / "Oswald[wght].ttf"), 0, "Bold"),
+    "space": (str(_KIT_FONTES / "SpaceGrotesk[wght].ttf"), 0, "Bold"),
+    "outfit": (str(_KIT_FONTES / "Outfit[wght].ttf"), 0, "Bold"),
+    "archivo": (str(_KIT_FONTES / "ArchivoBlack-Regular.ttf"), 0, None),
+    "rubik": (str(_KIT_FONTES / "Rubik[wght].ttf"), 0, "Black"),
+    "barlow": (str(_KIT_FONTES / "BarlowCondensed-Bold.ttf"), 0, None),
+    "anton": (str(_KIT_FONTES / "Anton-Regular.ttf"), 0, None),
+    "bangers": (str(_KIT_FONTES / "Bangers-Regular.ttf"), 0, None),
+    "syne": (str(_KIT_FONTES / "Syne[wght].ttf"), 0, "Bold"),
+    "rajdhani": (str(_KIT_FONTES / "Rajdhani-Bold.ttf"), 0, None),
+    "teko": (str(_KIT_FONTES / "Teko[wght].ttf"), 0, "Bold"),
+    "blackops": (str(_KIT_FONTES / "BlackOpsOne-Regular.ttf"), 0, None),
+    "kanit": (str(_KIT_FONTES / "Kanit-Bold.ttf"), 0, None),
+})
 _avisadas: set[str] = set()
 
 

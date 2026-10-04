@@ -8,7 +8,8 @@ import {
   OUTPUTS_DIR,
   UPLOADS_DIR,
 } from "./paths";
-import type { VideoEditOptions } from "./options";
+import { FORMAT_CANVAS, type VideoEditOptions } from "./options";
+import { KIT_DIR } from "./paths";
 
 export type RunResult = {
   ok: boolean;
@@ -207,25 +208,54 @@ export async function writePlan(input: {
     plan.captions = true;
   }
 
-  // resolution / intro overrides as axis patches when useful
+  // resolution / format / grade / font / effects as axis patches
   const imagem: Record<string, unknown> = {};
-  if (input.options.resolution === "1080p") imagem.altura =
+  const verticalLike =
+    input.options.formato === "9:16" ||
     input.options.estilo.includes("reel") ||
     input.options.estilo.includes("vertical") ||
+    input.options.estilo.includes("story") ||
+    input.options.estilo.includes("shorts") ||
     input.options.estilo === "vsl" ||
+    input.options.estilo === "teaser" ||
+    input.options.estilo === "pitch" ||
+    input.options.estilo === "tutorial" ||
+    input.options.estilo === "unboxing" ||
+    input.options.estilo === "hook-15s" ||
     input.options.estilo.startsWith("criativo") ||
     input.options.estilo.startsWith("lorcana-curto") ||
-    input.options.estilo.startsWith("anuncio")
-      ? 1920
-      : 1080;
+    input.options.estilo.startsWith("anuncio");
+
+  if (input.options.formato === "9:16") imagem.orientacao = "9:16";
+  if (input.options.formato === "16:9") imagem.orientacao = "16:9";
+
+  const canvasFromFormat = FORMAT_CANVAS[input.options.formato];
+  if (canvasFromFormat) imagem.canvas = canvasFromFormat;
+
+  if (input.options.resolution === "1080p") {
+    imagem.altura = verticalLike ? 1920 : 1080;
+  }
   if (input.options.resolution === "1440p") imagem.canvas = "2560x1440";
-  if (input.options.resolution === "4k") imagem.altura = 2160;
+  if (input.options.resolution === "4k") imagem.altura = verticalLike ? 3840 : 2160;
   if (Object.keys(imagem).length) plan.imagem = imagem;
 
-  if (input.options.introOutro === "crt") {
-    plan.efeito = { abertura: "crt" };
-  } else if (input.options.introOutro === "none") {
-    plan.efeito = { abertura: null, emenda: null };
+  plan.graduacao = { preset: input.options.grade };
+  plan.desenho = { fonte: input.options.fonte };
+
+  const efeito: Record<string, unknown> = {
+    emenda_forca: input.options.intensidade,
+  };
+  if (input.options.introOutro === "crt") efeito.abertura = "crt";
+  else if (input.options.introOutro === "none") efeito.abertura = null;
+  else if (input.options.introOutro === "fade") efeito.abertura = null;
+
+  if (input.options.efeitoEmenda === "none") efeito.emenda = null;
+  else efeito.emenda = input.options.efeitoEmenda; // glitch | flash | whip
+
+  plan.efeito = efeito;
+
+  if (input.options.som && input.options.som !== "none") {
+    plan.sfx = path.join(KIT_DIR, "assets", "sons", `${input.options.som}.wav`);
   }
 
   const planPath = path.join(EDITS_DIR, `${slug}.plan.json`);

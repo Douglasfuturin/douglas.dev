@@ -9,6 +9,7 @@ import {
   listStyles,
   measureBreathing,
   renderPlan,
+  runHelper,
   transcribeVideo,
   writePlan,
 } from "@/lib/video/runner";
@@ -40,6 +41,23 @@ export function videoEditorTools(defaults: VideoEditOptions) {
           ok: result.ok,
           styles: result.stdout,
           stderr: result.stderr || undefined,
+        };
+      },
+    }),
+
+    list_edit_catalog: tool({
+      description:
+        "Lista formatos, fontes do kit, sons/SFX, efeitos e grades de cor disponíveis.",
+      inputSchema: z.object({
+        parte: z
+          .enum(["tudo", "formatos", "fontes", "sons", "efeitos", "grades"])
+          .optional(),
+      }),
+      execute: async ({ parte }) => {
+        const result = await runHelper("catalogo.py", [parte || "tudo"]);
+        return {
+          ok: result.ok,
+          catalog: result.stdout || result.stderr,
         };
       },
     }),
