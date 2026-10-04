@@ -15,6 +15,7 @@ type ChatRequestBody = {
   mode?: AgentMode;
   researchDepth?: ResearchDepth;
   videoOptions?: Partial<VideoEditOptions>;
+  kitId?: string;
 };
 
 export async function POST(req: Request) {
@@ -33,11 +34,13 @@ export async function POST(req: Request) {
   const mode = body.mode ?? "auto";
   const researchDepth = body.researchDepth ?? "medium";
   const videoOptions = body.videoOptions;
+  const kitId = body.kitId;
 
   const agent = await resolveAgent(messages, {
     mode,
     researchDepth,
     videoOptions,
+    kitId,
   });
   const modelMessages = await convertToModelMessages(messages);
 
@@ -45,9 +48,12 @@ export async function POST(req: Request) {
     model: agent.model,
     instructions: agent.instructions,
     messages: modelMessages,
-    tools: agent.tools,
+    tools: agent.tools as Parameters<typeof streamText>[0]["tools"],
     providerOptions: agent.providerOptions,
-    stopWhen: agent.mode === "video" ? stepCountIs(12) : stepCountIs(8),
+    stopWhen:
+      agent.mode === "video" || agent.mode === "kits"
+        ? stepCountIs(12)
+        : stepCountIs(8),
   });
 
   return result.toUIMessageStreamResponse({

@@ -3,7 +3,7 @@
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import Link from "next/link";
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import type { AgentMode, ResearchDepth } from "@/lib/agents/models";
 import {
   DEFAULT_VIDEO_OPTIONS,
@@ -29,23 +29,66 @@ const MODE_LABELS: Record<AgentMode, string> = {
   chat: "Chat + tools",
   research: "Multi-agent research",
   video: "Editor de vídeo",
+  kits: "Ninja Kits",
 };
+
+function readQueryMode(): AgentMode {
+  if (typeof window === "undefined") return "auto";
+  const params = new URLSearchParams(window.location.search);
+  const m = params.get("mode");
+  if (m === "kits" || m === "video" || m === "chat" || m === "research" || m === "auto") {
+    return m;
+  }
+  if (params.get("kit")) return "kits";
+  return "auto";
+}
+
+function readQueryKitId(): string {
+  if (typeof window === "undefined") return "";
+  return new URLSearchParams(window.location.search).get("kit") || "";
+}
 
 export function ChatApp() {
   const [input, setInput] = useState("");
-  const [mode, setMode] = useState<AgentMode>("auto");
+  const [mode, setMode] = useState<AgentMode>(readQueryMode);
   const [researchDepth, setResearchDepth] = useState<ResearchDepth>("medium");
+  const [kitId, setKitId] = useState<string>(readQueryKitId);
+  const [kitOptions, setKitOptions] = useState<Array<{ id: string; name: string }>>(
+    [],
+  );
   const [videoOptions, setVideoOptions] =
     useState<VideoEditOptions>(DEFAULT_VIDEO_OPTIONS);
   const [uploadedPath, setUploadedPath] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
 
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/kits")
+      .then((r) => r.json())
+      .then((data: { kits?: Array<{ id: string; name: string }> }) => {
+        if (!alive) return;
+        setKitOptions(
+          (data.kits || []).map((k) => ({ id: k.id, name: k.name })),
+        );
+      })
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+    };
+  }, []);
+
   const transport = useMemo(
     () =>
       new DefaultChatTransport({
         api: "/api/chat",
+        body: {
+          mode,
+          researchDepth,
+          videoOptions,
+          kitId: kitId || undefined,
+        },
       }),
-    [],
+    [mode, researchDepth, videoOptions, kitId],
   );
 
   const { messages, sendMessage, status, error, stop } = useChat({
@@ -98,14 +141,22 @@ export function ChatApp() {
             Grokish
           </p>
           <p className="mt-2 max-w-md text-sm leading-relaxed text-[var(--muted)]">
-            Multi-agente + editor de vídeo automático com o kit de edição.
+            Multi-agente + kits Ninja + editor de vídeo automático.
           </p>
-          <Link
-            href="/editor"
-            className="mt-3 inline-flex rounded-lg bg-[var(--ink)] px-3 py-1.5 text-xs font-semibold text-[var(--panel)]"
-          >
-            Abrir editor visual EDVD →
-          </Link>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Link
+              href="/kits"
+              className="inline-flex rounded-lg bg-[var(--ink)] px-3 py-1.5 text-xs font-semibold text-[var(--panel)]"
+            >
+              Hub Ninja Kits →
+            </Link>
+            <Link
+              href="/editor"
+              className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
+            >
+              Editor EDVD
+            </Link>
+          </div>
         </div>
         <div className="flex flex-col items-end gap-2">
           <label className="text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">
@@ -135,6 +186,26 @@ export function ChatApp() {
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
                 <option value="high">High</option>
+              </select>
+            </label>
+          ) : null}
+          {mode === "kits" || mode === "auto" ? (
+            <label className="text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">
+              Kit ativo
+              <select
+                className="mt-1 block max-w-[200px] rounded-md border border-[var(--line)] bg-[var(--panel)] px-2 py-1.5 text-sm text-[var(--ink)]"
+                value={kitId}
+                onChange={(e) => {
+                  setKitId(e.target.value);
+                  if (e.target.value) setMode("kits");
+                }}
+              >
+                <option value="">Todos / inventário</option>
+                {kitOptions.map((k) => (
+                  <option key={k.id} value={k.id}>
+                    {k.name}
+                  </option>
+                ))}
               </select>
             </label>
           ) : null}
@@ -480,6 +551,7 @@ export function ChatApp() {
                 mode,
                 researchDepth,
                 videoOptions,
+                kitId: kitId || undefined,
               },
             },
           );
@@ -558,18 +630,26 @@ function EmptyState({
           "Edita automaticamente o vídeo em workspace/videos — estilo reel-mono com legendas",
           "Monta um plano de aula-ccnp, roda dry-run e só renderiza se eu confirmar",
         ]
-      : [
-          "O que é o modelo grok-4.20-multi-agent e quando usar?",
-          "Pesquise nas últimas notícias o que está rolando sobre agentes de IA",
-          "Quero editar um vídeo: corte silêncios, trate a voz e gere um reel",
-        ];
+      : mode === "kits"
+        ? [
+            "Lista todos os kits Ninja instalados e ZIPs na fila",
+            "Instala todos os ZIPs de ninja-kits/sources e da inbox de uploads",
+            "Descreve o kit editar-video e lista os helpers",
+          ]
+        : [
+            "O que é o modelo grok-4.20-multi-agent e quando usar?",
+            "Pesquise nas últimas notícias o que está rolando sobre agentes de IA",
+            "Lista os kits Ninja disponíveis e o que cada um faz",
+          ];
 
   return (
     <section className="animate-rise mt-2 space-y-4">
       <p className="text-sm text-[var(--muted)]">
         {mode === "video"
           ? "Upload um MP4, escolha estilo/opções e peça a edição automática."
-          : "Chat, research multi-agente, ou editor de vídeo com o kit."}
+          : mode === "kits"
+            ? "Importe ZIPs de F:\\NINJA CURSOS em /kits e opere cada skill pelo agente."
+            : "Chat, research, kits Ninja ou editor de vídeo."}
       </p>
       <ul className="space-y-2">
         {prompts.map((prompt) => (

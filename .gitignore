@@ -51,3 +51,10 @@ public/outputs/
 *.mp4
 *.mov
 *.mkv
+
+# ninja kits runtime (keep README; ignore bulky zips/extracts by default)
+ninja-kits/sources/*.zip
+ninja-kits/installed/
+ninja-kits/**/.venv/
+ninja-kits/**/__pycache__/
+ninja-kits/**/.staging-*

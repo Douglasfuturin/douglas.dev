@@ -74,6 +74,17 @@ const { text, sources } = await generateText({
 });
 ```
 
+## Hub Ninja Kits
+
+Abra [http://localhost:3000/kits](http://localhost:3000/kits) para importar cada ZIP de `F:\NINJA CURSOS`:
+
+1. Cole os `.zip` em `ninja-kits/sources/` (ou upload na UI / anexe na conversa do Cloud Agent)
+2. Clique em **Instalar todos os ZIPs**
+3. Cada kit vira agente + helpers (`list_ninja_kits`, `describe_ninja_kit`, `run_ninja_kit_helper`)
+4. Modo **Ninja Kits** no chat, com kit ativo selecionável
+
+O Cloud Agent **não acessa** o disco `F:\` do Windows — os ZIPs precisam ser enviados/copiados.
+
 ## Editor de vídeo (kit integrado)
 
 O modo **Editor de vídeo** usa o kit em `kit-edicao-video/`:
