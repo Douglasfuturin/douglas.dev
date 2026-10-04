@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState, startTransition } from "react";
+import { VisualEditPanel } from "@/components/visual-edit-panel";
 import type { KitSourceZip, NinjaKit } from "@/lib/kits/types";
 
 type Starter = { label: string; prompt: string };
@@ -18,6 +19,7 @@ type InventoryItem = {
   helpers: number;
   hasSkill?: boolean;
   kind?: string;
+  visual?: boolean;
   starters: Starter[];
 };
 
@@ -116,7 +118,7 @@ export function SkillsDashboard() {
     const text =
       prompt.trim() ||
       selected.starters[0]?.prompt ||
-      `Use a skill ${selected.id}`;
+      `Use a skill ${selected.name} (${selected.id}). Responda em português.`;
     const params = new URLSearchParams({
       mode: "kits",
       kit: selected.id,
@@ -203,14 +205,14 @@ export function SkillsDashboard() {
               </Link>
               <span className="text-xs text-[var(--muted)]">/</span>
               <p className="text-xs uppercase tracking-[0.18em] text-[var(--accent-ink)]">
-                Skills Dashboard
+                Painel de Skills
               </p>
             </div>
             <h1 className="mt-2 font-display text-3xl tracking-tight text-[var(--ink)] md:text-4xl">
-              Ninja Skills
+              Skills Ninja
             </h1>
             <p className="mt-1 max-w-xl text-sm text-[var(--muted)]">
-              Escolha a skill, preencha o brief e execute no agente —{" "}
+              Escolha a skill, ajuste o brief (ou o painel visual) e execute —{" "}
               {catalog?.manifestCount ?? "…"} skills disponíveis.
             </p>
           </div>
@@ -252,7 +254,13 @@ export function SkillsDashboard() {
           />
         ) : null}
 
-        <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(320px,400px)]">
+        <div
+          className={`grid min-h-0 flex-1 gap-4 ${
+            selected?.visual
+              ? "lg:grid-cols-[minmax(0,0.9fr)_minmax(360px,460px)]"
+              : "lg:grid-cols-[minmax(0,1fr)_minmax(320px,400px)]"
+          }`}
+        >
           <section className="flex min-h-0 flex-col animate-rise">
             <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center">
               <label className="relative min-w-0 flex-1">
@@ -313,7 +321,14 @@ export function SkillsDashboard() {
                           <span className="text-[10px] uppercase tracking-[0.12em] text-[var(--muted)]">
                             {item.categoryLabel}
                           </span>
-                          <StatusDot status={item.status} />
+                          <div className="flex items-center gap-1">
+                            {item.visual ? (
+                              <span className="rounded bg-[var(--chip)] px-1 py-0.5 text-[9px] text-[var(--accent-ink)]">
+                                Visual
+                              </span>
+                            ) : null}
+                            <StatusDot status={item.status} />
+                          </div>
                         </div>
                       </div>
                     </button>
@@ -331,9 +346,9 @@ export function SkillsDashboard() {
           <aside className="flex min-h-0 flex-col rounded-2xl border border-[var(--line)] bg-[var(--panel)]/90 p-4 animate-rise backdrop-blur md:p-5">
             {selected ? (
               <>
-                <div className="mb-3">
+                <div className="mb-3 shrink-0">
                   <p className="text-[10px] uppercase tracking-[0.16em] text-[var(--muted)]">
-                    {selected.categoryLabel} · {selected.id}
+                    {selected.categoryLabel}
                   </p>
                   <h2 className="mt-1 font-display text-2xl text-[var(--ink)]">
                     {selected.name}
@@ -343,74 +358,93 @@ export function SkillsDashboard() {
                   </p>
                   <div className="mt-3 flex flex-wrap gap-2 text-[11px]">
                     <StatusDot status={selected.status} withLabel />
+                    {selected.visual ? (
+                      <span className="rounded-md bg-[var(--chip)] px-2 py-0.5 text-[var(--accent-ink)]">
+                        Painel visual
+                      </span>
+                    ) : null}
                     {selected.hasSkill ? (
                       <span className="rounded-md bg-[var(--chip)] px-2 py-0.5 text-[var(--accent-ink)]">
-                        SKILL.md
+                        Skill instalada
                       </span>
                     ) : null}
                     {selected.helpers > 0 ? (
                       <span className="rounded-md bg-[var(--chip)] px-2 py-0.5 text-[var(--accent-ink)]">
-                        {selected.helpers} helpers
+                        {selected.helpers} auxiliares
                       </span>
                     ) : null}
                   </div>
                 </div>
 
-                <div className="mb-3">
-                  <p className="mb-1.5 text-[11px] uppercase tracking-[0.14em] text-[var(--muted)]">
-                    Atalhos
-                  </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {selected.starters.map((s) => (
-                      <button
-                        key={s.label}
-                        type="button"
-                        onClick={() => setBrief(s.prompt)}
-                        className="rounded-lg border border-[var(--line)] bg-white/70 px-2.5 py-1 text-xs text-[var(--ink)] hover:border-[var(--accent)]"
-                      >
-                        {s.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <label className="flex min-h-0 flex-1 flex-col">
-                  <span className="mb-1.5 text-[11px] uppercase tracking-[0.14em] text-[var(--muted)]">
-                    Brief / pedido
-                  </span>
-                  <textarea
-                    value={activeBrief}
-                    onChange={(e) => setBrief(e.target.value)}
-                    rows={8}
-                    className="min-h-[140px] flex-1 resize-none rounded-xl border border-[var(--line)] bg-white/80 px-3 py-2.5 text-sm leading-relaxed text-[var(--ink)] outline-none ring-[var(--accent)] focus:ring-2"
-                    placeholder="Descreva o que precisa. Troque os [placeholders] pelos seus dados."
+                {selected.visual ? (
+                  <VisualEditPanel
+                    key={selected.id}
+                    kitId={selected.id}
+                    kitName={selected.name}
+                    extraBrief={brief}
+                    onExtraBriefChange={setBrief}
+                    onRun={(prompt, autosend) => runSkill(prompt, autosend)}
                   />
-                </label>
+                ) : (
+                  <>
+                    <div className="mb-3">
+                      <p className="mb-1.5 text-[11px] uppercase tracking-[0.14em] text-[var(--muted)]">
+                        Atalhos
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {selected.starters.map((s) => (
+                          <button
+                            key={s.label}
+                            type="button"
+                            onClick={() => setBrief(s.prompt)}
+                            className="rounded-lg border border-[var(--line)] bg-white/70 px-2.5 py-1 text-xs text-[var(--ink)] hover:border-[var(--accent)]"
+                          >
+                            {s.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
 
-                <div className="mt-3 flex flex-col gap-2">
-                  <button
-                    type="button"
-                    onClick={() => runSkill(activeBrief, true)}
-                    className="rounded-xl bg-[var(--ink)] px-4 py-3 text-sm font-semibold text-[var(--panel)] transition hover:brightness-110"
+                    <label className="flex min-h-0 flex-1 flex-col">
+                      <span className="mb-1.5 text-[11px] uppercase tracking-[0.14em] text-[var(--muted)]">
+                        Pedido
+                      </span>
+                      <textarea
+                        value={activeBrief}
+                        onChange={(e) => setBrief(e.target.value)}
+                        rows={8}
+                        className="min-h-[140px] flex-1 resize-none rounded-xl border border-[var(--line)] bg-white/80 px-3 py-2.5 text-sm leading-relaxed text-[var(--ink)] outline-none ring-[var(--accent)] focus:ring-2"
+                        placeholder="Descreva o que precisa. Troque os [placeholders] pelos seus dados."
+                      />
+                    </label>
+
+                    <div className="mt-3 flex flex-col gap-2">
+                      <button
+                        type="button"
+                        onClick={() => runSkill(activeBrief, true)}
+                        className="rounded-xl bg-[var(--ink)] px-4 py-3 text-sm font-semibold text-[var(--panel)] transition hover:brightness-110"
+                      >
+                        Executar skill →
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => runSkill(activeBrief, false)}
+                        className="rounded-xl border border-[var(--line)] px-4 py-2.5 text-sm text-[var(--ink)]"
+                      >
+                        Abrir no agente (sem enviar)
+                      </button>
+                    </div>
+                  </>
+                )}
+
+                {selected.id.includes("video") || selected.kind === "video" ? (
+                  <Link
+                    href="/editor"
+                    className="mt-2 rounded-xl border border-[var(--line)] px-4 py-2.5 text-center text-sm text-[var(--ink)]"
                   >
-                    Executar skill →
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => runSkill(activeBrief, false)}
-                    className="rounded-xl border border-[var(--line)] px-4 py-2.5 text-sm text-[var(--ink)]"
-                  >
-                    Abrir no agente (sem enviar)
-                  </button>
-                  {selected.id.includes("video") || selected.kind === "video" ? (
-                    <Link
-                      href="/editor"
-                      className="rounded-xl border border-[var(--line)] px-4 py-2.5 text-center text-sm text-[var(--ink)]"
-                    >
-                      Abrir Editor EDVD
-                    </Link>
-                  ) : null}
-                </div>
+                    Abrir Editor EDVD
+                  </Link>
+                ) : null}
               </>
             ) : (
               <div className="flex flex-1 items-center justify-center text-sm text-[var(--muted)]">
@@ -458,7 +492,7 @@ function StatusDot({
   const map = {
     installed: { cls: "bg-emerald-500", label: "Pronta" },
     "zip-ready": { cls: "bg-amber-500", label: "ZIP pronto" },
-    missing: { cls: "bg-slate-400", label: "Persona" },
+    missing: { cls: "bg-slate-400", label: "Modo persona" },
   } as const;
   const item = map[status];
   if (withLabel) {

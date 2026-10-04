@@ -25,11 +25,11 @@ import {
 } from "@/lib/video/options";
 
 const MODE_LABELS: Record<AgentMode, string> = {
-  auto: "Auto",
-  chat: "Chat + tools",
-  research: "Multi-agent research",
+  auto: "Automático",
+  chat: "Chat + ferramentas",
+  research: "Pesquisa multiagente",
   video: "Editor de vídeo",
-  kits: "Ninja Kits",
+  kits: "Skills Ninja",
 };
 
 function readQueryMode(): AgentMode {
@@ -192,7 +192,7 @@ export function ChatApp() {
               href="/kits"
               className="inline-flex rounded-lg bg-[var(--ink)] px-3 py-1.5 text-xs font-semibold text-[var(--panel)]"
             >
-              Skills Dashboard →
+              Painel de Skills →
             </Link>
             <Link
               href="/editor"
@@ -244,7 +244,7 @@ export function ChatApp() {
                   if (e.target.value) setMode("kits");
                 }}
               >
-                <option value="">Todos / inventário</option>
+                <option value="">Todas as skills</option>
                 {kitOptions.map((k) => (
                   <option key={k.id} value={k.id}>
                     {k.name}

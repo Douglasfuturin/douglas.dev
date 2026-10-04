@@ -449,6 +449,8 @@ export function startersForKit(id: string, name?: string): KitStarter[] {
 }
 
 export function displayNameForKit(id: string, installedName?: string): string {
+  // Prefer PT labels; fall back to installed name or pretty id.
+  // Imported lazily by callers that already use labels-pt.
   if (installedName && installedName !== id) return installedName;
   return id
     .split("-")
