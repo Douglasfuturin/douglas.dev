@@ -5,6 +5,8 @@ const nextConfig: NextConfig = {
   experimental: {
     proxyClientMaxBodySize: "512mb",
   },
+  // Dev server listens on 0.0.0.0; Next only trusts `localhost` unless listed here.
+  allowedDevOrigins: ["127.0.0.1"],
   serverExternalPackages: [],
 };
 
