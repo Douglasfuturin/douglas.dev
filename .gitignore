@@ -40,3 +40,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# video kit runtime
+kit-edicao-video/skill/.venv/
+kit-edicao-video/skill/**/__pycache__/
+kit-edicao-video/skill/**/*.egg-info/
+workspace/videos/
+workspace/edits/
+public/outputs/
+*.mp4
+*.mov
+*.mkv

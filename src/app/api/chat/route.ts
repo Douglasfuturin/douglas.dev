@@ -1,10 +1,12 @@
 import {
   convertToModelMessages,
+  stepCountIs,
   streamText,
   type UIMessage,
 } from "ai";
 import type { AgentMode, ResearchDepth } from "@/lib/agents/models";
 import { resolveAgent } from "@/lib/agents/orchestrator";
+import type { VideoEditOptions } from "@/lib/video/options";
 
 export const maxDuration = 300;
 
@@ -12,6 +14,7 @@ type ChatRequestBody = {
   messages: UIMessage[];
   mode?: AgentMode;
   researchDepth?: ResearchDepth;
+  videoOptions?: Partial<VideoEditOptions>;
 };
 
 export async function POST(req: Request) {
@@ -29,8 +32,13 @@ export async function POST(req: Request) {
   const messages = body.messages ?? [];
   const mode = body.mode ?? "auto";
   const researchDepth = body.researchDepth ?? "medium";
+  const videoOptions = body.videoOptions;
 
-  const agent = await resolveAgent(messages, { mode, researchDepth });
+  const agent = await resolveAgent(messages, {
+    mode,
+    researchDepth,
+    videoOptions,
+  });
   const modelMessages = await convertToModelMessages(messages);
 
   const result = streamText({
@@ -39,6 +47,7 @@ export async function POST(req: Request) {
     messages: modelMessages,
     tools: agent.tools,
     providerOptions: agent.providerOptions,
+    stopWhen: agent.mode === "video" ? stepCountIs(12) : stepCountIs(8),
   });
 
   return result.toUIMessageStreamResponse({

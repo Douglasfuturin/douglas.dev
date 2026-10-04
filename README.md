@@ -74,6 +74,27 @@ const { text, sources } = await generateText({
 });
 ```
 
+## Editor de vídeo (kit integrado)
+
+O modo **Editor de vídeo** usa o kit em `kit-edicao-video/`:
+
+1. Uma vez: `cd kit-edicao-video/skill && uv sync`
+2. Na UI: escolha o modo **Editor de vídeo**, faça upload do MP4 e ajuste opções
+3. Peça: `Edita automaticamente este vídeo…`
+
+### Opções na UI
+
+- Estilos: `aula-ccnp`, `reel-mono`, `reel-camera`, `quadro`, `vsl`, etc.
+- Resolução, idioma, modelo Whisper
+- Legendas, intro/outro, crop 9:16, `pause_keep`, `sil_cut`
+- Auto-confirmar plano + render automático
+
+### Tools do agente
+
+`list_video_styles`, `describe_video_style`, `transcribe_video`, `create_edit_plan`, `dry_run_edit`, `render_edit`, `burn_captions`, `measure_breathing`, `auto_edit_video`
+
+Pipeline automático: **transcreve → plano → dry-run → render**.
+
 ## Próximos passos
 
 - Persistência de sessão (DB / Redis)
@@ -81,3 +102,4 @@ const { text, sources } = await generateText({
 - Canal Slack / Discord
 - Evals para qualidade das respostas research
 - Deploy na Vercel com `XAI_API_KEY` nas env vars
+- Fila de jobs para renders longos
