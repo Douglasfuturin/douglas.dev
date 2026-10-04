@@ -2,6 +2,7 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
+import Link from "next/link";
 import { useMemo, useState, type ReactNode } from "react";
 import type { AgentMode, ResearchDepth } from "@/lib/agents/models";
 import {
@@ -89,6 +90,12 @@ export function ChatApp() {
           <p className="mt-2 max-w-md text-sm leading-relaxed text-[var(--muted)]">
             Multi-agente + editor de vídeo automático com o kit de edição.
           </p>
+          <Link
+            href="/editor"
+            className="mt-3 inline-flex rounded-lg bg-[var(--ink)] px-3 py-1.5 text-xs font-semibold text-[var(--panel)]"
+          >
+            Abrir editor visual EDVD →
+          </Link>
         </div>
         <div className="flex flex-col items-end gap-2">
           <label className="text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">

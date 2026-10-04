@@ -82,7 +82,18 @@ O modo **Editor de vídeo** usa o kit em `kit-edicao-video/`:
 2. Na UI: escolha o modo **Editor de vídeo**, faça upload do MP4 e ajuste opções
 3. Peça: `Edita automaticamente este vídeo…`
 
-### Opções na UI
+### Editor visual em tempo real (EDVD)
+
+Abra [http://localhost:3000/editor](http://localhost:3000/editor):
+
+- Abas **Code** / **Visual** (como na referência)
+- Preview 9:16 com legendas ao vivo
+- Timeline com filmstrip, waveform e playhead
+- Takes arrastáveis + atalhos (espaço, setas)
+- Painel do agente: material analisado, transcript, gordura
+- Comandos + automação no rodapé
+
+### Opções na UI do chat
 
 - Estilos: `aula-ccnp`, `reel-mono`, `reel-camera`, `quadro`, `vsl`, etc.
 - Resolução, idioma, modelo Whisper
