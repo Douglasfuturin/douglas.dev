@@ -45,26 +45,20 @@ const FIELD_AGENTS = [
   },
 ];
 
-const ORCHESTRATIONS = [
-  {
-    title: "Conteúdo Dev — Imagem",
-    agents: "Radar → Roteiro → Arte",
-    progress: 75,
-    href: "/dashboard",
-  },
-  {
-    title: "Conteúdo Dev — Vídeo",
-    agents: "Radar → Roteiro → Editor",
-    progress: 60,
-    href: "/dashboard",
-  },
-  {
-    title: "Conteúdo Espanha",
-    agents: "Roteiro ES → Carrossel → Capas",
-    progress: 100,
-    href: "/grupos",
-  },
-];
+function agentsChain(names: string[]) {
+  return names.slice(0, 4).join(" → ") || "Orquestrador";
+}
+
+function progressForGroup(group: {
+  workflow: string[];
+  members: Array<{ isOrchestrator?: boolean; mode?: string }>;
+}) {
+  const steps = Math.max(group.workflow.length, 1);
+  const filled = group.members.filter(
+    (m) => !m.isOrchestrator && m.mode !== "bit",
+  ).length;
+  return Math.min(100, Math.round((filled / steps) * 100));
+}
 
 function greeting() {
   const h = new Date().getHours();
@@ -73,14 +67,30 @@ function greeting() {
   return "Boa noite";
 }
 
+type ApiGroup = {
+  id: string;
+  name: string;
+  blurb: string;
+  workflow: string[];
+  members: Array<{ name: string; isOrchestrator?: boolean; mode?: string }>;
+  builtin: boolean;
+};
+
 export function NexusOverview() {
   const [stats, setStats] = useState<Stats | null>(null);
+  const [apiGroups, setApiGroups] = useState<ApiGroup[]>([]);
   const groupCount = AGENT_GROUPS.length;
 
   useEffect(() => {
     fetch("/api/content")
       .then((r) => r.json())
       .then((data: { stats?: Stats }) => setStats(data.stats ?? null))
+      .catch(() => undefined);
+    fetch("/api/groups")
+      .then((r) => r.json())
+      .then((data: { groups?: ApiGroup[] }) =>
+        setApiGroups((data.groups || []).filter((g) => g.builtin).slice(0, 3)),
+      )
       .catch(() => undefined);
   }, []);
 
@@ -226,31 +236,51 @@ export function NexusOverview() {
             Fluxos com múltiplos agentes
           </p>
           <ul className="mt-4 space-y-4">
-            {ORCHESTRATIONS.map((flow) => (
-              <li key={flow.title}>
-                <Link href={flow.href} className="block space-y-2">
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <p className="text-sm font-medium text-[color:var(--foreground)]">
-                        {flow.title}
-                      </p>
-                      <p className="text-xs text-[color:var(--muted-foreground)]">
-                        {flow.agents}
-                      </p>
+            {(apiGroups.length
+              ? apiGroups
+              : AGENT_GROUPS.map((g) => ({
+                  id: g.id,
+                  name: g.name,
+                  workflow: g.workflow,
+                  members: g.members.map((m) => ({
+                    name: m.name,
+                    isOrchestrator: m.id === "bit",
+                    mode: m.mode,
+                  })),
+                }))
+            ).map((flow) => {
+              const progress = progressForGroup(flow);
+              const chain = agentsChain(
+                flow.members
+                  .filter((m) => !m.isOrchestrator && m.mode !== "bit")
+                  .map((m) => m.name.split(" ")[0]),
+              );
+              return (
+                <li key={flow.id}>
+                  <Link href="/grupos" className="block space-y-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <p className="text-sm font-medium text-[color:var(--foreground)]">
+                          {flow.name}
+                        </p>
+                        <p className="text-xs text-[color:var(--muted-foreground)]">
+                          {chain}
+                        </p>
+                      </div>
+                      <span className="text-xs font-medium text-[color:var(--muted-foreground)]">
+                        {progress}%
+                      </span>
                     </div>
-                    <span className="text-xs font-medium text-[color:var(--muted-foreground)]">
-                      {flow.progress}%
-                    </span>
-                  </div>
-                  <div className="h-1.5 overflow-hidden rounded-full bg-[color:var(--muted)]">
-                    <div
-                      className="h-full rounded-full bg-[color:var(--primary)] transition-all"
-                      style={{ width: `${flow.progress}%` }}
-                    />
-                  </div>
-                </Link>
-              </li>
-            ))}
+                    <div className="h-1.5 overflow-hidden rounded-full bg-[color:var(--muted)]">
+                      <div
+                        className="h-full rounded-full bg-[color:var(--primary)] transition-all"
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </article>
       </section>

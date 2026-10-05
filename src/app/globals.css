@@ -872,3 +872,119 @@ textarea.field {
   background: var(--primary);
   color: var(--primary-foreground);
 }
+
+.nexus-label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.nexus-field {
+  width: 100%;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+  background: color-mix(in oklab, var(--card) 80%, transparent);
+  padding: 0.55rem 0.75rem;
+  font-size: 0.875rem;
+  color: var(--foreground);
+  outline: none;
+}
+
+.nexus-field:focus {
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--primary) 35%, transparent);
+}
+
+.nexus-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+  padding: 0.35rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.nexus-chip-on {
+  border-color: color-mix(in oklab, var(--primary) 55%, var(--border));
+  background: color-mix(in oklab, var(--primary) 14%, transparent);
+  color: var(--foreground);
+}
+
+.nexus-orch-card {
+  border-radius: 0.85rem;
+  border: 1px solid var(--border);
+  background: var(--card);
+  padding: 1.25rem 1.35rem;
+}
+
+.nexus-template-card {
+  border-radius: 0.75rem;
+  border: 1px solid var(--border);
+  background: color-mix(in oklab, var(--card) 90%, var(--primary) 3%);
+  padding: 1rem 1.1rem;
+  transition: border-color 160ms ease, transform 160ms ease;
+}
+
+.nexus-template-card:hover {
+  border-color: color-mix(in oklab, var(--primary) 45%, var(--border));
+  transform: translateY(-1px);
+}
+
+.nexus-tag {
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--primary) 40%, var(--border));
+  padding: 0.1rem 0.5rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.nexus-tag-muted {
+  border-color: var(--border);
+  color: var(--muted-foreground);
+}
+
+.nexus-pipeline-step {
+  position: relative;
+  border-radius: 0.65rem;
+  border: 1px solid var(--border);
+  background: color-mix(in oklab, var(--background) 60%, transparent);
+  padding: 0.75rem;
+}
+
+.nexus-pipeline-orch {
+  border-color: color-mix(in oklab, var(--primary) 35%, var(--border));
+}
+
+.nexus-step-num {
+  display: inline-flex;
+  height: 1.25rem;
+  min-width: 1.25rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--muted);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--muted-foreground);
+}
+
+@media (min-width: 640px) {
+  .nexus-pipeline-step:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    top: 1.25rem;
+    right: -0.35rem;
+    width: 0.5rem;
+    height: 1px;
+    background: var(--border);
+    z-index: 1;
+  }
+}
