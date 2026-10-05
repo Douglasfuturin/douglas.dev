@@ -332,8 +332,8 @@ export function EditorApp() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
+    <div className="nexus-editor flex flex-col">
+      <header className="flex items-center justify-between gap-3 border-b border-[color:var(--border)] px-4 py-3">
         <div className="flex items-center gap-4">
           <Link href="/dashboard" className="flex items-center gap-2.5">
             <span className="flex size-8 items-center justify-center rounded-md bg-[color:var(--primary)] text-[11px] font-bold text-[color:var(--primary-foreground)]">
@@ -347,14 +347,14 @@ export function EditorApp() {
             </span>
           </Link>
 
-          <div className="flex rounded-lg bg-white/5 p-1">
+          <div className="flex rounded-lg bg-[color:var(--muted)]/40 p-1">
             <button
               type="button"
               onClick={() => setView("code")}
               className={`rounded-md px-3 py-1.5 text-sm ${
                 view === "code"
                   ? "bg-[color:var(--primary)] text-[color:var(--primary-foreground)] font-semibold"
-                  : "text-white/60"
+                  : "text-[color:var(--muted-foreground)]"
               }`}
             >
               Code
@@ -364,8 +364,8 @@ export function EditorApp() {
               onClick={() => setView("visual")}
               className={`rounded-md px-3 py-1.5 text-sm ${
                 view === "visual"
-                  ? "bg-white/15 text-white font-semibold"
-                  : "text-white/60"
+                  ? "bg-[color:var(--muted)] text-[color:var(--foreground)] font-semibold"
+                  : "text-[color:var(--muted-foreground)]"
               }`}
             >
               Visual
@@ -374,7 +374,7 @@ export function EditorApp() {
         </div>
 
         <div className="flex items-center gap-2">
-          <label className="cursor-pointer rounded-lg border border-white/15 px-3 py-1.5 text-sm text-white/80 hover:bg-white/5">
+          <label className="cursor-pointer rounded-lg border border-[color:var(--border)] px-3 py-1.5 text-sm text-[color:var(--foreground)]/85 hover:bg-[color:var(--muted)]/40">
             {uploading ? "Enviando…" : "Upload"}
             <input
               type="file"
@@ -386,14 +386,14 @@ export function EditorApp() {
           </label>
           <button
             type="button"
-            className="rounded-lg border border-white/15 px-3 py-1.5 text-sm text-white/70"
+            className="rounded-lg border border-[color:var(--border)] px-3 py-1.5 text-sm text-[color:var(--muted-foreground)]"
             title="feedback"
           >
             👍
           </button>
           <button
             type="button"
-            className="rounded-lg border border-white/15 px-3 py-1.5 text-sm text-white/70"
+            className="rounded-lg border border-[color:var(--border)] px-3 py-1.5 text-sm text-[color:var(--muted-foreground)]"
             title="feedback"
           >
             👎
@@ -404,7 +404,7 @@ export function EditorApp() {
               setView("code");
               setCommand("Perguntar: o que cortar neste vídeo?");
             }}
-            className="rounded-lg bg-[#ff7a1a] px-3 py-1.5 text-sm font-semibold text-black"
+            className="rounded-lg bg-[color:var(--primary)] px-3 py-1.5 text-sm font-semibold text-[color:var(--primary-foreground)]"
           >
             Perguntar
           </button>
@@ -412,7 +412,7 @@ export function EditorApp() {
       </header>
 
       {analysis?.statusNote ? (
-        <div className="border-b border-white/10 bg-[#151922] px-4 py-2 text-sm text-white/75">
+        <div className="border-b border-[color:var(--border)] bg-[color:var(--muted)]/40 px-4 py-2 text-sm text-[color:var(--foreground)]/80">
           {analysis.statusNote}
         </div>
       ) : null}
@@ -438,14 +438,14 @@ export function EditorApp() {
               <button
                 type="button"
                 onClick={() => setCurrentTime((t) => Math.max(0, t - 1 / 30))}
-                className="rounded-full border border-white/15 px-3 py-2 text-sm"
+                className="rounded-full border border-[color:var(--border)] px-3 py-2 text-sm"
               >
                 ‹
               </button>
               <button
                 type="button"
                 onClick={() => setPlaying((p) => !p)}
-                className="rounded-full bg-white px-5 py-2 text-sm font-semibold text-black"
+                className="rounded-full bg-[color:var(--foreground)] px-5 py-2 text-sm font-semibold text-[color:var(--background)]"
               >
                 {playing ? "Pause" : "Play"}
               </button>
@@ -454,7 +454,7 @@ export function EditorApp() {
                 onClick={() =>
                   setCurrentTime((t) => Math.min(duration, t + 1 / 30))
                 }
-                className="rounded-full border border-white/15 px-3 py-2 text-sm"
+                className="rounded-full border border-[color:var(--border)] px-3 py-2 text-sm"
               >
                 ›
               </button>
@@ -488,17 +488,17 @@ export function EditorApp() {
         )}
       </main>
 
-      <footer className="border-t border-white/10 px-4 py-3">
+      <footer className="border-t border-[color:var(--border)] px-4 py-3">
         <div className="mx-auto flex w-full max-w-5xl flex-col gap-2">
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
-            <label className="flex flex-col gap-1 text-[10px] uppercase tracking-wider text-white/40">
+            <label className="flex flex-col gap-1 text-[10px] uppercase tracking-wider text-[color:var(--muted-foreground)]">
               Estilo
               <select
                 value={editOptions.estilo}
                 onChange={(e) =>
                   patchEdit("estilo", e.target.value as VideoStyle)
                 }
-                className="rounded-lg border border-white/10 bg-[#12151a] px-2 py-1.5 text-xs text-white"
+                className="rounded-lg border border-[color:var(--border)] bg-[color:var(--background)] px-2 py-1.5 text-xs text-[color:var(--foreground)]"
               >
                 {VIDEO_STYLES.map((s) => (
                   <option key={s} value={s}>
@@ -507,14 +507,14 @@ export function EditorApp() {
                 ))}
               </select>
             </label>
-            <label className="flex flex-col gap-1 text-[10px] uppercase tracking-wider text-white/40">
+            <label className="flex flex-col gap-1 text-[10px] uppercase tracking-wider text-[color:var(--muted-foreground)]">
               Formato
               <select
                 value={editOptions.formato}
                 onChange={(e) =>
                   patchEdit("formato", e.target.value as VideoFormat)
                 }
-                className="rounded-lg border border-white/10 bg-[#12151a] px-2 py-1.5 text-xs text-white"
+                className="rounded-lg border border-[color:var(--border)] bg-[color:var(--background)] px-2 py-1.5 text-xs text-[color:var(--foreground)]"
               >
                 {VIDEO_FORMATS.map((f) => (
                   <option key={f} value={f}>
@@ -523,14 +523,14 @@ export function EditorApp() {
                 ))}
               </select>
             </label>
-            <label className="flex flex-col gap-1 text-[10px] uppercase tracking-wider text-white/40">
+            <label className="flex flex-col gap-1 text-[10px] uppercase tracking-wider text-[color:var(--muted-foreground)]">
               Fonte
               <select
                 value={editOptions.fonte}
                 onChange={(e) =>
                   patchEdit("fonte", e.target.value as VideoFont)
                 }
-                className="rounded-lg border border-white/10 bg-[#12151a] px-2 py-1.5 text-xs text-white"
+                className="rounded-lg border border-[color:var(--border)] bg-[color:var(--background)] px-2 py-1.5 text-xs text-[color:var(--foreground)]"
               >
                 {VIDEO_FONTS.map((f) => (
                   <option key={f} value={f}>
@@ -539,14 +539,14 @@ export function EditorApp() {
                 ))}
               </select>
             </label>
-            <label className="flex flex-col gap-1 text-[10px] uppercase tracking-wider text-white/40">
+            <label className="flex flex-col gap-1 text-[10px] uppercase tracking-wider text-[color:var(--muted-foreground)]">
               Grade
               <select
                 value={editOptions.grade}
                 onChange={(e) =>
                   patchEdit("grade", e.target.value as VideoGrade)
                 }
-                className="rounded-lg border border-white/10 bg-[#12151a] px-2 py-1.5 text-xs text-white"
+                className="rounded-lg border border-[color:var(--border)] bg-[color:var(--background)] px-2 py-1.5 text-xs text-[color:var(--foreground)]"
               >
                 {VIDEO_GRADES.map((g) => (
                   <option key={g} value={g}>
@@ -555,7 +555,7 @@ export function EditorApp() {
                 ))}
               </select>
             </label>
-            <label className="flex flex-col gap-1 text-[10px] uppercase tracking-wider text-white/40">
+            <label className="flex flex-col gap-1 text-[10px] uppercase tracking-wider text-[color:var(--muted-foreground)]">
               Emenda
               <select
                 value={editOptions.efeitoEmenda}
@@ -565,7 +565,7 @@ export function EditorApp() {
                     e.target.value as VideoEditOptions["efeitoEmenda"],
                   )
                 }
-                className="rounded-lg border border-white/10 bg-[#12151a] px-2 py-1.5 text-xs text-white"
+                className="rounded-lg border border-[color:var(--border)] bg-[color:var(--background)] px-2 py-1.5 text-xs text-[color:var(--foreground)]"
               >
                 <option value="none">Nenhum</option>
                 <option value="glitch">Glitch</option>
@@ -573,12 +573,12 @@ export function EditorApp() {
                 <option value="whip">Whip</option>
               </select>
             </label>
-            <label className="flex flex-col gap-1 text-[10px] uppercase tracking-wider text-white/40">
+            <label className="flex flex-col gap-1 text-[10px] uppercase tracking-wider text-[color:var(--muted-foreground)]">
               Som
               <select
                 value={editOptions.som}
                 onChange={(e) => patchEdit("som", e.target.value as VideoSound)}
-                className="rounded-lg border border-white/10 bg-[#12151a] px-2 py-1.5 text-xs text-white"
+                className="rounded-lg border border-[color:var(--border)] bg-[color:var(--background)] px-2 py-1.5 text-xs text-[color:var(--foreground)]"
               >
                 {VIDEO_SOUNDS.map((s) => (
                   <option key={s} value={s}>
@@ -589,7 +589,7 @@ export function EditorApp() {
             </label>
           </div>
           {outputUrl ? (
-            <p className="mb-2 text-xs text-[#6dd3a7]">
+            <p className="mb-2 text-xs text-[color:var(--primary)]">
               Saída:{" "}
               <a href={outputUrl} className="underline" target="_blank" rel="noreferrer">
                 {outputUrl}
@@ -601,7 +601,7 @@ export function EditorApp() {
               type="button"
               disabled={busy || !analysis}
               onClick={() => void runLocalRender(true)}
-              className="rounded-xl border border-white/15 px-3 py-3 text-sm text-white/80 disabled:opacity-40"
+              className="rounded-xl border border-[color:var(--border)] px-3 py-3 text-sm text-[color:var(--foreground)]/85 disabled:opacity-40"
             >
               Dry-run
             </button>
@@ -609,7 +609,7 @@ export function EditorApp() {
               type="button"
               disabled={busy || !analysis}
               onClick={() => void runLocalRender(false)}
-              className="rounded-xl bg-[#ff7a1a] px-4 py-3 text-sm font-semibold text-black disabled:opacity-40"
+              className="rounded-xl bg-[color:var(--primary)] px-4 py-3 text-sm font-semibold text-[color:var(--primary-foreground)] disabled:opacity-40"
             >
               {busy ? "Renderizando…" : "Renderizar corte"}
             </button>
@@ -620,9 +620,9 @@ export function EditorApp() {
                 if (e.key === "Enter") void runCommand();
               }}
               placeholder="Comandos — corta gordura · transcreve · edita / render"
-              className="min-w-[200px] flex-1 rounded-xl border border-white/10 bg-[#12151a] px-3 py-3 text-sm text-white outline-none ring-[#ff7a1a] placeholder:text-white/30 focus:ring-2"
+              className="min-w-[200px] flex-1 rounded-xl border border-[color:var(--border)] bg-[color:var(--background)] px-3 py-3 text-sm text-[color:var(--foreground)] outline-none ring-[color:var(--primary)] placeholder:text-[color:var(--muted-foreground)] focus:ring-2"
             />
-            <label className="flex items-center gap-2 rounded-xl border border-white/10 px-3 py-3 text-xs text-white/60">
+            <label className="flex items-center gap-2 rounded-xl border border-[color:var(--border)] px-3 py-3 text-xs text-[color:var(--muted-foreground)]">
               <input
                 type="checkbox"
                 checked={automation}
@@ -634,7 +634,7 @@ export function EditorApp() {
               type="button"
               disabled={!command.trim() || busy || !analysis}
               onClick={() => void runCommand()}
-              className="rounded-xl border border-white/15 px-4 py-3 text-sm font-semibold text-white disabled:opacity-40"
+              className="rounded-xl border border-[color:var(--border)] px-4 py-3 text-sm font-semibold text-[color:var(--foreground)] disabled:opacity-40"
             >
               Enviar
             </button>

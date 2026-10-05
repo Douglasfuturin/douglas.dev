@@ -44,7 +44,7 @@ export function VideoPreview({
 
   return (
     <div className="relative mx-auto flex h-full max-h-[58vh] w-full max-w-[360px] items-center justify-center">
-      <div className="relative aspect-[9/16] w-full overflow-hidden rounded-2xl bg-black shadow-[0_0_80px_rgba(255,122,26,0.12)] ring-1 ring-white/10">
+      <div className="relative aspect-[9/16] w-full overflow-hidden rounded-2xl bg-black shadow-[0_0_80px_color-mix(in_oklab,var(--primary)_14%,transparent)] ring-1 ring-[color:var(--border)]">
         {src ? (
           <video
             ref={ref}
@@ -59,21 +59,21 @@ export function VideoPreview({
             onEnded={() => onPlayingChange(false)}
           />
         ) : (
-          <div className="flex h-full items-center justify-center px-6 text-center text-sm text-white/40">
+          <div className="flex h-full items-center justify-center px-6 text-center text-sm text-[color:var(--muted-foreground)]">
             Envie um vídeo para pré-visualizar em tempo real
           </div>
         )}
 
         {caption ? (
           <div className="pointer-events-none absolute inset-x-0 bottom-[14%] px-4 text-center">
-            <p className="font-display text-3xl font-extrabold uppercase leading-none tracking-tight text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)]">
+            <p className="font-display text-3xl font-extrabold uppercase leading-none tracking-tight text-[color:var(--foreground)] drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)]">
               {caption}
             </p>
           </div>
         ) : null}
       </div>
 
-      <div className="pointer-events-none absolute -bottom-8 left-1/2 -translate-x-1/2 font-mono text-xs text-white/45">
+      <div className="pointer-events-none absolute -bottom-8 left-1/2 -translate-x-1/2 font-mono text-xs text-[color:var(--muted-foreground)]">
         {formatClock(currentTime)}
       </div>
     </div>

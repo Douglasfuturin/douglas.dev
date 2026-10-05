@@ -14,7 +14,7 @@ export default function FerramentasEditorPage() {
             </div>
           }
         >
-          <div className="overflow-hidden rounded-xl border border-[color:var(--border)] bg-[color:var(--card)]">
+          <div className="rounded-xl border border-[color:var(--border)] bg-[color:var(--card)]">
             <EditorApp />
           </div>
         </Suspense>

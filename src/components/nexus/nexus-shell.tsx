@@ -283,7 +283,8 @@ export function NexusShell({
           className={`relative min-h-0 flex-1 ${
           isChat
             ? "flex flex-col"
-            : pathname.startsWith("/ferramentas/skills")
+            : pathname.startsWith("/ferramentas/skills") ||
+                pathname.startsWith("/ferramentas/editor")
               ? "overflow-y-auto nexus-scroll-hidden"
               : "overflow-y-auto"
         }`}
