@@ -144,62 +144,6 @@ export function CrmDashboard() {
 
   return (
     <div className="space-y-10">
-      <section className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#141414] px-6 py-8 text-white sm:px-8 sm:py-10 animate-fase-rise">
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(600px 320px at 15% 20%, rgba(242,101,34,0.35), transparent 55%), radial-gradient(500px 280px at 90% 10%, rgba(120,30,10,0.25), transparent 50%)",
-          }}
-          aria-hidden
-        />
-        <div className="relative z-10 flex flex-wrap items-end justify-between gap-6">
-          <div className="max-w-xl">
-            <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[color:var(--primary)]">
-              Fluxos por grupo · @o.douglas.dev
-            </p>
-            <h2 className="font-display mt-3 text-4xl tracking-tight text-white sm:text-5xl">
-              <span className="fase-shimmer-text">Central de Agentes</span>
-            </h2>
-            <p className="mt-3 text-sm leading-relaxed text-white/55 sm:text-base">
-              Agentes em sequência de pipeline — Imagem e Vídeo — cada um com
-              sua função no fluxo.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Link
-              href="/app?q=Orquestra%20os%20grupos%20Imagem%20e%20V%C3%ADdeo%20no%20fluxo%20correto&autosend=1"
-              className="crm-btn crm-btn-primary"
-            >
-              Orquestrador Principal
-            </Link>
-            <Link href="/grupos" className="crm-btn crm-btn-ghost">
-              Gerenciar grupos
-            </Link>
-          </div>
-        </div>
-
-        <div className="relative z-10 mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {[
-            { label: "Itens", value: stats?.total ?? "—" },
-            { label: "Em fluxo", value: inMotion },
-            { label: "Fila", value: stats?.queued ?? 0 },
-            { label: "Postados", value: stats?.published ?? 0 },
-          ].map((s, i) => (
-            <div
-              key={s.label}
-              className="crm-card-sm animate-fase-rise"
-              style={{ animationDelay: `${120 + i * 60}ms` }}
-            >
-              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-white/45">
-                {s.label}
-              </p>
-              <p className="font-display mt-1 text-2xl font-bold">{s.value}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
       <section className="space-y-6">
         <div>
           <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[color:var(--primary)]">
