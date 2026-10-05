@@ -1,0 +1,20 @@
+{
+ "_leia": "Exemplo de plano do criativo, com o banco vazio. Confira sem gastar nada: uv run python tools/video-use/helpers/fabrica.py exemplos/criativo/plano.json --seco. Sem as cenas do lote, a cadeia para no passo que cobra na Higgsfield, com a estimativa; sem a voz, no da ElevenLabs. A linguagem está em docs/linguagem-do-criativo.md, o formato do lote no topo de tools/video-use/helpers/lote.py e o do plano no de criativo.py.",
+ "estilo": "criativo",
+ "slug": "exemplo-criativo",
+ "projeto": "exemplo",
+ "fonte": "voz.mp3",
+ "banco": "banco",
+ "lote": "banco/lote.json",
+ "_locutor": "troque o id pelo de uma voz da sua conta na ElevenLabs (Voices > a voz > copiar o ID): encorpada, em português, sem sotaque de fora",
+ "locutor": {"id": "ID_DA_VOZ_NA_ELEVENLABS", "nome": "locutor",
+             "ajustes": {"stability": 0.5, "similarity_boost": 0.8, "style": 0.3, "use_speaker_boost": true}},
+ "trechos": [
+  ["Três da manhã. Ninguém no escritório, e o trabalho anda sozinho.", "escritorio-3h"],
+  ["Enquanto isso, lá fora, todo mundo corre atrás de conteúdo. Comenta FÁBRICA.", "reporter-na-rua"]
+ ],
+ "punch": ["FÁBRICA"],
+ "cor": "neutra",
+ "_trilha": "a faixa do exemplo é um acorde gerado no ffmpeg, sem direito autoral, só pra cadeia ir até o fim (o mixa não mede silêncio): troque pela sua, feita na ElevenLabs Music. O caminho é a partir da raiz da pasta",
+ "trilha": {"faixa": "exemplos/reel-editorial/trilha.m4a"}
+}

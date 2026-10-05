@@ -1,36 +1,35 @@
 import type { Metadata } from "next";
-import { DM_Sans, Geist_Mono, Syne } from "next/font/google";
+import { IBM_Plex_Mono, Manrope } from "next/font/google";
+import type { ReactNode } from "react";
 import "./globals.css";
 
-const syne = Syne({
-  variable: "--font-syne",
+const manrope = Manrope({
+  variable: "--font-body",
   subsets: ["latin"],
-  weight: ["600", "700", "800"],
+  weight: ["400", "500", "600", "700"],
 });
 
-const dmSans = DM_Sans({
-  variable: "--font-dm-sans",
+const ibmMono = IBM_Plex_Mono({
+  variable: "--font-mono",
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  weight: ["400", "500"],
 });
 
 export const metadata: Metadata = {
-  title: "Grokish — multi-agente com tools do Grok",
+  title: "Nexus OS · Central de Agentes",
   description:
-    "Starter de sistema multi-agente usando xAI Grok: chat agentic, research paralelo, web/X search, código e imagem.",
+    "Orquestre agentes, pipelines de conteúdo e publicação no Nexus OS.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       lang="pt-BR"
-      className={`${syne.variable} ${dmSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${manrope.variable} ${ibmMono.variable} nexus-theme h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col bg-[color:var(--background)] text-[color:var(--foreground)]">
+        {children}
+      </body>
     </html>
   );
 }

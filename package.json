@@ -1,12 +1,14 @@
 {
-  "name": "grokish",
-  "version": "0.1.0",
+  "name": "central-de-agentes",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
+    "build": "node scripts/next-safe-build.mjs build",
     "dev": "next dev",
-    "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:smoke": "node scripts/smoke-api.mjs && npx tsx scripts/smoke-video.ts",
+    "test:render": "npx tsx scripts/smoke-render.ts"
   },
   "dependencies": {
     "@ai-sdk/react": "^4.0.130",

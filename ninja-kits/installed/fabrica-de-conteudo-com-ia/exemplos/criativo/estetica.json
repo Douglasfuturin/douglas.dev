@@ -1,0 +1,18 @@
+{
+ "_leia": "O código da estética: o lote acrescenta o 'prompt' da estética dele ('estetica' no lote.json) no fim de cada cena, e o prompt da cena fica só com a cena, a câmera e a composição. Mora na pasta do lote ou na de cima. Como nasce uma estética: docs/linguagem-do-criativo.md.",
+ "documento-neutro": {
+  "tres_palavras": "documento, neutro, flagrado",
+  "textura": "câmera de segurança, celular, telejornal",
+  "paleta": "cor neutra de foto de jornal",
+  "luz": "luz do dia ou fluorescente",
+  "prompt": "Photorealistic, looks like real footage, neutral natural colors, no cinematic color grading. Everyone acts completely normal. No readable text anywhere, no letters, no numbers, no signs, no price tags, no logos, no watermarks, no on-screen graphics."
+ },
+ "achado-saturado": {
+  "tres_palavras": "achado, saturado, cômico",
+  "textura": "found footage",
+  "paleta": "technicolor",
+  "luz": "luz que deixa ler a piada (dia, fluorescente); escuro só em cena de noite",
+  "prompt": "Look: found footage. It must look like real amateur footage or a surveillance recording, not a movie: visible grain, slight video compression, imperfect focus, no smooth cinematic camera moves. Color: rich saturated primary colors with strong color separation, warm skin tones. Light: bright enough to read every action clearly, ordinary daylight or office fluorescent light, no moody cinematic lighting (only night scenes are dark, lit by one practical source). Everyone acts completely normal. No readable text anywhere, no letters, no numbers, no signs, no logos, no watermarks, no on-screen graphics.",
+  "cor_pos": "o modelo não entrega a cor saturada pelo prompt: no plano do criativo, \"cor\": \"technicolor\""
+ }
+}

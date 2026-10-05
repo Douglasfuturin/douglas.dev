@@ -1,3 +1,4 @@
+import path from "node:path";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -5,6 +6,8 @@ const nextConfig: NextConfig = {
   experimental: {
     proxyClientMaxBodySize: "512mb",
   },
+  // Evita pânico do Turbopack com symlinks do .venv do kit (python -> /usr/bin/...).
+  outputFileTracingRoot: path.join(__dirname),
   serverExternalPackages: [],
 };
 

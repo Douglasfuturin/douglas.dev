@@ -1,0 +1,27 @@
+{
+  "ad_account_id": "act_REPLACE_ME",
+  "api_version": "v21.0",
+  "default_lookback_days": 7,
+  "currency": "USD",
+  "primary_kpi_by_objective": {
+    "OUTCOME_SALES": "roas",
+    "OUTCOME_LEADS": "cpa",
+    "OUTCOME_AWARENESS": "cpm",
+    "OUTCOME_TRAFFIC": "cpc",
+    "OUTCOME_ENGAGEMENT": "cpe",
+    "OUTCOME_APP_PROMOTION": "cpa"
+  },
+  "always_on_campaign_ids": [],
+  "ignore_campaign_ids": [],
+  "purchase_action_type": "omni_purchase",
+  "min_lifetime_spend_for_recommendations": 50,
+  "min_conversions_for_winner": 10,
+  "default_targets": {
+    "roas": 2.5,
+    "cpa": 15.0,
+    "link_ctr": 0.015,
+    "cpm_ceiling": 12.0,
+    "frequency_ceiling_fatigue": 3.0,
+    "frequency_ceiling_saturation": 4.0
+  }
+}

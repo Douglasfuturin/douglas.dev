@@ -1,0 +1,136 @@
+/* Direção visual v2 — neobrutal com mola. FECHADA: 2a + fundo 3c
+   (tokens do Carimbo, Space Grotesk, amarelo #F2C744, papel branco pontilhado).
+   Mesma regra da v1: painel importa isto e NÃO redeclara cor, fonte nem medida.
+
+   A linguagem:
+   - borda preta grossa + sombra DURA deslocada (sem blur) em tudo que é objeto;
+   - papel branco pontilhado — herança do deck, com textura pra não ser tela vazia;
+   - azul é o acento de BLOCO (o que a pessoa recebe, o que muda);
+     amarelo é o MARCADOR: a palavra grifada, a etiqueta, o foco que anda;
+   - verde e vermelho seguem sinal, não decoração. */
+
+:root{
+  --pp:#FFFFFF; --dot:rgba(11,13,18,.10);
+  --tex:radial-gradient(circle,var(--dot) 2px,transparent 2.6px) 0 0/36px 36px;
+  --sur:#FFFFFF;
+  --ink:#0B0D12; --ink9:#0B0D12; --ink6:#3B3F4A; --ink4:#7C808B; --ink2:#D9D4C8;
+  --ac:#0640fb; --ac2:#DCE4FF; --act:#C9D6FF;
+  --mk:#F2C744;
+  --ok:#17A354; --no:#E1432F; --no2:#FFE0D9;
+  /* apoio: papel sombreado, e o editor escuro das aulas (código, captura) */
+  --pp2:#ECE8DF; --ink8:#2A2F3D; --cine:#050608; --cine-tx:#8A8F9A;
+  --cod:#12151C; --cod2:#1C1F26; --cod-tx:#E8EAF0; --cod-cm:#9AA0AD; --cod-ln:#4E535D; --cod-kw:#8FA8FF; --cod-nm:#FF9B85;
+  --fd:'Space Grotesk',system-ui,sans-serif; --fx:100%; --ls:-.035em;
+  --fm:'IBM Plex Mono',ui-monospace,monospace;
+  --bw:4px; --sh:10px; --raio:12px; --raio-s:8px;
+
+  /* escala: o piso do celular não muda (ver v1) */
+  --piso:58px; --t-hd:96px; --t-big:330px; --t-item:60px; --t-apoio:38px; --t-kick:30px;
+  --pad:36px; --marg:90px;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{overflow:hidden;background:var(--pp)}
+body{font-family:var(--fd);font-stretch:var(--fx)}
+#stage{position:relative;background:var(--tex),var(--pp);
+  display:flex;flex-direction:column;justify-content:center;padding:var(--pad) var(--marg);
+  font-stretch:var(--fx)}
+
+/* Objeto neobrutal. `--shx` é a distância da sombra, e é ANIMÁVEL: o D.pousa
+   começa em 0 (a peça no ar, sem chão) e termina em --sh (a peça aterrissou). */
+.nb{background:var(--sur);border:var(--bw) solid var(--ink);border-radius:var(--raio);
+  box-shadow:var(--shx,var(--sh)) var(--shx,var(--sh)) 0 var(--sombra,var(--ink))}
+.nb.cor-ac{background:var(--ac);color:#fff}
+.nb.cor-mk{background:var(--mk);color:var(--ink)}
+.nb.cor-ink{background:var(--ink);color:#fff}
+.nb.cor-ink{box-shadow:var(--shx,var(--sh)) var(--shx,var(--sh)) 0 var(--mk)}
+/* sinal como objeto: verde é valor/lucro, vermelho é custo/prejuízo — nunca enfeite */
+.nb.cor-ok{background:var(--ok);color:#fff}
+.nb.cor-no{background:var(--no);color:#fff}
+
+/* Etiqueta: carimbo amarelo. Situa, não informa. */
+.kick{align-self:flex-start;display:inline-block;font:700 var(--t-kick)/1 var(--fm);
+  letter-spacing:.12em;text-transform:uppercase;color:var(--ink);background:var(--mk);
+  border:var(--bw) solid var(--ink);border-radius:var(--raio-s);padding:.42em .66em .36em;
+  margin-bottom:30px;opacity:0;
+  box-shadow:calc(var(--sh)*.5) calc(var(--sh)*.5) 0 var(--sombra,var(--ink))}
+.kick:empty{display:none}
+
+/* A frase. <b> é a palavra GRIFADA (marcador que varre), <i> é a palavra azul.
+   Continua valendo: uma ênfase por frase. */
+.hd{font:900 var(--t-hd)/1.02 var(--fd);font-stretch:var(--fx);letter-spacing:var(--ls);
+  color:var(--ink);margin-bottom:44px;opacity:0}
+.hd b,.mkr{font-weight:inherit;padding:0 .1em;margin:0 -.04em;
+  background:linear-gradient(var(--mk),var(--mk)) no-repeat 0 60%/0% 88%;
+  -webkit-box-decoration-break:clone;box-decoration-break:clone}
+.hd i{font-style:normal;color:var(--ac)}
+
+.big{font:900 var(--t-big)/.86 var(--fd);font-stretch:var(--fx);letter-spacing:-.05em;
+  color:var(--ink);opacity:0}
+.big small{font-size:.34em;font-weight:800;vertical-align:.5em;margin-right:.06em;letter-spacing:-.02em}
+
+/* Selo de índice: quadrado amarelo com número mono. */
+.ic{flex:none;display:flex;align-items:center;justify-content:center;width:72px;height:72px;
+  background:var(--mk);border:var(--bw) solid var(--ink);border-radius:var(--raio-s);
+  font:700 30px/1 var(--fm);color:var(--ink)}
+
+.item{display:flex;align-items:center;gap:24px;padding:24px 30px;opacity:0}
+.item .nm{font:800 var(--t-item)/1.08 var(--fd);letter-spacing:var(--ls);color:var(--ink);
+  flex:1;min-width:0}
+.item .de{font:600 var(--t-apoio)/1.2 var(--fm);color:var(--ink6);text-align:right}
+
+.btn{display:flex;align-items:center;justify-content:center;gap:.4em;
+  background:var(--ac);color:#fff;border:var(--bw) solid var(--ink);border-radius:var(--raio);
+  box-shadow:var(--shx,var(--sh)) var(--shx,var(--sh)) 0 var(--ink);
+  font:900 64px/1 var(--fd);letter-spacing:-.01em}
+
+/* Máscara por palavra (D.palavras). O respiro de .1em embaixo e .08em em cima
+   é o que não corta descendente nem acento de maiúscula. */
+.mw{display:inline-block;overflow:hidden;vertical-align:top;
+  padding:.08em .02em .12em;margin:-.08em -.02em -.12em}
+.w{display:inline-block}
+
+/* peça de tela cheia sem papel (?alfa=1) */
+html.alfa,html.alfa body{background:transparent}
+html.alfa #stage{background:none}
+
+/* captura real (D.midia) e o marcador de onde ela entra */
+.mid{display:block;width:100%;height:100%}
+.vazio{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  background:repeating-linear-gradient(135deg,#E9E6DF 0 18px,#F4F2EC 18px 36px)}
+.vazio span{font:600 30px/1 var(--fm);letter-spacing:.12em;text-transform:uppercase;color:var(--ink4);
+  background:#fff;border:3px solid var(--ink4);border-radius:6px;padding:.5em .7em}
+
+/* ?tema=tinta — o mesmo sistema sobre o chão tinta. Os objetos (.nb) continuam
+   brancos com borda tinta; muda o chão e a sombra dura, que vira amarela pra
+   existir sobre o escuro. Texto solto no chão (.hd, .big) vira branco; a
+   palavra grifada continua tinta sobre o amarelo. */
+html.tinta{--pp:#0B0D12;--dot:rgba(255,255,255,.07);--sombra:var(--mk)}
+html.tinta .hd,html.tinta .big{color:#fff}
+html.tinta .hd b,html.tinta .mkr{color:var(--ink)}
+html.tinta .nb.cor-ink{border-color:#3B3F4A}
+
+/* ?tema=tinteiro — o canal de Lorcana, direção 12a "Tinteiro noturno" (Claude Design,
+   29/09/2026). OUTRA MARCA: não é a
+   direção Ninja, e só o estilo lorcana-curto pede este tema.
+   - o chão é o fundo do tinteiro, liso; o objeto é painel ameixa-escuro com borda OURO,
+     CHAPADO (sem a sombra dura: `--sh` zera e o D.pousa pousa sem sombra);
+   - texto creme; o ouro é o marcador (etiqueta, palavra grifada) e leva letra escura;
+   - ameixa é o bloco de acento; verde e vermelho continuam sinal (valor e custo).
+   A fonte (Unbounded) o direcao-v2.js injeta quando o tema pede. */
+html.tinteiro{--pp:#120C1A;--dot:rgba(255,243,223,.05);--tex:none;--sur:#221733;
+  --ink:#FFF3DF;--ink9:#120C1A;--ink6:#CDBFE0;--ink4:#8C7FA8;--ink2:#3A2D52;
+  --ac:#5B2B78;--ac2:#3A1F55;--act:#4A2A6A;--mk:#E8AE4F;
+  --ok:#2FB36F;--no:#E5484D;--no2:#3A1820;
+  --fd:'Unbounded',system-ui,sans-serif;--fx:100%;--ls:-.01em;
+  --sh:0px;--sombra:transparent;--raio:16px;--raio-s:10px;
+  /* as seis tintas do Lorcana (a cor da mancha), de pesquisa/lorcana/marca/tinteiro.css */
+  --t-ambar:#F2A516;--t-ametista:#7B3F9E;--t-esmeralda:#2E9E48;--t-rubi:#D1123F;--t-safira:#1C8FD1;--t-aco:#8A9BA8}
+/* texto sem cor própria herdava o preto do navegador — no painel escuro, sumia */
+html.tinteiro body{color:var(--ink)}
+html.tinteiro .nb{border-color:var(--mk)}
+html.tinteiro .nb.cor-ac{color:var(--ink)}
+html.tinteiro .nb.cor-ink{background:var(--ink9)}
+html.tinteiro .nb.cor-mk,html.tinteiro .kick,html.tinteiro .ic,
+html.tinteiro .hd b,html.tinteiro .mkr{color:var(--ink9)}
+html.tinteiro .kick,html.tinteiro .ic{border-color:transparent}

@@ -55,7 +55,74 @@ export function EditorApp() {
   const [editOptions, setEditOptions] = useState<VideoEditOptions>(
     DEFAULT_VIDEO_OPTIONS,
   );
+  const [outputUrl, setOutputUrl] = useState<string | null>(null);
   const bootstrapped = useRef<string | null>(null);
+
+  async function runLocalRender(dryRunOnly = false) {
+    if (!analysis) return;
+    setBusy(true);
+    pushLog(
+      dryRunOnly
+        ? "Dry-run local (fabrica --seco)…"
+        : "Render local sem depender do chat/XAI…",
+    );
+    try {
+      const res = await fetch("/api/editor/render", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          path: analysis.path,
+          takes,
+          dryRunOnly,
+          videoOptions: {
+            ...editOptions,
+            estilo:
+              editOptions.estilo ||
+              (analysis.orientation === "vertical" ? "reel-mono" : "aula-ccnp"),
+            whisperModel: "tiny",
+            captions: false,
+          },
+        }),
+      });
+      const data = (await res.json()) as {
+        ok?: boolean;
+        error?: string;
+        step?: string;
+        publicUrl?: string | null;
+        outputPath?: string | null;
+        report?: string;
+        renderLog?: string;
+      };
+      if (!res.ok || !data.ok) {
+        throw new Error(data.error || data.report || data.renderLog || "Render falhou");
+      }
+      if (data.publicUrl) {
+        setOutputUrl(data.publicUrl);
+        pushLog(`Pronto: ${data.publicUrl}`);
+      } else if (data.outputPath) {
+        setOutputUrl(mediaUrl(data.outputPath));
+        pushLog(`Pronto: ${data.outputPath}`);
+      } else if (dryRunOnly) {
+        pushLog(`Dry-run OK (${data.step})`);
+      } else {
+        pushLog("Render OK — arquivo gerado (veja logs do servidor).");
+      }
+      setAnalysis((prev) =>
+        prev
+          ? {
+              ...prev,
+              statusNote: dryRunOnly
+                ? `${prev.filename.replace(/\.[^.]+$/, "")} — dry-run OK. Aprove o render.`
+                : `${prev.filename.replace(/\.[^.]+$/, "")} v2 – corte renderizado.`,
+            }
+          : prev,
+      );
+    } catch (err) {
+      pushLog(err instanceof Error ? err.message : "Erro no render local");
+    } finally {
+      setBusy(false);
+    }
+  }
 
   function patchEdit<K extends keyof VideoEditOptions>(
     key: K,
@@ -229,50 +296,9 @@ export function EditorApp() {
       }
 
       if (/aplic(a|ar)?\s*corte|aprova|render|edita/i.test(text) && automation) {
-        const res = await fetch("/api/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            mode: "video",
-            videoOptions: {
-              ...editOptions,
-              autoConfirm: true,
-              autoRender: true,
-              estilo:
-                editOptions.estilo ||
-                (analysis.orientation === "vertical" ? "reel-mono" : "aula-ccnp"),
-            },
-            messages: [
-              {
-                id: "cmd-1",
-                role: "user",
-                parts: [
-                  {
-                    type: "text",
-                    text: `${text}. Vídeo: ${analysis.path}. Takes: ${JSON.stringify(takes)}. Use auto_edit_video ou create_edit_plan + dry_run_edit + render_edit.`,
-                  },
-                ],
-              },
-            ],
-          }),
-        });
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          throw new Error(
-            (err as { error?: string }).error ||
-              `Falha no agente (${res.status}). Configure XAI_API_KEY.`,
-          );
-        }
-        pushLog("Agente de vídeo acionado — acompanhe o pipeline nas tools.");
-        setAnalysis((prev) =>
-          prev
-            ? {
-                ...prev,
-                statusNote: `${prev.filename.replace(/\.[^.]+$/, "")} v2 – corte pelos takes aprovados. Revise o render.`,
-              }
-            : prev,
-        );
+        // Pipeline local: não depende de XAI_API_KEY / chat
         setCommand("");
+        await runLocalRender(false);
         return;
       }
 
@@ -309,15 +335,15 @@ export function EditorApp() {
     <div className="flex min-h-screen flex-col">
       <header className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
         <div className="flex items-center gap-4">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="flex flex-col gap-[3px]">
-              <i className="block h-[3px] w-7 rounded-full bg-[#ff7a1a]" />
-              <i className="block h-[3px] w-7 rounded-full bg-[#f5d76e]" />
-              <i className="block h-[3px] w-7 rounded-full bg-[#6dd3a7]" />
-              <i className="block h-[3px] w-7 rounded-full bg-[#5aa7ff]" />
+          <Link href="/dashboard" className="flex items-center gap-2.5">
+            <span className="flex size-8 items-center justify-center rounded-md bg-[color:var(--primary)] text-[11px] font-bold text-[color:var(--primary-foreground)]">
+              NX
             </span>
-            <span className="font-display text-lg font-bold tracking-[0.2em]">
-              EDVD
+            <span className="text-sm font-semibold tracking-tight text-[color:var(--foreground)]">
+              Editor{" "}
+              <span className="font-mono text-[9px] font-medium uppercase text-[color:var(--muted-foreground)]">
+                Nexus
+              </span>
             </span>
           </Link>
 
@@ -327,7 +353,7 @@ export function EditorApp() {
               onClick={() => setView("code")}
               className={`rounded-md px-3 py-1.5 text-sm ${
                 view === "code"
-                  ? "bg-[#ff7a1a] text-black font-semibold"
+                  ? "bg-[color:var(--primary)] text-[color:var(--primary-foreground)] font-semibold"
                   : "text-white/60"
               }`}
             >
@@ -562,15 +588,39 @@ export function EditorApp() {
               </select>
             </label>
           </div>
-          <div className="flex items-center gap-2">
+          {outputUrl ? (
+            <p className="mb-2 text-xs text-[#6dd3a7]">
+              Saída:{" "}
+              <a href={outputUrl} className="underline" target="_blank" rel="noreferrer">
+                {outputUrl}
+              </a>
+            </p>
+          ) : null}
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              disabled={busy || !analysis}
+              onClick={() => void runLocalRender(true)}
+              className="rounded-xl border border-white/15 px-3 py-3 text-sm text-white/80 disabled:opacity-40"
+            >
+              Dry-run
+            </button>
+            <button
+              type="button"
+              disabled={busy || !analysis}
+              onClick={() => void runLocalRender(false)}
+              className="rounded-xl bg-[#ff7a1a] px-4 py-3 text-sm font-semibold text-black disabled:opacity-40"
+            >
+              {busy ? "Renderizando…" : "Renderizar corte"}
+            </button>
             <input
               value={command}
               onChange={(e) => setCommand(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") void runCommand();
               }}
-              placeholder="Digite para comandos — ex: corta gordura · transcreve · edita automaticamente"
-              className="flex-1 rounded-xl border border-white/10 bg-[#12151a] px-3 py-3 text-sm text-white outline-none ring-[#ff7a1a] placeholder:text-white/30 focus:ring-2"
+              placeholder="Comandos — corta gordura · transcreve · edita / render"
+              className="min-w-[200px] flex-1 rounded-xl border border-white/10 bg-[#12151a] px-3 py-3 text-sm text-white outline-none ring-[#ff7a1a] placeholder:text-white/30 focus:ring-2"
             />
             <label className="flex items-center gap-2 rounded-xl border border-white/10 px-3 py-3 text-xs text-white/60">
               <input
@@ -584,7 +634,7 @@ export function EditorApp() {
               type="button"
               disabled={!command.trim() || busy || !analysis}
               onClick={() => void runCommand()}
-              className="rounded-xl bg-[#ff7a1a] px-4 py-3 text-sm font-semibold text-black disabled:opacity-40"
+              className="rounded-xl border border-white/15 px-4 py-3 text-sm font-semibold text-white disabled:opacity-40"
             >
               Enviar
             </button>

@@ -3,8 +3,14 @@
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import Link from "next/link";
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { AgentMode, ResearchDepth } from "@/lib/agents/models";
+import type { ResolvedAgentGroup } from "@/lib/agents/group-types";
+import {
+  extractRadarBriefing,
+  RadarApprovalCards,
+  type RadarCardItem,
+} from "@/components/radar-approval-cards";
 import {
   DEFAULT_VIDEO_OPTIONS,
   FONT_LABELS,
@@ -25,27 +31,214 @@ import {
 } from "@/lib/video/options";
 
 const MODE_LABELS: Record<AgentMode, string> = {
-  auto: "Auto",
-  chat: "Chat + tools",
-  research: "Multi-agent research",
-  video: "Editor de vídeo",
+  auto: "Automático",
+  chat: "Chat + ferramentas",
+  research: "Pesquisa multiagente",
+  grupo: "Grupo (sala)",
+  radar: "Radar de Pesquisa",
+  github: "GitHub Scout + Reels 60s",
+  roteiro: "Roteirista",
+  "roteiro-pessoal": "Roteirista Pessoal",
+  "arte-twitter": "Diretor de Arte Twitter",
+  "arte-realista": "Diretor de Arte Realista",
+  bit: "Orquestrador",
+  "editor-reels": "Editor Reels Animação/Realismo",
+  youtube: "YouTube ES",
+  carrossel: "Carrossel ES",
+  capas: "Capas e Miniaturas",
+  central: "Central de Agentes",
+  orquestrador: "Orquestrador Principal",
+  custom: "Agente custom",
+  notion: "Notion Guide",
+  pipeline: "Pack Scout→Reels→Notion",
+  video: "Editor Reels Pessoal",
+  kits: "Skills Ninja",
 };
 
-export function ChatApp() {
-  const [input, setInput] = useState("");
-  const [mode, setMode] = useState<AgentMode>("auto");
+const VALID_MODES = new Set<string>(Object.keys(MODE_LABELS));
+
+
+function readQueryMode(): AgentMode {
+  if (typeof window === "undefined") return "auto";
+  const params = new URLSearchParams(window.location.search);
+  const m = params.get("mode");
+  if (m && VALID_MODES.has(m)) return m as AgentMode;
+  if (params.get("agent")) return "custom";
+  if (params.get("group")) return "grupo";
+  if (params.get("kit")) return "kits";
+  return "auto";
+}
+
+function readQueryGroupId(): string {
+  if (typeof window === "undefined") return "";
+  return new URLSearchParams(window.location.search).get("group") || "";
+}
+
+function readQueryMemberId(): string {
+  if (typeof window === "undefined") return "";
+  return new URLSearchParams(window.location.search).get("member") || "";
+}
+
+function readQueryKitId(): string {
+  if (typeof window === "undefined") return "";
+  return new URLSearchParams(window.location.search).get("kit") || "";
+}
+
+function readQueryCustomAgentId(): string {
+  if (typeof window === "undefined") return "";
+  return new URLSearchParams(window.location.search).get("agent") || "";
+}
+
+function readQueryPrompt(): string {
+  if (typeof window === "undefined") return "";
+  return new URLSearchParams(window.location.search).get("q") || "";
+}
+
+function readQueryAutosend(): boolean {
+  if (typeof window === "undefined") return false;
+  return new URLSearchParams(window.location.search).get("autosend") === "1";
+}
+
+function resolveInitialMode(variant: "studio" | "hub"): AgentMode {
+  const fromQuery = readQueryMode();
+  if (variant === "hub") {
+    if (fromQuery !== "auto") return fromQuery;
+    return "orquestrador";
+  }
+  return fromQuery;
+}
+
+function readHandoff(): {
+  kitId?: string;
+  prompt?: string;
+  autosend?: boolean;
+} | null {
+  if (typeof window === "undefined") return null;
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("handoff") !== "1") return null;
+  try {
+    const raw = sessionStorage.getItem("grokish-skill-handoff");
+    if (!raw) return null;
+    sessionStorage.removeItem("grokish-skill-handoff");
+    return JSON.parse(raw) as {
+      kitId?: string;
+      prompt?: string;
+      autosend?: boolean;
+    };
+  } catch {
+    return null;
+  }
+}
+
+export function ChatApp({
+  variant = "studio",
+}: {
+  variant?: "studio" | "hub";
+}) {
+  const [handoff] = useState(readHandoff);
+  const [input, setInput] = useState(
+    () => handoff?.prompt || readQueryPrompt(),
+  );
+  const [mode, setMode] = useState<AgentMode>(() =>
+    handoff?.kitId ? "kits" : resolveInitialMode(variant),
+  );
   const [researchDepth, setResearchDepth] = useState<ResearchDepth>("medium");
+  const [kitId, setKitId] = useState<string>(
+    () => handoff?.kitId || readQueryKitId(),
+  );
+  const [groupId, setGroupId] = useState<string>(() => readQueryGroupId());
+  const [memberId, setMemberId] = useState<string>(() => readQueryMemberId());
+  const [customAgentId, setCustomAgentId] = useState<string>(() =>
+    readQueryCustomAgentId(),
+  );
+  const [customAgents, setCustomAgents] = useState<
+    Array<{ id: string; name: string; role: string; color: string }>
+  >([]);
+  const [groups, setGroups] = useState<ResolvedAgentGroup[]>([]);
+  const [kitOptions, setKitOptions] = useState<Array<{ id: string; name: string }>>(
+    [],
+  );
   const [videoOptions, setVideoOptions] =
     useState<VideoEditOptions>(DEFAULT_VIDEO_OPTIONS);
   const [uploadedPath, setUploadedPath] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const autosendRef = useRef(Boolean(handoff?.autosend) || readQueryAutosend());
+
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/kits")
+      .then((r) => r.json())
+      .then(
+        (data: {
+          kits?: Array<{ id: string; name: string }>;
+          inventory?: Array<{ id: string; name?: string; status: string }>;
+        }) => {
+          if (!alive) return;
+          const fromInventory = (data.inventory || []).map((k) => ({
+            id: k.id,
+            name: k.name || k.id,
+          }));
+          const fromInstalled = (data.kits || []).map((k) => ({
+            id: k.id,
+            name: k.name,
+          }));
+          const map = new Map<string, { id: string; name: string }>();
+          for (const k of [...fromInventory, ...fromInstalled]) {
+            map.set(k.id, k);
+          }
+          setKitOptions(
+            [...map.values()].sort((a, b) => a.id.localeCompare(b.id)),
+          );
+        },
+      )
+      .catch(() => undefined);
+    fetch("/api/agents")
+      .then((r) => r.json())
+      .then(
+        (data: {
+          agents?: Array<{
+            id: string;
+            name: string;
+            role: string;
+            color: string;
+          }>;
+        }) => {
+          if (!alive) return;
+          setCustomAgents(data.agents || []);
+        },
+      )
+      .catch(() => undefined);
+    fetch("/api/groups")
+      .then((r) => r.json())
+      .then((data: { groups?: ResolvedAgentGroup[] }) => {
+        if (!alive) return;
+        setGroups(data.groups || []);
+      })
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (customAgentId) setMode("custom");
+  }, [customAgentId]);
 
   const transport = useMemo(
     () =>
       new DefaultChatTransport({
         api: "/api/chat",
+        body: {
+          mode,
+          researchDepth,
+          videoOptions,
+          kitId: kitId || undefined,
+          groupId: groupId || undefined,
+          memberId: memberId || undefined,
+          customAgentId: customAgentId || undefined,
+        },
       }),
-    [],
+    [mode, researchDepth, videoOptions, kitId, groupId, memberId, customAgentId],
   );
 
   const { messages, sendMessage, status, error, stop } = useChat({
@@ -53,7 +246,105 @@ export function ChatApp() {
   });
 
   const busy = status === "submitted" || status === "streaming";
-  const showVideoPanel = mode === "video" || mode === "auto";
+  const showVideoPanel =
+    variant === "hub"
+      ? mode === "video" || mode === "editor-reels"
+      : mode === "video" || mode === "editor-reels" || mode === "auto";
+  const activeGroup = groups.find((g) => g.id === groupId) || null;
+
+  function sendBody(overrides?: Partial<{
+    mode: AgentMode;
+    researchDepth: ResearchDepth;
+    videoOptions: VideoEditOptions;
+    kitId: string | undefined;
+    groupId: string | undefined;
+    memberId: string | undefined;
+    customAgentId: string | undefined;
+  }>) {
+    const effectiveMode =
+      overrides?.mode ??
+      (variant === "hub" && mode === "auto" ? "orquestrador" : mode);
+    return {
+      mode: effectiveMode,
+      researchDepth,
+      videoOptions,
+      kitId: kitId || undefined,
+      groupId: groupId || undefined,
+      memberId: memberId || undefined,
+      customAgentId: customAgentId || undefined,
+      ...overrides,
+    };
+  }
+
+  function approveTrendForRoteirista(item: RadarCardItem) {
+    void fetch("/api/content", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: item.headline,
+        summary: item.summary,
+        stage: "approved",
+        source: "radar",
+        score: item.score,
+        tags: [item.category],
+        topic: item.category,
+        notes: `Ângulo: ${item.angle}\nPor que agora: ${item.whyNow}`,
+        groupId: groupId || "conteudo-dev",
+        networks: ["instagram", "youtube"],
+      }),
+    }).catch(() => undefined);
+
+    const prompt =
+      item.approvePrompt ||
+      [
+        "Crie um roteiro de Reels de ~60 segundos sobre esta tendência APROVADA do Radar:",
+        "",
+        `Manchete: ${item.headline}`,
+        `Ângulo: ${item.angle}`,
+        `Resumo: ${item.summary}`,
+        `Por que agora: ${item.whyNow}`,
+        "",
+        "Use prepare_trend_for_reels e deliver_reels_script.",
+        "Depois use run_central_pipeline (ou create_content_item) para salvar o roteiro na Central de Agentes com stage=script.",
+      ].join("\n");
+    setMode("roteiro");
+    void sendMessage(
+      { text: prompt },
+      {
+        body: {
+          mode: "roteiro",
+          researchDepth,
+          videoOptions,
+          groupId: groupId || "conteudo-dev",
+          memberId: "roteirista",
+        },
+      },
+    );
+  }
+
+  // Dashboard → agent handoff: autosend once (sessionStorage or ?q=)
+  useEffect(() => {
+    if (!autosendRef.current) return;
+    const prompt = (handoff?.prompt || readQueryPrompt()).trim();
+    autosendRef.current = false;
+    if (!prompt) return;
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("autosend");
+      url.searchParams.delete("handoff");
+      window.history.replaceState({}, "", url.toString());
+    } catch {
+      /* ignore */
+    }
+    void sendMessage(
+      { text: prompt },
+      {
+        body: handoff?.kitId || kitId
+          ? { mode: "kits", kitId: kitId || undefined }
+          : sendBody({ mode: variant === "hub" ? "orquestrador" : mode }),
+      },
+    );
+  }, [handoff, kitId, sendMessage, variant, mode]);
 
   async function onUpload(file: File | null) {
     if (!file) return;
@@ -87,25 +378,118 @@ export function ChatApp() {
     setVideoOptions((prev) => ({ ...prev, [key]: value }));
   }
 
-  return (
-    <div className="relative flex min-h-full flex-1 flex-col overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 atmosphere" aria-hidden />
-      <div className="pointer-events-none absolute inset-0 grid-fade" aria-hidden />
+  const assistantLabel =
+    variant === "hub" || mode === "orquestrador"
+      ? "Orquestrador"
+      : "Grokish";
+  const maxWidth = variant === "hub" ? "max-w-2xl" : "max-w-3xl";
 
+  return (
+    <div
+      className={`relative flex min-h-0 flex-1 flex-col overflow-hidden ${
+        variant === "hub" ? "nexus-hub-chat" : ""
+      }`}
+    >
+      {variant === "studio" ? (
+        <div className="pointer-events-none absolute inset-0 atmosphere" aria-hidden />
+      ) : null}
+      {variant === "studio" ? (
+        <div className="pointer-events-none absolute inset-0 grid-fade" aria-hidden />
+      ) : null}
+
+      {variant === "studio" ? (
       <header className="relative z-10 mx-auto flex w-full max-w-3xl items-end justify-between gap-4 px-5 pt-8 pb-4">
         <div>
-          <p className="font-display text-4xl tracking-tight text-[var(--ink)] md:text-5xl">
-            Grokish
+          <p className="font-display text-3xl tracking-tight text-[var(--ink)] md:text-4xl">
+            Studio
           </p>
           <p className="mt-2 max-w-md text-sm leading-relaxed text-[var(--muted)]">
-            Multi-agente + editor de vídeo automático com o kit de edição.
+            Agentes — grupos, radar, roteiro, artes e edição.
           </p>
-          <Link
-            href="/editor"
-            className="mt-3 inline-flex rounded-lg bg-[var(--ink)] px-3 py-1.5 text-xs font-semibold text-[var(--panel)]"
-          >
-            Abrir editor visual EDVD →
-          </Link>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Link
+              href="/app"
+              className="inline-flex rounded-lg bg-[var(--ink)] px-3 py-1.5 text-xs font-semibold text-[var(--panel)]"
+            >
+              Chat Orquestrador →
+            </Link>
+            <Link
+              href="/dashboard"
+              className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
+            >
+              Dashboard
+            </Link>
+            <Link
+              href="/central"
+              className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
+            >
+              Pipeline
+            </Link>
+            <Link
+              href="/grupos"
+              className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
+            >
+              Grupos
+            </Link>
+            <Link
+              href="/kits"
+              className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
+            >
+              Skills
+            </Link>
+            <button
+              type="button"
+              onClick={() => {
+                setGroupId("conteudo-dev");
+                setMemberId("");
+                setMode("grupo");
+              }}
+              className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
+            >
+              Conteúdo Dev — Imagem
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setGroupId("conteudo-dev-video");
+                setMemberId("");
+                setMode("grupo");
+              }}
+              className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
+            >
+              Conteúdo Dev — Vídeo
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setGroupId("conteudos-espanha");
+                setMemberId("");
+                setMode("grupo");
+              }}
+              className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
+            >
+              Conteúdo Espanha
+            </button>
+            <Link
+              href="/agentes"
+              className="inline-flex rounded-lg border border-[var(--line)] bg-[var(--accent)] px-3 py-1.5 text-xs font-bold text-[var(--accent-ink)]"
+            >
+              + Criar agente
+            </Link>
+            <button
+              type="button"
+              onClick={() => setMode("radar")}
+              className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
+            >
+              Radar
+            </button>
+            <Link
+              href="/editor"
+              className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
+            >
+              Editor EDVD
+            </Link>
+          </div>
         </div>
         <div className="flex flex-col items-end gap-2">
           <label className="text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">
@@ -138,10 +522,103 @@ export function ChatApp() {
               </select>
             </label>
           ) : null}
+          {mode === "custom" || customAgents.length > 0 ? (
+            <label className="text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">
+              Agente custom
+              <select
+                className="mt-1 block max-w-[220px] rounded-md border border-[var(--line)] bg-[var(--panel)] px-2 py-1.5 text-sm text-[var(--ink)]"
+                value={customAgentId}
+                onChange={(e) => {
+                  const id = e.target.value;
+                  setCustomAgentId(id);
+                  if (id) setMode("custom");
+                }}
+              >
+                <option value="">(nenhum)</option>
+                {customAgents.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
+          {mode === "kits" || mode === "auto" ? (
+            <label className="text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">
+              Kit ativo
+              <select
+                className="mt-1 block max-w-[200px] rounded-md border border-[var(--line)] bg-[var(--panel)] px-2 py-1.5 text-sm text-[var(--ink)]"
+                value={kitId}
+                onChange={(e) => {
+                  setKitId(e.target.value);
+                  if (e.target.value) setMode("kits");
+                }}
+              >
+                <option value="">Todas as skills</option>
+                {kitOptions.map((k) => (
+                  <option key={k.id} value={k.id}>
+                    {k.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
+          <label className="text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">
+            Grupo
+            <select
+              className="mt-1 block max-w-[200px] rounded-md border border-[var(--line)] bg-[var(--panel)] px-2 py-1.5 text-sm text-[var(--ink)]"
+              value={groupId}
+              onChange={(e) => {
+                setGroupId(e.target.value);
+                setMemberId("");
+                if (e.target.value) setMode("grupo");
+              }}
+            >
+              <option value="">(nenhum)</option>
+              {groups.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          {activeGroup ? (
+            <label className="text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">
+              Membro
+              <select
+                className="mt-1 block max-w-[200px] rounded-md border border-[var(--line)] bg-[var(--panel)] px-2 py-1.5 text-sm text-[var(--ink)]"
+                value={memberId}
+                onChange={(e) => {
+                  const next = e.target.value;
+                  setMemberId(next);
+                  const member = activeGroup.members.find((m) => m.id === next);
+                  if (member) {
+                    if (member.isOrchestrator || member.mode === "bit") {
+                      setMode("grupo");
+                    } else if (member.kind === "custom") {
+                      setMode("grupo");
+                    } else {
+                      setMode(member.mode as AgentMode);
+                    }
+                  } else setMode("grupo");
+                }}
+              >
+                <option value="">Sala inteira</option>
+                {activeGroup.members.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
         </div>
       </header>
+      ) : null}
 
-      <main className="relative z-10 mx-auto flex w-full max-w-3xl flex-1 flex-col px-5 pb-36">
+      <main
+        className={`relative z-10 mx-auto flex w-full ${maxWidth} flex-1 flex-col px-5 pb-36`}
+      >
         {showVideoPanel ? (
           <section className="mb-4 animate-rise rounded-2xl border border-[var(--line)] bg-[var(--panel)]/85 p-4 backdrop-blur">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
@@ -409,6 +886,7 @@ export function ChatApp() {
           {messages.length === 0 ? (
             <EmptyState
               mode={mode}
+              variant={variant}
               onPick={(prompt) => {
                 setInput(prompt);
               }}
@@ -425,7 +903,7 @@ export function ChatApp() {
               }`}
             >
               <p className="mb-1 text-[10px] uppercase tracking-[0.16em] opacity-60">
-                {message.role === "user" ? "Você" : "Grokish"}
+                {message.role === "user" ? "Você" : assistantLabel}
               </p>
               <div className="space-y-3 whitespace-pre-wrap">
                 {message.parts.map((part, index) => {
@@ -435,13 +913,21 @@ export function ChatApp() {
 
                   if (part.type.startsWith("tool-")) {
                     const toolName = part.type.replace(/^tool-/, "");
+                    const briefing = extractRadarBriefing(part);
                     return (
-                      <p
-                        key={`${message.id}-${index}`}
-                        className="rounded-md bg-[var(--chip)] px-2 py-1 font-mono text-xs text-[var(--accent-ink)]"
-                      >
-                        tool · {toolName}
-                      </p>
+                      <div key={`${message.id}-${index}`} className="space-y-2">
+                        <p className="rounded-md bg-[var(--chip)] px-2 py-1 font-mono text-xs text-[var(--accent-ink)]">
+                          tool · {toolName}
+                        </p>
+                        {briefing ? (
+                          <RadarApprovalCards
+                            date={briefing.date}
+                            items={briefing.items}
+                            busy={busy}
+                            onApprove={approveTrendForRoteirista}
+                          />
+                        ) : null}
+                      </div>
                     );
                   }
 
@@ -455,7 +941,9 @@ export function ChatApp() {
             <p className="animate-pulse text-sm text-[var(--muted)]">
               {mode === "video"
                 ? "Editor trabalhando no pipeline…"
-                : "Agentes trabalhando…"}
+                : variant === "hub" || mode === "orquestrador"
+                  ? "Orquestrador delegando tarefas…"
+                  : "Agentes trabalhando…"}
             </p>
           ) : null}
 
@@ -468,35 +956,32 @@ export function ChatApp() {
       </main>
 
       <form
-        className="fixed inset-x-0 bottom-0 z-20 border-t border-[var(--line)] bg-[var(--panel)]/85 px-5 py-4 backdrop-blur-xl"
+        className={`nexus-composer fixed inset-x-0 bottom-0 z-20 border-t border-[var(--line)] bg-[var(--panel)]/85 px-5 py-4 backdrop-blur-xl ${
+          variant === "hub" ? "md:left-[var(--nexus-sidebar-width)]" : ""
+        }`}
         onSubmit={(e) => {
           e.preventDefault();
           const text = input.trim();
           if (!text || busy) return;
-          sendMessage(
-            { text },
-            {
-              body: {
-                mode,
-                researchDepth,
-                videoOptions,
-              },
-            },
-          );
+          sendMessage({ text }, { body: sendBody() });
           setInput("");
         }}
       >
-        <div className="mx-auto flex w-full max-w-3xl items-end gap-2">
+        <div className={`mx-auto flex w-full ${maxWidth} items-end gap-2`}>
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            rows={2}
+            rows={variant === "hub" ? 1 : 2}
             placeholder={
-              mode === "video"
-                ? "Ex: edita automaticamente o vídeo enviado em reel-mono com legendas"
-                : "Pergunte algo… ou peça para editar um vídeo"
+              variant === "hub" || mode === "orquestrador"
+                ? "Peça qualquer coisa — delego para Radar, Roteiro, Arte, Vídeo ou crio um agente novo…"
+                : mode === "video"
+                  ? "Ex: edita automaticamente o vídeo enviado em reel-mono com legendas"
+                  : mode === "radar"
+                    ? "Ex: Monta o briefing diário de IA, automação e marketing"
+                    : "Pergunte algo… ou peça o radar / um roteiro"
             }
-            className="min-h-[56px] flex-1 resize-none rounded-xl border border-[var(--line)] bg-white/70 px-3 py-3 text-sm text-[var(--ink)] outline-none ring-[var(--accent)] placeholder:text-[var(--muted)] focus:ring-2"
+            className="min-h-[56px] flex-1 resize-none rounded-xl border border-[var(--line)] bg-[var(--panel)] px-3 py-3 text-sm text-[var(--ink)] outline-none ring-[var(--accent)] placeholder:text-[var(--muted)] focus:ring-2"
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
@@ -537,7 +1022,7 @@ function Field({
   return (
     <label className="block text-[11px] uppercase tracking-[0.14em] text-[var(--muted)]">
       {label}
-      <div className="mt-1 [&_input]:w-full [&_input]:rounded-md [&_input]:border [&_input]:border-[var(--line)] [&_input]:bg-white/80 [&_input]:px-2 [&_input]:py-1.5 [&_input]:text-sm [&_input]:normal-case [&_input]:tracking-normal [&_input]:text-[var(--ink)] [&_select]:w-full [&_select]:rounded-md [&_select]:border [&_select]:border-[var(--line)] [&_select]:bg-white/80 [&_select]:px-2 [&_select]:py-1.5 [&_select]:text-sm [&_select]:normal-case [&_select]:tracking-normal [&_select]:text-[var(--ink)]">
+      <div className="mt-1 [&_input]:w-full [&_input]:rounded-md [&_input]:border [&_input]:border-[var(--line)] [&_input]:bg-[var(--panel)] [&_input]:px-2 [&_input]:py-1.5 [&_input]:text-sm [&_input]:normal-case [&_input]:tracking-normal [&_input]:text-[var(--ink)] [&_select]:w-full [&_select]:rounded-md [&_select]:border [&_select]:border-[var(--line)] [&_select]:bg-[var(--panel)] [&_select]:px-2 [&_select]:py-1.5 [&_select]:text-sm [&_select]:normal-case [&_select]:tracking-normal [&_select]:text-[var(--ink)]">
         {children}
       </div>
     </label>
@@ -546,30 +1031,98 @@ function Field({
 
 function EmptyState({
   mode,
+  variant = "studio",
   onPick,
 }: {
   mode: AgentMode;
+  variant?: "studio" | "hub";
   onPick: (prompt: string) => void;
 }) {
   const prompts =
-    mode === "video"
+    variant === "hub" || mode === "orquestrador"
+      ? [
+          "Lista agentes e grupos disponíveis e sugere o próximo passo no pipeline",
+          "Roda Conteúdo Dev — Imagem: radar → roteiro → direção de arte",
+          "Delega ao roteirista um Reels de 60s sobre automação com IA",
+          "Coordena Conteúdo Espanha: carrossel + capas para esta semana",
+          "Cria um agente custom para threads no Twitter e me mostra como usar",
+        ]
+      : mode === "video"
       ? [
           "Lista os estilos de edição disponíveis no kit",
           "Edita automaticamente o vídeo em workspace/videos — estilo reel-mono com legendas",
           "Monta um plano de aula-ccnp, roda dry-run e só renderiza se eu confirmar",
         ]
-      : [
-          "O que é o modelo grok-4.20-multi-agent e quando usar?",
-          "Pesquise nas últimas notícias o que está rolando sobre agentes de IA",
-          "Quero editar um vídeo: corte silêncios, trate a voz e gere um reel",
-        ];
+      : mode === "kits"
+        ? [
+            "Abra o dashboard em /kits e escolha uma skill para executar",
+            "Lista todas as skills Ninja disponíveis e o que cada uma faz",
+            "Descreve a skill ativa e entregue um resultado de exemplo",
+          ]
+        : mode === "github"
+          ? [
+              "Quais os melhores repositórios de agentes de IA em TypeScript?",
+              "Ache libs open-source de edição de vídeo no GitHub e ranqueie",
+              "Compare vercel/ai com langchainjs e diga qual usar para um chatbot",
+            ]
+          : mode === "roteiro"
+            ? [
+                "Roteiro de Reels 60s sobre vercel/ai",
+                "Escreva um roteiro hype de 60 segundos sobre shadcn-ui/ui",
+                "Monte o script falado + texto de tela para um Reels do supabase/supabase",
+              ]
+            : mode === "notion"
+              ? [
+                  "Publique no Notion o guia de instalação do vercel/ai",
+                  "Crie um arquivo/página Notion com link + como usar o repo supabase/supabase",
+                  "Exporte o markdown de guia do repositório facebook/react",
+                ]
+              : mode === "pipeline"
+                ? [
+                    "Pacote completo: melhores repos de agentes IA em TypeScript + roteiro 60s + guia Notion",
+                    "Gera o pack Scout→Reels→Notion sobre edição de vídeo open-source",
+                    "Roda o pipeline no repo vercel/ai (roteiro + Notion)",
+                  ]
+                : mode === "radar"
+                  ? [
+                      "Monta o briefing diário de automação, IA e marketing",
+                      "Quais as melhores notícias de IA de hoje para eu aprovar um Reels?",
+                      "Radar de tendências: top histórias + ângulos para conteúdo",
+                    ]
+                  : mode === "grupo"
+                    ? [
+                        "Roda o fluxo do grupo: radar → roteiro → direção de arte",
+                        "Comece pelo briefing do dia e me peça aprovação",
+                        "Coordene Bit: qual o próximo membro agora?",
+                      ]
+                    : [
+                        "O que é o modelo grok-4.20-multi-agent e quando usar?",
+                        "Pesquise nas últimas notícias o que está rolando sobre agentes de IA",
+                        "Lista os kits Ninja disponíveis e o que cada um faz",
+                      ];
 
   return (
     <section className="animate-rise mt-2 space-y-4">
       <p className="text-sm text-[var(--muted)]">
-        {mode === "video"
+        {variant === "hub" || mode === "orquestrador"
+          ? "Converse com o Orquestrador Principal — ele delega para especialistas ou cria novos agentes."
+          : mode === "video"
           ? "Upload um MP4, escolha estilo/opções e peça a edição automática."
-          : "Chat, research multi-agente, ou editor de vídeo com o kit."}
+          : mode === "kits"
+            ? "Skill ativa via dashboard /kits — descreva o pedido ou use um atalho."
+            : mode === "github"
+              ? "Descreva o tema/stack — o scout busca e ranqueia os melhores repos no GitHub."
+              : mode === "roteiro"
+                ? "Passe o owner/repo ou uma tendência aprovada — Reels de ~60s."
+                : mode === "notion"
+                  ? "Passe o repo — o agente gera arquivo/página Notion com link, instalação e uso."
+                  : mode === "pipeline"
+                    ? "Uma tacada: escolhe o melhor repo → roteiro Reels 60s → guia Notion."
+                    : mode === "radar"
+                      ? "Briefing diário de IA, automação e marketing — aprove um card para o Roteirista."
+                      : mode === "grupo"
+                        ? "Sala do grupo: os membros colaboram no fluxo (radar → roteiro → arte/edição)."
+                        : "Chat, grupos, radar, Scout, pack, roteiros, Notion, kits ou editor."}
       </p>
       <ul className="space-y-2">
         {prompts.map((prompt) => (
@@ -577,7 +1130,7 @@ function EmptyState({
             <button
               type="button"
               onClick={() => onPick(prompt)}
-              className="w-full rounded-xl border border-[var(--line)] bg-[var(--panel)]/80 px-4 py-3 text-left text-sm text-[var(--ink)] transition hover:border-[var(--accent)] hover:bg-white"
+              className="crm-card transition hover:border-[var(--accent)]"
             >
               {prompt}
             </button>

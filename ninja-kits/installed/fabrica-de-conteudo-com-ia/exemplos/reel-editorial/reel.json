@@ -1,0 +1,33 @@
+{
+ "_leia": "Exemplo de plano do reel editorial. Confira sem gastar nada: uv run python tools/video-use/helpers/fabrica.py exemplos/reel-editorial/reel.json --seco. Sem a voz.wav, a cadeia para no passo que cobra na ElevenLabs e mostra o comando. O formato inteiro está no topo de tools/video-use/helpers/reel_editorial.py.",
+ "estilo": "reel-editorial",
+ "slug": "exemplo-editorial",
+ "fonte": "voz.wav",
+ "narracao": "Você grava uma vez, e a fábrica monta o reel inteiro. Comenta FÁBRICA que eu te mando o passo a passo.",
+ "palavra": "FÁBRICA",
+ "trabalho": "_trabalho",
+ "dur": 8.0,
+ "_fundo": "imagem.fundo é o que vai atrás do seu rosto: a placa do seu look na HeyGen. A daqui é neutra, só pro exemplo",
+ "imagem": {"fundo": "exemplos/reel-editorial/fundo.png"},
+ "avatar": {
+  "arquivo": "avatar/rosto.webm",
+  "cartao": {"s": 1.0, "x": 18, "y": 427},
+  "cheio": {"s": 1.2, "x": -6, "y": -378}
+ },
+ "base": [
+  {"de": 0.0, "ate": 4.0, "avatar": 0.0, "quadro": "cartao"},
+  {"de": 4.0, "ate": 8.0, "avatar": 4.0, "quadro": "cheio"}
+ ],
+ "r": {
+  "dur": 8.0,
+  "cenas": [[0, 4.0, "split", "tinta"], [4.0, 8.0, "rosto"]],
+  "vozes": [{"t": 6.0, "ate": 8.0, "chamada": ["comenta", "“FÁBRICA”"]}]
+ },
+ "pecas": [
+  {"nome": "gancho", "peca": "g_gancho", "em": 0, "ate": 4.0, "segura": true,
+   "caixa": [60, 440, 1020, 720], "q": {"l": "*Grava uma vez"}}
+ ],
+ "sons": [],
+ "_trilha": "a faixa do exemplo é um acorde gerado no ffmpeg, sem direito autoral, só pra cadeia ir até o fim (o mixa não mede silêncio): troque pela sua, feita na ElevenLabs Music. O caminho é a partir da raiz da pasta",
+ "trilha": {"faixa": "exemplos/reel-editorial/trilha.m4a"}
+}
