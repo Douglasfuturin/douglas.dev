@@ -177,7 +177,7 @@ export function SkillRunner({
               className={`max-w-[95%] rounded-2xl px-3 py-2.5 text-sm leading-relaxed ${
                 message.role === "user"
                   ? "ml-auto bg-[var(--ink)] text-[var(--panel)]"
-                  : "mr-auto border border-[var(--line)] bg-white/80 text-[var(--ink)]"
+                  : "mr-auto border border-[var(--line)] bg-[var(--panel)] text-[var(--ink)]"
               }`}
             >
               <p className="mb-1 text-[10px] uppercase tracking-[0.14em] opacity-60">
@@ -247,7 +247,7 @@ export function SkillRunner({
             onChange={(e) => setFollowUp(e.target.value)}
             rows={2}
             placeholder="Ajuste o pedido ou peça outra variação…"
-            className="min-h-[52px] flex-1 resize-none rounded-xl border border-[var(--line)] bg-white/80 px-3 py-2 text-sm text-[var(--ink)] outline-none focus:ring-2 focus:ring-[var(--accent)]"
+            className="min-h-[52px] flex-1 resize-none rounded-xl border border-[var(--line)] bg-[var(--panel)] px-3 py-2 text-sm text-[var(--ink)] outline-none focus:ring-2 focus:ring-[var(--accent)]"
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();

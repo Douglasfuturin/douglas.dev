@@ -924,7 +924,7 @@ export function ChatApp() {
                   ? "Ex: Monta o briefing diário de IA, automação e marketing"
                   : "Pergunte algo… ou peça o radar / um roteiro"
             }
-            className="min-h-[56px] flex-1 resize-none rounded-xl border border-[var(--line)] bg-white/70 px-3 py-3 text-sm text-[var(--ink)] outline-none ring-[var(--accent)] placeholder:text-[var(--muted)] focus:ring-2"
+            className="min-h-[56px] flex-1 resize-none rounded-xl border border-[var(--line)] bg-[var(--panel)] px-3 py-3 text-sm text-[var(--ink)] outline-none ring-[var(--accent)] placeholder:text-[var(--muted)] focus:ring-2"
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
@@ -965,7 +965,7 @@ function Field({
   return (
     <label className="block text-[11px] uppercase tracking-[0.14em] text-[var(--muted)]">
       {label}
-      <div className="mt-1 [&_input]:w-full [&_input]:rounded-md [&_input]:border [&_input]:border-[var(--line)] [&_input]:bg-white/80 [&_input]:px-2 [&_input]:py-1.5 [&_input]:text-sm [&_input]:normal-case [&_input]:tracking-normal [&_input]:text-[var(--ink)] [&_select]:w-full [&_select]:rounded-md [&_select]:border [&_select]:border-[var(--line)] [&_select]:bg-white/80 [&_select]:px-2 [&_select]:py-1.5 [&_select]:text-sm [&_select]:normal-case [&_select]:tracking-normal [&_select]:text-[var(--ink)]">
+      <div className="mt-1 [&_input]:w-full [&_input]:rounded-md [&_input]:border [&_input]:border-[var(--line)] [&_input]:bg-[var(--panel)] [&_input]:px-2 [&_input]:py-1.5 [&_input]:text-sm [&_input]:normal-case [&_input]:tracking-normal [&_input]:text-[var(--ink)] [&_select]:w-full [&_select]:rounded-md [&_select]:border [&_select]:border-[var(--line)] [&_select]:bg-[var(--panel)] [&_select]:px-2 [&_select]:py-1.5 [&_select]:text-sm [&_select]:normal-case [&_select]:tracking-normal [&_select]:text-[var(--ink)]">
         {children}
       </div>
     </label>
@@ -1061,7 +1061,7 @@ function EmptyState({
             <button
               type="button"
               onClick={() => onPick(prompt)}
-              className="w-full rounded-xl border border-[var(--line)] bg-[var(--panel)]/80 px-4 py-3 text-left text-sm text-[var(--ink)] transition hover:border-[var(--accent)] hover:bg-white"
+              className="crm-card transition hover:border-[var(--accent)]"
             >
               {prompt}
             </button>

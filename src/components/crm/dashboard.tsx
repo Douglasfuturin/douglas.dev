@@ -217,7 +217,7 @@ export function CrmDashboard() {
           ].map((s, i) => (
             <div
               key={s.label}
-              className="rounded-xl border border-white/10 bg-white/5 px-3 py-3 backdrop-blur-sm animate-fase-rise"
+              className="crm-card-sm animate-fase-rise"
               style={{ animationDelay: `${120 + i * 60}ms` }}
             >
               <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-white/45">
@@ -324,7 +324,7 @@ export function CrmDashboard() {
                 <li key={item.id}>
                   <Link
                     href={`/central/${item.id}`}
-                    className="flex items-start justify-between gap-3 rounded-xl border border-[color:var(--fase-line)] bg-white/80 px-3 py-2.5 transition hover:border-[color:var(--fase-ink)]/20"
+                    className="crm-card-sm flex items-start justify-between gap-3"
                   >
                     <div>
                       <p className="text-sm font-semibold text-white">
@@ -360,7 +360,7 @@ export function CrmDashboard() {
                 {queue.slice(0, 4).map((j) => (
                   <li
                     key={j.id}
-                    className="flex items-center justify-between rounded-lg bg-white/70 px-2.5 py-2 text-xs"
+                    className="crm-card-sm flex items-center justify-between text-xs"
                   >
                     <span className="font-semibold uppercase">{j.network}</span>
                     <span className="text-[color:var(--fase-muted)]">

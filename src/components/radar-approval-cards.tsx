@@ -50,7 +50,7 @@ export function RadarApprovalCards({
         {items.map((item) => (
           <li
             key={item.id}
-            className="rounded-xl border border-[var(--line)] bg-white/70 px-3 py-3"
+            className="crm-card"
           >
             <div className="flex flex-wrap items-center gap-2 text-[11px] text-[var(--muted)]">
               <span className="rounded bg-[var(--chip)] px-1.5 py-0.5 font-semibold text-[var(--accent-ink)]">
@@ -69,7 +69,7 @@ export function RadarApprovalCards({
               type="button"
               disabled={busy}
               onClick={() => onApprove(item)}
-              className="mt-2 inline-flex rounded-lg bg-[var(--ink)] px-3 py-1.5 text-xs font-semibold text-[var(--panel)] disabled:opacity-50"
+              className="mt-2 inline-flex rounded-lg bg-[color:var(--dd-orange)] px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
             >
               Aprovar → Roteirista
             </button>

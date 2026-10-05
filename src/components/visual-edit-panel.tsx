@@ -19,7 +19,7 @@ type Props = {
 };
 
 const inputClass =
-  "w-full rounded-xl border border-[var(--line)] bg-white/80 px-3 py-2 text-sm text-[var(--ink)] outline-none focus:ring-2 focus:ring-[var(--accent)]";
+  "w-full rounded-xl border border-[var(--line)] bg-[var(--panel)] px-3 py-2 text-sm text-[var(--ink)] outline-none focus:ring-2 focus:ring-[var(--accent)]";
 
 export function VisualEditPanel({
   kitId,
@@ -172,7 +172,7 @@ export function VisualEditPanel({
               className={`rounded-lg px-2.5 py-1 text-xs ${
                 draft.aspectId === a.id
                   ? "bg-[var(--ink)] font-semibold text-[var(--panel)]"
-                  : "border border-[var(--line)] bg-white/70 text-[var(--ink)]"
+                  : "border border-[var(--line)] bg-[var(--panel)] text-[var(--ink)]"
               }`}
             >
               {a.label}

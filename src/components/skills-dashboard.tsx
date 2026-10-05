@@ -340,8 +340,8 @@ export function SkillsDashboard() {
                       style={{ animationDelay: `${Math.min(index, 12) * 30}ms` }}
                       className={`animate-rise w-full rounded-xl border px-3 py-2.5 text-left transition ${
                         active
-                          ? "border-[var(--accent)] bg-white shadow-[0_0_0_1px_var(--accent)]"
-                          : "border-[var(--line)] bg-[var(--panel)]/75 hover:border-[var(--accent)]/50 hover:bg-white/90"
+                          ? "border-[var(--accent)] bg-[var(--panel)] shadow-[0_0_0_1px_var(--accent)]"
+                          : "border-[var(--line)] bg-[var(--panel)] hover:border-[var(--accent)]/50 hover:bg-[color:var(--dd-elevated)]"
                       }`}
                     >
                       <div className="flex items-start justify-between gap-2">
@@ -445,7 +445,7 @@ export function SkillsDashboard() {
                               key={s.label}
                               type="button"
                               onClick={() => setBrief(s.prompt)}
-                              className="rounded-lg border border-[var(--line)] bg-white/70 px-2.5 py-1 text-xs text-[var(--ink)] hover:border-[var(--accent)]"
+                              className="rounded-lg border border-[var(--line)] bg-[var(--panel)] px-2.5 py-1 text-xs text-[var(--ink)] hover:border-[var(--accent)]"
                             >
                               {s.label}
                             </button>
@@ -461,7 +461,7 @@ export function SkillsDashboard() {
                           value={activeBrief}
                           onChange={(e) => setBrief(e.target.value)}
                           rows={8}
-                          className="min-h-[140px] flex-1 resize-none rounded-xl border border-[var(--line)] bg-white/80 px-3 py-2.5 text-sm leading-relaxed text-[var(--ink)] outline-none ring-[var(--accent)] focus:ring-2"
+                          className="min-h-[140px] flex-1 resize-none rounded-xl border border-[var(--line)] bg-[var(--panel)] px-3 py-2.5 text-sm leading-relaxed text-[var(--ink)] outline-none ring-[var(--accent)] focus:ring-2"
                           placeholder="Descreva o que precisa. Troque os [placeholders] pelos seus dados."
                         />
                       </label>
@@ -546,7 +546,7 @@ function StatusDot({
   const item = map[status];
   if (withLabel) {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-md bg-white/80 px-2 py-0.5 text-[var(--ink)]">
+      <span className="inline-flex items-center gap-1.5 rounded-md bg-[var(--panel)] px-2 py-0.5 text-[var(--ink)]">
         <span className={`h-1.5 w-1.5 rounded-sm ${item.cls}`} />
         {item.label}
       </span>

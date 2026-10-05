@@ -240,7 +240,7 @@ export function CentralBoard() {
             {queue.slice(0, 8).map((job) => (
               <li
                 key={job.id}
-                className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[color:var(--fase-line)] bg-white/80 px-3 py-2 text-sm"
+                className="crm-card-sm flex flex-wrap items-center justify-between gap-2 text-sm"
               >
                 <span>
                   <strong>{NETWORK_LABELS[job.network]}</strong> · {job.status}

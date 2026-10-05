@@ -280,7 +280,7 @@ export function GroupsManager({ compact = false }: { compact?: boolean }) {
                     className={`rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition ${
                       on
                         ? "border-[color:var(--dd-orange)] bg-[color:var(--dd-orange)]/15 text-white"
-                        : "border-[color:var(--fase-line)] bg-white/5 text-white/70"
+                        : "border-[color:var(--fase-line)] bg-[color:var(--dd-surface)] text-white/70"
                     }`}
                   >
                     <span
@@ -371,7 +371,7 @@ export function GroupsManager({ compact = false }: { compact?: boolean }) {
                   {group.members.map((m) => (
                     <li
                       key={m.id}
-                      className="flex items-center justify-between gap-2 rounded-xl border border-[color:var(--fase-line)] bg-white px-3 py-2"
+                      className="crm-card-sm flex items-center justify-between gap-2"
                     >
                       <div className="flex min-w-0 items-center gap-2">
                         <span
@@ -381,11 +381,11 @@ export function GroupsManager({ compact = false }: { compact?: boolean }) {
                           {m.name.slice(0, 2).toUpperCase()}
                         </span>
                         <span className="min-w-0">
-                          <span className="block truncate text-sm font-semibold text-black">
+                          <span className="block truncate text-sm font-semibold text-white">
                             {m.name}
                             {m.isOrchestrator ? " · Orquestrador" : ""}
                           </span>
-                          <span className="block truncate text-[11px] text-black/60">
+                          <span className="block truncate text-[11px] text-white/55">
                             {m.role}
                           </span>
                         </span>
