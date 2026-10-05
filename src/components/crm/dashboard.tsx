@@ -118,7 +118,6 @@ function PipelineGroupCard({
 export function CrmDashboard() {
   const [items, setItems] = useState<ContentItem[]>([]);
   const [queue, setQueue] = useState<PublishJob[]>([]);
-  const [stats, setStats] = useState<Stats | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -126,7 +125,6 @@ export function CrmDashboard() {
       const data = await res.json();
       if (!data.ok) return;
       setItems(data.items || []);
-      setStats(data.stats || null);
       setQueue(data.queue || []);
     } catch {
       /* ignore */
@@ -138,9 +136,6 @@ export function CrmDashboard() {
   }, [load]);
 
   const recent = items.slice(0, 5);
-  const inMotion = items.filter(
-    (i) => !["published", "idea"].includes(i.stage),
-  ).length;
 
   return (
     <div className="space-y-10">
