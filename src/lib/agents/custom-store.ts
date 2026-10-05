@@ -65,6 +65,7 @@ export async function getCustomAgent(agentId: string): Promise<CustomAgent | nul
 }
 
 export async function createCustomAgent(input: {
+  id?: string;
   name: string;
   role: string;
   instructions: string;
@@ -77,8 +78,23 @@ export async function createCustomAgent(input: {
   const color =
     input.color ||
     AGENT_COLORS[store.agents.length % AGENT_COLORS.length];
+  const existingIdx = input.id
+    ? store.agents.findIndex((a) => a.id === input.id)
+    : -1;
+  if (existingIdx >= 0) {
+    return (
+      (await updateCustomAgent(input.id!, {
+        name: input.name,
+        role: input.role,
+        instructions: input.instructions,
+        toolkit: input.toolkit,
+        color: input.color,
+        avatar: input.avatar,
+      })) ?? store.agents[existingIdx]
+    );
+  }
   const agent: CustomAgent = {
-    id: id(),
+    id: input.id || id(),
     name: input.name.trim().slice(0, 80),
     role: input.role.trim().slice(0, 160),
     instructions: input.instructions.trim().slice(0, 8000),

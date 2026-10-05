@@ -4,6 +4,10 @@ import {
   listCustomAgents,
 } from "@/lib/agents/custom-store";
 import {
+  listRegistryAgents,
+  registryToCustomShape,
+} from "@/lib/agents/registry/store";
+import {
   TOOLKIT_LABELS,
   TOOLKIT_PRESETS,
   type ToolkitPreset,
@@ -12,10 +16,26 @@ import {
 export const runtime = "nodejs";
 
 export async function GET() {
-  const agents = await listCustomAgents();
+  const registry = await listRegistryAgents({ status: "all" });
+  const legacy = await listCustomAgents();
+  const byId = new Map<string, ReturnType<typeof registryToCustomShape>>();
+  for (const r of registry) {
+    byId.set(r.id, registryToCustomShape(r));
+  }
+  for (const c of legacy) {
+    if (!byId.has(c.id)) byId.set(c.id, c);
+  }
+  const agents = [...byId.values()];
   return NextResponse.json({
     ok: true,
     agents,
+    registry: registry.map((a) => ({
+      id: a.id,
+      name: a.name,
+      status: a.status,
+      version: a.version,
+      seedKey: a.seedKey,
+    })),
     toolkits: TOOLKIT_PRESETS.map((id) => ({
       id,
       label: TOOLKIT_LABELS[id],

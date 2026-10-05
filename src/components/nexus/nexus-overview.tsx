@@ -45,8 +45,19 @@ const FIELD_AGENTS = [
   },
 ];
 
+type RegistryRow = {
+  id: string;
+  name: string;
+  role: string;
+  status: string;
+  avatar: string;
+  color: string;
+  runtimeMode?: string;
+};
+
 export function NexusOverview() {
   const [stats, setStats] = useState<Stats | null>(null);
+  const [registry, setRegistry] = useState<RegistryRow[]>([]);
   const groupCount = AGENT_GROUPS.length;
 
   useEffect(() => {
@@ -54,6 +65,16 @@ export function NexusOverview() {
       .then((r) => r.json())
       .then((data: { stats?: Stats }) => setStats(data.stats ?? null))
       .catch(() => undefined);
+    const loadReg = () =>
+      fetch("/api/registry/agents?status=active")
+        .then((r) => r.json())
+        .then((data: { agents?: RegistryRow[] }) =>
+          setRegistry(data.agents || []),
+        )
+        .catch(() => undefined);
+    void loadReg();
+    window.addEventListener("nexus-registry-refresh", loadReg);
+    return () => window.removeEventListener("nexus-registry-refresh", loadReg);
   }, []);
 
   const tasksDone = stats?.total ?? 0;
@@ -69,8 +90,8 @@ export function NexusOverview() {
         {[
           {
             label: "Agentes ativos",
-            value: `${groupCount + 4}`,
-            hint: "+2 hoje",
+            value: String(registry.length || FIELD_AGENTS.length),
+            hint: "registro dinâmico",
           },
           {
             label: "Itens no CRM",
@@ -115,8 +136,30 @@ export function NexusOverview() {
           </Link>
         </div>
         <div className="grid gap-3 md:grid-cols-2">
-          {FIELD_AGENTS.map((agent) => (
-            <Link key={agent.name} href={agent.href} className="nexus-agent-card group">
+          {(registry.length
+            ? registry.slice(0, 8).map((a) => ({
+                key: a.id,
+                name: a.name,
+                role: a.role,
+                href:
+                  a.runtimeMode && a.runtimeMode !== "custom"
+                    ? `/app?mode=${encodeURIComponent(a.runtimeMode)}`
+                    : `/app?mode=custom&agent=${encodeURIComponent(a.id)}`,
+                status: a.status === "paused" ? "Pausado" : "Ativo",
+                tone: a.status === "paused" ? ("idle" as const) : ("active" as const),
+                detail: "Gerenciado pelo Orquestrador · registro dinâmico",
+              }))
+            : FIELD_AGENTS.map((a) => ({
+                key: a.name,
+                name: a.name,
+                role: a.role,
+                href: a.href,
+                status: a.status,
+                tone: a.tone,
+                detail: a.detail,
+              }))
+          ).map((agent) => (
+            <Link key={agent.key} href={agent.href} className="nexus-agent-card group">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-sm font-semibold text-[color:var(--foreground)] group-hover:text-[color:var(--primary)]">

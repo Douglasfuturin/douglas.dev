@@ -82,6 +82,7 @@ export type UserAgentGroup = {
   members: GroupMemberRef[];
   workflow: string[];
   orchestratorMemberId: string;
+  status?: "active" | "archived";
   createdAt: string;
   updatedAt: string;
 };

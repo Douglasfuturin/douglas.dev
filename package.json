@@ -7,7 +7,7 @@
     "dev": "next dev",
     "start": "next start",
     "lint": "eslint",
-    "test:smoke": "node scripts/smoke-api.mjs && npx tsx scripts/smoke-video.ts",
+    "test:smoke": "node scripts/smoke-api.mjs && npx tsx scripts/smoke-video.ts && npx tsx scripts/smoke-registry.ts",
     "test:render": "npx tsx scripts/smoke-render.ts"
   },
   "dependencies": {
