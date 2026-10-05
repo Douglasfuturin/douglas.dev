@@ -17,9 +17,15 @@ export type AgentMode =
   | "kits"
   | "github"
   | "roteiro"
+  | "roteiro-pessoal"
   | "notion"
   | "pipeline"
   | "radar"
+  | "arte-twitter"
+  | "arte-realista"
+  | "bit"
+  | "editor-reels"
+  | "grupo"
   | "auto";
 
 export type ResearchDepth = "low" | "medium" | "high";

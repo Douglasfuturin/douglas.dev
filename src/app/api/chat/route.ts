@@ -16,6 +16,8 @@ type ChatRequestBody = {
   researchDepth?: ResearchDepth;
   videoOptions?: Partial<VideoEditOptions>;
   kitId?: string;
+  groupId?: string;
+  memberId?: string;
 };
 
 export async function POST(req: Request) {
@@ -35,12 +37,16 @@ export async function POST(req: Request) {
   const researchDepth = body.researchDepth ?? "medium";
   const videoOptions = body.videoOptions;
   const kitId = body.kitId;
+  const groupId = body.groupId;
+  const memberId = body.memberId;
 
   const agent = await resolveAgent(messages, {
     mode,
     researchDepth,
     videoOptions,
     kitId,
+    groupId,
+    memberId,
   });
   const modelMessages = await convertToModelMessages(messages);
 
@@ -54,7 +60,9 @@ export async function POST(req: Request) {
       agent.mode === "video" ||
       agent.mode === "kits" ||
       agent.mode === "radar" ||
-      agent.mode === "pipeline"
+      agent.mode === "pipeline" ||
+      agent.mode === "grupo" ||
+      agent.mode === "editor-reels"
         ? stepCountIs(12)
         : stepCountIs(8),
   });

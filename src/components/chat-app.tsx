@@ -6,6 +6,10 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { AgentMode, ResearchDepth } from "@/lib/agents/models";
 import {
+  getAgentGroup,
+  listAgentGroups,
+} from "@/lib/agents/groups";
+import {
   extractRadarBriefing,
   RadarApprovalCards,
   type RadarCardItem,
@@ -33,35 +37,42 @@ const MODE_LABELS: Record<AgentMode, string> = {
   auto: "Automático",
   chat: "Chat + ferramentas",
   research: "Pesquisa multiagente",
+  grupo: "Grupo (sala)",
   radar: "Radar de Tendências",
-  github: "GitHub Scout",
-  roteiro: "Roteirista Reels",
+  github: "Radar GitHub",
+  roteiro: "Roteirista",
+  "roteiro-pessoal": "Roteirista Pessoal",
+  "arte-twitter": "Diretor de Arte Twitter",
+  "arte-realista": "Diretor de Arte Realista",
+  bit: "Bit",
+  "editor-reels": "Editor Reels Realista",
   notion: "Notion Guide",
   pipeline: "Pack Scout→Reels→Notion",
-  video: "Editor de vídeo",
+  video: "Editor Vídeo Pessoal",
   kits: "Skills Ninja",
 };
+
+const VALID_MODES = new Set<string>(Object.keys(MODE_LABELS));
+
 
 function readQueryMode(): AgentMode {
   if (typeof window === "undefined") return "auto";
   const params = new URLSearchParams(window.location.search);
   const m = params.get("mode");
-  if (
-    m === "kits" ||
-    m === "video" ||
-    m === "chat" ||
-    m === "research" ||
-    m === "github" ||
-    m === "roteiro" ||
-    m === "notion" ||
-    m === "pipeline" ||
-    m === "radar" ||
-    m === "auto"
-  ) {
-    return m;
-  }
+  if (m && VALID_MODES.has(m)) return m as AgentMode;
+  if (params.get("group")) return "grupo";
   if (params.get("kit")) return "kits";
   return "auto";
+}
+
+function readQueryGroupId(): string {
+  if (typeof window === "undefined") return "";
+  return new URLSearchParams(window.location.search).get("group") || "";
+}
+
+function readQueryMemberId(): string {
+  if (typeof window === "undefined") return "";
+  return new URLSearchParams(window.location.search).get("member") || "";
 }
 
 function readQueryKitId(): string {
@@ -113,6 +124,8 @@ export function ChatApp() {
   const [kitId, setKitId] = useState<string>(
     () => handoff?.kitId || readQueryKitId(),
   );
+  const [groupId, setGroupId] = useState<string>(() => readQueryGroupId());
+  const [memberId, setMemberId] = useState<string>(() => readQueryMemberId());
   const [kitOptions, setKitOptions] = useState<Array<{ id: string; name: string }>>(
     [],
   );
@@ -164,9 +177,11 @@ export function ChatApp() {
           researchDepth,
           videoOptions,
           kitId: kitId || undefined,
+          groupId: groupId || undefined,
+          memberId: memberId || undefined,
         },
       }),
-    [mode, researchDepth, videoOptions, kitId],
+    [mode, researchDepth, videoOptions, kitId, groupId, memberId],
   );
 
   const { messages, sendMessage, status, error, stop } = useChat({
@@ -174,7 +189,10 @@ export function ChatApp() {
   });
 
   const busy = status === "submitted" || status === "streaming";
-  const showVideoPanel = mode === "video" || mode === "auto";
+  const showVideoPanel =
+    mode === "video" || mode === "editor-reels" || mode === "auto";
+  const activeGroup = getAgentGroup(groupId);
+  const groups = listAgentGroups();
 
   function approveTrendForRoteirista(item: RadarCardItem) {
     const prompt =
@@ -197,6 +215,8 @@ export function ChatApp() {
           mode: "roteiro",
           researchDepth,
           videoOptions,
+          groupId: groupId || "conteudo-dev",
+          memberId: "roteirista",
         },
       },
     );
@@ -270,49 +290,49 @@ export function ChatApp() {
             Grokish
           </p>
           <p className="mt-2 max-w-md text-sm leading-relaxed text-[var(--muted)]">
-            Multi-agente + radar + roteiros + Scout + Notion.
+            Grupos Conteúdo Dev + Vídeo · radar · roteiro · arte · edição.
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             <Link
-              href="/kits"
+              href="/grupos"
               className="inline-flex rounded-lg bg-[var(--ink)] px-3 py-1.5 text-xs font-semibold text-[var(--panel)]"
             >
-              Painel de Skills →
+              Grupos de agentes →
             </Link>
+            <Link
+              href="/kits"
+              className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
+            >
+              Skills
+            </Link>
+            <button
+              type="button"
+              onClick={() => {
+                setGroupId("conteudo-dev");
+                setMemberId("");
+                setMode("grupo");
+              }}
+              className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
+            >
+              Conteúdo Dev
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setGroupId("conteudo-dev-video");
+                setMemberId("");
+                setMode("grupo");
+              }}
+              className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
+            >
+              Dev Vídeo
+            </button>
             <button
               type="button"
               onClick={() => setMode("radar")}
               className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
             >
               Radar
-            </button>
-            <button
-              type="button"
-              onClick={() => setMode("pipeline")}
-              className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
-            >
-              Pack completo
-            </button>
-            <button
-              type="button"
-              onClick={() => setMode("github")}
-              className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
-            >
-              GitHub Scout
-            </button>
-            <button
-              type="button"
-              onClick={() => setMode("roteiro")}
-              className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
-            >
-              Roteirista
-            </button>
-            <button
-              type="button"
-              onClick={() => setMode("notion")}
-              className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
-            >
-              Notion
             </button>
             <Link
               href="/editor"
@@ -368,6 +388,48 @@ export function ChatApp() {
                 {kitOptions.map((k) => (
                   <option key={k.id} value={k.id}>
                     {k.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
+          <label className="text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">
+            Grupo
+            <select
+              className="mt-1 block max-w-[200px] rounded-md border border-[var(--line)] bg-[var(--panel)] px-2 py-1.5 text-sm text-[var(--ink)]"
+              value={groupId}
+              onChange={(e) => {
+                setGroupId(e.target.value);
+                setMemberId("");
+                if (e.target.value) setMode("grupo");
+              }}
+            >
+              <option value="">(nenhum)</option>
+              {groups.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          {activeGroup ? (
+            <label className="text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">
+              Membro
+              <select
+                className="mt-1 block max-w-[200px] rounded-md border border-[var(--line)] bg-[var(--panel)] px-2 py-1.5 text-sm text-[var(--ink)]"
+                value={memberId}
+                onChange={(e) => {
+                  const next = e.target.value;
+                  setMemberId(next);
+                  const member = activeGroup.members.find((m) => m.id === next);
+                  if (member) setMode(member.mode as AgentMode);
+                  else setMode("grupo");
+                }}
+              >
+                <option value="">Sala inteira</option>
+                {activeGroup.members.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.name}
                   </option>
                 ))}
               </select>
@@ -724,6 +786,8 @@ export function ChatApp() {
                 researchDepth,
                 videoOptions,
                 kitId: kitId || undefined,
+                groupId: groupId || undefined,
+                memberId: memberId || undefined,
               },
             },
           );
@@ -840,11 +904,17 @@ function EmptyState({
                       "Quais as melhores notícias de IA de hoje para eu aprovar um Reels?",
                       "Radar de tendências: top histórias + ângulos para conteúdo",
                     ]
-                  : [
-                      "O que é o modelo grok-4.20-multi-agent e quando usar?",
-                      "Pesquise nas últimas notícias o que está rolando sobre agentes de IA",
-                      "Lista os kits Ninja disponíveis e o que cada um faz",
-                    ];
+                  : mode === "grupo"
+                    ? [
+                        "Roda o fluxo do grupo: radar → roteiro → direção de arte",
+                        "Comece pelo briefing do dia e me peça aprovação",
+                        "Coordene Bit: qual o próximo membro agora?",
+                      ]
+                    : [
+                        "O que é o modelo grok-4.20-multi-agent e quando usar?",
+                        "Pesquise nas últimas notícias o que está rolando sobre agentes de IA",
+                        "Lista os kits Ninja disponíveis e o que cada um faz",
+                      ];
 
   return (
     <section className="animate-rise mt-2 space-y-4">
@@ -863,7 +933,9 @@ function EmptyState({
                     ? "Uma tacada: escolhe o melhor repo → roteiro Reels 60s → guia Notion."
                     : mode === "radar"
                       ? "Briefing diário de IA, automação e marketing — aprove um card para o Roteirista."
-                      : "Chat, radar, Scout, pack, roteiros, Notion, kits ou editor."}
+                      : mode === "grupo"
+                        ? "Sala do grupo: os membros colaboram no fluxo (radar → roteiro → arte/edição)."
+                        : "Chat, grupos, radar, Scout, pack, roteiros, Notion, kits ou editor."}
       </p>
       <ul className="space-y-2">
         {prompts.map((prompt) => (

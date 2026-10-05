@@ -6,14 +6,20 @@ import {
   type ResearchDepth,
 } from "./models";
 import {
+  ARTE_REALISTA_PERSONA,
+  ARTE_TWITTER_PERSONA,
+  BIT_PERSONA,
+  EDITOR_REELS_PERSONA,
   GROK_PERSONA,
   GITHUB_SCOUT_PERSONA,
+  groupConductorPersona,
   KITS_PERSONA,
   NOTION_AGENT_PERSONA,
   PIPELINE_PERSONA,
   RADAR_PERSONA,
   RESEARCH_PERSONA,
   ROTEIRISTA_PERSONA,
+  ROTEIRISTA_PESSOAL_PERSONA,
   ROUTER_PROMPT,
   VIDEO_EDITOR_PERSONA,
 } from "./prompts";
@@ -23,9 +29,16 @@ import { reelsScriptTools } from "./reels-tools";
 import { notionRepoTools } from "./notion-tools";
 import { pipelineTools } from "./pipeline-tools";
 import { radarTools } from "./radar-tools";
+import { artDirectorTools, bitCoordinatorTools } from "./art-tools";
 import { videoEditorTools } from "./video-tools";
 import { kitPersona, ninjaKitTools } from "./kit-tools";
 import { getKitById } from "@/lib/kits/discover";
+import {
+  getAgentGroup,
+  getGroupMember,
+  type AgentGroupId,
+  type MemberMode,
+} from "./groups";
 import {
   DEFAULT_VIDEO_OPTIONS,
   type VideoEditOptions,
@@ -36,6 +49,8 @@ export type OrchestratorInput = {
   researchDepth?: ResearchDepth;
   videoOptions?: Partial<VideoEditOptions>;
   kitId?: string;
+  groupId?: string;
+  memberId?: string;
   latestUserText: string;
 };
 
@@ -65,18 +80,170 @@ function extractLatestUserText(messages: UIMessage[]): string {
   return "";
 }
 
+function memberModeToAgentMode(mode: MemberMode): ConcreteMode {
+  if (mode === "video") return "video";
+  return mode;
+}
+
+function toolsForMemberMode(
+  mode: MemberMode,
+  videoOptions: VideoEditOptions,
+): Record<string, unknown> {
+  switch (mode) {
+    case "radar":
+      return { ...radarTools(), ...researchTools(), ...grokBotTools() };
+    case "roteiro":
+    case "roteiro-pessoal":
+      return { ...reelsScriptTools(), ...githubScoutTools(), ...grokBotTools() };
+    case "arte-twitter":
+      return {
+        ...artDirectorTools("twitter"),
+        ...grokBotTools(),
+      };
+    case "arte-realista":
+      return {
+        ...artDirectorTools("realista"),
+        ...grokBotTools(),
+      };
+    case "bit":
+      return {
+        ...bitCoordinatorTools(),
+        ...radarTools(),
+        ...reelsScriptTools(),
+        ...githubScoutTools(),
+        ...grokBotTools(),
+      };
+    case "editor-reels":
+      return {
+        ...videoEditorTools({
+          ...videoOptions,
+          estilo: "reel-camera",
+          formato: "9:16",
+        }),
+        ...ninjaKitTools(),
+      };
+    case "video":
+      return {
+        ...videoEditorTools(videoOptions),
+        ...ninjaKitTools(),
+      };
+    case "github":
+      return { ...githubScoutTools(), ...grokBotTools() };
+    default:
+      return { ...grokBotTools() };
+  }
+}
+
+function personaForMemberMode(mode: MemberMode, videoOptions: VideoEditOptions): string {
+  switch (mode) {
+    case "radar":
+      return RADAR_PERSONA;
+    case "roteiro":
+      return ROTEIRISTA_PERSONA;
+    case "roteiro-pessoal":
+      return ROTEIRISTA_PESSOAL_PERSONA;
+    case "arte-twitter":
+      return ARTE_TWITTER_PERSONA;
+    case "arte-realista":
+      return ARTE_REALISTA_PERSONA;
+    case "bit":
+      return BIT_PERSONA;
+    case "editor-reels":
+      return EDITOR_REELS_PERSONA;
+    case "video":
+      return `${VIDEO_EDITOR_PERSONA}
+
+Current UI editor options (JSON):
+${JSON.stringify(videoOptions, null, 2)}
+`;
+    case "github":
+      return `${GITHUB_SCOUT_PERSONA}
+
+Você também atua como Radar GitHub no grupo Conteúdo Dev Vídeo.`;
+    default:
+      return GROK_PERSONA;
+  }
+}
+
+function toolsForGroup(groupId: AgentGroupId, videoOptions: VideoEditOptions) {
+  const group = getAgentGroup(groupId);
+  const tools: Record<string, unknown> = { ...bitCoordinatorTools() };
+  if (!group) return tools;
+  for (const member of group.members) {
+    Object.assign(tools, toolsForMemberMode(member.mode, videoOptions));
+  }
+  return tools;
+}
+
 export async function resolveAgent(
   messages: UIMessage[],
   input: Pick<
     OrchestratorInput,
-    "mode" | "researchDepth" | "videoOptions" | "kitId"
+    "mode" | "researchDepth" | "videoOptions" | "kitId" | "groupId" | "memberId"
   >,
 ): Promise<ResolvedAgent> {
   const latestUserText = extractLatestUserText(messages);
-  const mode =
+  const videoOptions = {
+    ...DEFAULT_VIDEO_OPTIONS,
+    ...input.videoOptions,
+  };
+
+  // Grupo explícito: membro específico ou sala inteira
+  if (input.groupId) {
+    const group = getAgentGroup(input.groupId);
+    const member = getGroupMember(input.groupId, input.memberId);
+    if (group && member) {
+      const mode = memberModeToAgentMode(member.mode);
+      return {
+        mode,
+        model: chatModel,
+        instructions: `${personaForMemberMode(member.mode, videoOptions)}
+
+Você está no grupo "${group.name}" como **${member.name}**.
+Papel: ${member.role}
+`,
+        tools: toolsForMemberMode(member.mode, videoOptions),
+      };
+    }
+    if (group) {
+      return {
+        mode: "grupo",
+        model: chatModel,
+        instructions: groupConductorPersona(
+          group.name,
+          group.members.map((m) => `${m.name} — ${m.role}`),
+          group.workflow,
+        ),
+        tools: toolsForGroup(group.id, videoOptions),
+      };
+    }
+  }
+
+  let mode: ConcreteMode =
     input.mode === "auto"
       ? await routeMode(latestUserText)
-      : input.mode;
+      : input.mode === "grupo"
+        ? "grupo"
+        : input.mode;
+
+  if (mode === "grupo") {
+    const guessed =
+      getAgentGroup("conteudo-dev-video") &&
+      /\b(v[ií]deo|reels?|editor|github)\b/i.test(latestUserText)
+        ? "conteudo-dev-video"
+        : "conteudo-dev";
+    const group = getAgentGroup(guessed)!;
+    return {
+      mode: "grupo",
+      model: chatModel,
+      instructions: groupConductorPersona(
+        group.name,
+        group.members.map((m) => `${m.name} — ${m.role}`),
+        group.workflow,
+      ),
+      tools: toolsForGroup(group.id, videoOptions),
+    };
+  }
 
   if (mode === "research") {
     const depth = input.researchDepth ?? "medium";
@@ -92,22 +259,20 @@ export async function resolveAgent(
   }
 
   if (mode === "video") {
-    const videoOptions = {
-      ...DEFAULT_VIDEO_OPTIONS,
-      ...input.videoOptions,
-    };
     return {
       mode,
       model: chatModel,
-      instructions: `${VIDEO_EDITOR_PERSONA}
+      instructions: personaForMemberMode("video", videoOptions),
+      tools: toolsForMemberMode("video", videoOptions),
+    };
+  }
 
-Current UI editor options (JSON):
-${JSON.stringify(videoOptions, null, 2)}
-`,
-      tools: {
-        ...videoEditorTools(videoOptions),
-        ...ninjaKitTools(),
-      },
+  if (mode === "editor-reels") {
+    return {
+      mode,
+      model: chatModel,
+      instructions: EDITOR_REELS_PERSONA,
+      tools: toolsForMemberMode("editor-reels", videoOptions),
     };
   }
 
@@ -123,13 +288,7 @@ ${JSON.stringify(videoOptions, null, 2)}
     };
 
     if (installed?.kind === "video" || input.kitId === "editar-video") {
-      Object.assign(
-        tools,
-        videoEditorTools({
-          ...DEFAULT_VIDEO_OPTIONS,
-          ...input.videoOptions,
-        }),
-      );
+      Object.assign(tools, videoEditorTools(videoOptions));
     }
 
     return {
@@ -148,11 +307,8 @@ Installed ZIP/SKILL: ${installed ? "yes" : "no — still deliver the kit's job w
     return {
       mode,
       model: chatModel,
-      instructions: GITHUB_SCOUT_PERSONA,
-      tools: {
-        ...githubScoutTools(),
-        ...grokBotTools(),
-      },
+      instructions: personaForMemberMode("github", videoOptions),
+      tools: toolsForMemberMode("github", videoOptions),
     };
   }
 
@@ -161,11 +317,43 @@ Installed ZIP/SKILL: ${installed ? "yes" : "no — still deliver the kit's job w
       mode,
       model: chatModel,
       instructions: ROTEIRISTA_PERSONA,
-      tools: {
-        ...reelsScriptTools(),
-        ...githubScoutTools(),
-        ...grokBotTools(),
-      },
+      tools: toolsForMemberMode("roteiro", videoOptions),
+    };
+  }
+
+  if (mode === "roteiro-pessoal") {
+    return {
+      mode,
+      model: chatModel,
+      instructions: ROTEIRISTA_PESSOAL_PERSONA,
+      tools: toolsForMemberMode("roteiro-pessoal", videoOptions),
+    };
+  }
+
+  if (mode === "arte-twitter") {
+    return {
+      mode,
+      model: chatModel,
+      instructions: ARTE_TWITTER_PERSONA,
+      tools: toolsForMemberMode("arte-twitter", videoOptions),
+    };
+  }
+
+  if (mode === "arte-realista") {
+    return {
+      mode,
+      model: chatModel,
+      instructions: ARTE_REALISTA_PERSONA,
+      tools: toolsForMemberMode("arte-realista", videoOptions),
+    };
+  }
+
+  if (mode === "bit") {
+    return {
+      mode,
+      model: chatModel,
+      instructions: BIT_PERSONA,
+      tools: toolsForMemberMode("bit", videoOptions),
     };
   }
 
@@ -202,11 +390,7 @@ Installed ZIP/SKILL: ${installed ? "yes" : "no — still deliver the kit's job w
       mode,
       model: chatModel,
       instructions: RADAR_PERSONA,
-      tools: {
-        ...radarTools(),
-        ...researchTools(),
-        ...grokBotTools(),
-      },
+      tools: toolsForMemberMode("radar", videoOptions),
     };
   }
 
@@ -215,12 +399,8 @@ Installed ZIP/SKILL: ${installed ? "yes" : "no — still deliver the kit's job w
     model: chatModel,
     instructions: `${GROK_PERSONA}
 
-You can also inventory Ninja kits with list_ninja_kits when the user mentions kits/ZIPs/cursos.
-For GitHub repo discovery, prefer mode github / search_best_github_repos.
-For Reels scripts about a repo or approved trend, prefer mode roteiro.
-For Notion repo guides, prefer mode notion.
-For the full Scout → Roteiro → Notion pack, prefer mode pipeline / run_repo_content_pack.
-For daily AI/automation/marketing briefing, prefer mode radar / deliver_daily_radar_briefing.`,
+Grupos disponíveis: Conteúdo Dev e Conteúdo Dev Vídeo (veja /grupos).
+Modos: radar, roteiro, arte-twitter, arte-realista, bit, editor-reels, github, pipeline, notion, kits, video.`,
     tools: {
       ...grokBotTools(),
       ...ninjaKitTools(),
@@ -229,6 +409,8 @@ For daily AI/automation/marketing briefing, prefer mode radar / deliver_daily_ra
       ...notionRepoTools(),
       ...pipelineTools(),
       ...radarTools(),
+      ...artDirectorTools("twitter"),
+      ...bitCoordinatorTools(),
     },
   };
 }
@@ -236,8 +418,16 @@ For daily AI/automation/marketing briefing, prefer mode radar / deliver_daily_ra
 async function routeMode(latestUserText: string): Promise<ConcreteMode> {
   if (!latestUserText) return "chat";
   if (heuristicKits(latestUserText)) return "kits";
+  if (heuristicGrupo(latestUserText)) return "grupo";
   if (heuristicRadar(latestUserText)) return "radar";
+  if (heuristicArte(latestUserText)) {
+    return /realista|foto|cinem/i.test(latestUserText)
+      ? "arte-realista"
+      : "arte-twitter";
+  }
+  if (heuristicEditorReels(latestUserText)) return "editor-reels";
   if (heuristicPipeline(latestUserText)) return "pipeline";
+  if (heuristicRoteiroPessoal(latestUserText)) return "roteiro-pessoal";
   if (heuristicRoteiro(latestUserText)) return "roteiro";
   if (heuristicNotion(latestUserText)) return "notion";
   if (heuristicGithub(latestUserText)) return "github";
@@ -254,14 +444,26 @@ async function routeMode(latestUserText: string): Promise<ConcreteMode> {
     const match = text.match(/\{[\s\S]*\}/);
     if (!match) return heuristicRoute(latestUserText);
     const parsed = JSON.parse(match[0]) as { mode?: string };
-    if (parsed.mode === "research") return "research";
-    if (parsed.mode === "video") return "video";
-    if (parsed.mode === "kits") return "kits";
-    if (parsed.mode === "github") return "github";
-    if (parsed.mode === "roteiro") return "roteiro";
-    if (parsed.mode === "notion") return "notion";
-    if (parsed.mode === "pipeline") return "pipeline";
-    if (parsed.mode === "radar") return "radar";
+    const allowed: ConcreteMode[] = [
+      "research",
+      "video",
+      "kits",
+      "github",
+      "roteiro",
+      "roteiro-pessoal",
+      "notion",
+      "pipeline",
+      "radar",
+      "arte-twitter",
+      "arte-realista",
+      "bit",
+      "editor-reels",
+      "grupo",
+      "chat",
+    ];
+    if (parsed.mode && allowed.includes(parsed.mode as ConcreteMode)) {
+      return parsed.mode as ConcreteMode;
+    }
     return "chat";
   } catch {
     return heuristicRoute(latestUserText);
@@ -274,14 +476,38 @@ function heuristicKits(text: string): boolean {
   );
 }
 
+function heuristicGrupo(text: string): boolean {
+  return /\b(grupo\s+conte[uú]do|conte[uú]do\s+dev(\s+v[ií]deo)?|sala\s+de\s+agentes|time\s+de\s+conte[uú]do)\b/i.test(
+    text,
+  );
+}
+
 function heuristicRadar(text: string): boolean {
-  return /\b(radar(\s+de)?\s+tend[eê]ncias?|briefing\s+di[aá]rio|not[ií]cias?\s+(de\s+)?(ia|automa[cç][aã]o|marketing)|tend[eê]ncias?\s+(de\s+)?(ia|automa[cç][aã]o|marketing)|o\s+que\s+est[aá]\s+bombando|aprovar?\s+(para\s+o\s+)?roteirista)\b/i.test(
+  return /\b(radar(\s+de)?\s+tend[eê]ncias?|briefing\s+di[aá]rio|not[ií]cias?\s+(de\s+)?(ia|automa[cç][aã]o|marketing)|tend[eê]ncias?\s+(de\s+)?(ia|automa[cç][aã]o|marketing)|o\s+que\s+est[aá]\s+bombando)\b/i.test(
+    text,
+  );
+}
+
+function heuristicArte(text: string): boolean {
+  return /\b(diretor\s+de\s+arte|arte\s+(twitter|realista)|capa\s+pro\s+twitter|carrossel\s+(pro\s+)?(x|twitter)|dire[cç][aã]o\s+de\s+arte)\b/i.test(
+    text,
+  );
+}
+
+function heuristicEditorReels(text: string): boolean {
+  return /\b(editor\s+reels|reels\s+realista|edita(r)?\s+(o\s+)?reels)\b/i.test(
     text,
   );
 }
 
 function heuristicPipeline(text: string): boolean {
   return /\b(pipeline|content\s*pack|pacote\s+completo|scout\s*\+\s*roteiro|roteiro\s+e\s+notion|tudo\s+(junto|de\s+uma\s+vez)|gera(r)?\s+(o\s+)?pack|encade(ia|ar))\b/i.test(
+    text,
+  );
+}
+
+function heuristicRoteiroPessoal(text: string): boolean {
+  return /\b(roteirista\s+pessoal|roteiro\s+pessoal|em\s+primeira\s+pessoa|tom\s+pessoal)\b/i.test(
     text,
   );
 }
@@ -299,7 +525,7 @@ function heuristicNotion(text: string): boolean {
 }
 
 function heuristicGithub(text: string): boolean {
-  return /\b(github|reposit[oó]rios?|repos?\b|open[\s-]?source|melhor(es)?\s+(libs?|bibliotecas?|projetos?)|stars?\b)\b/i.test(
+  return /\b(radar\s+github|github|reposit[oó]rios?|repos?\b|open[\s-]?source|melhor(es)?\s+(libs?|bibliotecas?|projetos?)|stars?\b)\b/i.test(
     text,
   );
 }
@@ -312,8 +538,14 @@ function heuristicVideo(text: string): boolean {
 
 function heuristicRoute(text: string): ConcreteMode {
   if (heuristicKits(text)) return "kits";
+  if (heuristicGrupo(text)) return "grupo";
   if (heuristicRadar(text)) return "radar";
+  if (heuristicArte(text)) {
+    return /realista|foto|cinem/i.test(text) ? "arte-realista" : "arte-twitter";
+  }
+  if (heuristicEditorReels(text)) return "editor-reels";
   if (heuristicPipeline(text)) return "pipeline";
+  if (heuristicRoteiroPessoal(text)) return "roteiro-pessoal";
   if (heuristicRoteiro(text)) return "roteiro";
   if (heuristicNotion(text)) return "notion";
   if (heuristicGithub(text)) return "github";

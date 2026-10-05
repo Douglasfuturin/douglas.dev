@@ -95,6 +95,31 @@ Atalho `/radar` ou `/?mode=radar`:
 
 Exemplo: “Monta o briefing diário de automação, IA e marketing”.
 
+## Grupos de agentes
+
+Atalho [`/grupos`](/grupos) — duas salas no estilo Grok (até 6 membros):
+
+### Conteúdo Dev
+1. Radar de Tendências  
+2. Roteirista  
+3. Diretor de Arte Twitter  
+4. Diretor de Arte Realista  
+5. Bit  
+6. Roteirista Pessoal  
+
+Fluxo: briefing → aprovação → roteiro → artes Twitter/realista → Bit fecha.
+
+### Conteúdo Dev Vídeo
+1. Roteirista Pessoal  
+2. Editor Reels Realista  
+3. Editor Vídeo Pessoal  
+4. Bit  
+5. Radar GitHub  
+
+Fluxo: repo/tema → roteiro pessoal → edição Reels → render EDVD → Bit.
+
+Abra a sala (`/?mode=grupo&group=conteudo-dev`) ou um membro específico (`&member=radar`).
+
 ## Como rodar
 
 ```bash
