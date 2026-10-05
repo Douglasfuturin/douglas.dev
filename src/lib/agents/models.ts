@@ -10,6 +10,12 @@ export const chatModel = xai.responses("grok-4.7");
  */
 export const multiAgentModel = xai.responses("grok-4.20-multi-agent");
 
-export type AgentMode = "chat" | "research" | "video" | "kits" | "auto";
+export type AgentMode =
+  | "chat"
+  | "research"
+  | "video"
+  | "kits"
+  | "github"
+  | "auto";
 
 export type ResearchDepth = "low" | "medium" | "high";

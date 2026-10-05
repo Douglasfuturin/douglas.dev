@@ -4,6 +4,7 @@ Starter em Next.js + Vercel AI SDK + xAI Grok para um sistema multi-agente com a
 
 - chat agentic com tools server-side
 - research multi-agente paralelo (`grok-4.20-multi-agent`)
+- GitHub Scout — busca e ranqueia os melhores repositórios open-source
 - web search, X search, code execution, image generation
 
 ## Arquitetura (duas camadas)
@@ -22,13 +23,28 @@ Um roteador escolhe o modo:
 | --- | --- | --- |
 | `chat` | `grok-4.7` | conversa, código, imagens, fatos rápidos |
 | `research` | `grok-4.20-multi-agent` | investigação profunda com fontes |
+| `github` | `grok-4.7` | melhores repos GitHub, libs open-source, comparação |
+| `kits` | `grok-4.7` | skills Ninja / ZIPs instalados |
+| `video` | `grok-4.7` | edição automática de vídeo |
 | `auto` | roteador + um dos acima | decide pelo conteúdo da mensagem |
 
 ```
-Usuário → /api/chat → orchestrator (auto|chat|research)
-                         ├─ chat: grok-4.7 + web/X/code/image tools
+Usuário → /api/chat → orchestrator (auto|chat|research|github|kits|video)
+                         ├─ chat: grok-4.7 + web/X/code/image (+ github tools)
+                         ├─ github: GitHub Scout (search/rank/compare repos)
+                         ├─ kits / video: skills Ninja + editor
                          └─ research: grok-4.20-multi-agent + web/X
 ```
+
+## GitHub Scout
+
+Modo dedicado (UI: **GitHub Scout**, atalho `/github` ou `/?mode=github`) que usa a Search API do GitHub:
+
+- `search_best_github_repos` — busca + score (stars, forks, atividade, licença)
+- `get_github_repo` — detalhe + preview do README
+- `compare_github_repos` — comparativo lado a lado
+
+Opcional: defina `GITHUB_TOKEN` (ou `GH_TOKEN` / `GITHUB_PAT`) em `.env.local` para limites de rate maiores.
 
 ## Como rodar
 

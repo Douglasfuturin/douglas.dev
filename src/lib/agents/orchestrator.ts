@@ -7,12 +7,14 @@ import {
 } from "./models";
 import {
   GROK_PERSONA,
+  GITHUB_SCOUT_PERSONA,
   KITS_PERSONA,
   RESEARCH_PERSONA,
   ROUTER_PROMPT,
   VIDEO_EDITOR_PERSONA,
 } from "./prompts";
 import { grokBotTools, researchTools } from "./tools";
+import { githubScoutTools } from "./github-tools";
 import { videoEditorTools } from "./video-tools";
 import { kitPersona, ninjaKitTools } from "./kit-tools";
 import { getKitById } from "@/lib/kits/discover";
@@ -132,24 +134,39 @@ Installed ZIP/SKILL: ${installed ? "yes" : "no — still deliver the kit's job w
     };
   }
 
+  if (mode === "github") {
+    return {
+      mode,
+      model: chatModel,
+      instructions: GITHUB_SCOUT_PERSONA,
+      tools: {
+        ...githubScoutTools(),
+        ...grokBotTools(),
+      },
+    };
+  }
+
   return {
     mode: "chat",
     model: chatModel,
     instructions: `${GROK_PERSONA}
 
-You can also inventory Ninja kits with list_ninja_kits when the user mentions kits/ZIPs/cursos.`,
+You can also inventory Ninja kits with list_ninja_kits when the user mentions kits/ZIPs/cursos.
+For GitHub repo discovery, prefer mode github / search_best_github_repos.`,
     tools: {
       ...grokBotTools(),
       ...ninjaKitTools(),
+      ...githubScoutTools(),
     },
   };
 }
 
 async function routeMode(
   latestUserText: string,
-): Promise<"chat" | "research" | "video" | "kits"> {
+): Promise<"chat" | "research" | "video" | "kits" | "github"> {
   if (!latestUserText) return "chat";
   if (heuristicKits(latestUserText)) return "kits";
+  if (heuristicGithub(latestUserText)) return "github";
   if (heuristicVideo(latestUserText)) return "video";
 
   try {
@@ -166,6 +183,7 @@ async function routeMode(
     if (parsed.mode === "research") return "research";
     if (parsed.mode === "video") return "video";
     if (parsed.mode === "kits") return "kits";
+    if (parsed.mode === "github") return "github";
     return "chat";
   } catch {
     return heuristicRoute(latestUserText);
@@ -178,14 +196,23 @@ function heuristicKits(text: string): boolean {
   );
 }
 
+function heuristicGithub(text: string): boolean {
+  return /\b(github|reposit[oó]rios?|repos?\b|open[\s-]?source|melhor(es)?\s+(libs?|bibliotecas?|projetos?)|trending|stars?\b)\b/i.test(
+    text,
+  );
+}
+
 function heuristicVideo(text: string): boolean {
   return /\b(edita|editar|edi[cç][aã]o|v[ií]deo|reel|legenda|legendas|fabrica|transcreve|transcrever|aula-ccnp|sil[eê]ncio|mp4|b-?roll|vsl)\b/i.test(
     text,
   );
 }
 
-function heuristicRoute(text: string): "chat" | "research" | "video" | "kits" {
+function heuristicRoute(
+  text: string,
+): "chat" | "research" | "video" | "kits" | "github" {
   if (heuristicKits(text)) return "kits";
+  if (heuristicGithub(text)) return "github";
   if (heuristicVideo(text)) return "video";
   const researchSignals =
     /\b(pesquisa|pesquise|research|compare|comparar|fontes|cita|deep dive|investiga|o que est[aã]o dizendo|latest|mais recentes|tend[eê]ncias)\b/i;

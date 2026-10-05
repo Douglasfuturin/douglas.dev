@@ -28,6 +28,7 @@ const MODE_LABELS: Record<AgentMode, string> = {
   auto: "Automático",
   chat: "Chat + ferramentas",
   research: "Pesquisa multiagente",
+  github: "GitHub Scout",
   video: "Editor de vídeo",
   kits: "Skills Ninja",
 };
@@ -36,7 +37,14 @@ function readQueryMode(): AgentMode {
   if (typeof window === "undefined") return "auto";
   const params = new URLSearchParams(window.location.search);
   const m = params.get("mode");
-  if (m === "kits" || m === "video" || m === "chat" || m === "research" || m === "auto") {
+  if (
+    m === "kits" ||
+    m === "video" ||
+    m === "chat" ||
+    m === "research" ||
+    m === "github" ||
+    m === "auto"
+  ) {
     return m;
   }
   if (params.get("kit")) return "kits";
@@ -232,6 +240,13 @@ export function ChatApp() {
             >
               Painel de Skills →
             </Link>
+            <button
+              type="button"
+              onClick={() => setMode("github")}
+              className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
+            >
+              GitHub Scout
+            </button>
             <Link
               href="/editor"
               className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
@@ -718,11 +733,17 @@ function EmptyState({
             "Lista todas as skills Ninja disponíveis e o que cada uma faz",
             "Descreve a skill ativa e entregue um resultado de exemplo",
           ]
-        : [
-            "O que é o modelo grok-4.20-multi-agent e quando usar?",
-            "Pesquise nas últimas notícias o que está rolando sobre agentes de IA",
-            "Lista os kits Ninja disponíveis e o que cada um faz",
-          ];
+        : mode === "github"
+          ? [
+              "Quais os melhores repositórios de agentes de IA em TypeScript?",
+              "Ache libs open-source de edição de vídeo no GitHub e ranqueie",
+              "Compare vercel/ai com langchainjs e diga qual usar para um chatbot",
+            ]
+          : [
+              "O que é o modelo grok-4.20-multi-agent e quando usar?",
+              "Pesquise nas últimas notícias o que está rolando sobre agentes de IA",
+              "Lista os kits Ninja disponíveis e o que cada um faz",
+            ];
 
   return (
     <section className="animate-rise mt-2 space-y-4">
@@ -731,7 +752,9 @@ function EmptyState({
           ? "Upload um MP4, escolha estilo/opções e peça a edição automática."
           : mode === "kits"
             ? "Skill ativa via dashboard /kits — descreva o pedido ou use um atalho."
-            : "Chat, research, kits Ninja ou editor de vídeo."}
+            : mode === "github"
+              ? "Descreva o tema/stack — o scout busca e ranqueia os melhores repos no GitHub."
+              : "Chat, research, GitHub Scout, kits Ninja ou editor de vídeo."}
       </p>
       <ul className="space-y-2">
         {prompts.map((prompt) => (
