@@ -5,10 +5,9 @@ import { useEffect, useState } from "react";
 
 const STAGES = [
   "Radar",
-  "Aprovar",
   "Roteiro",
   "Artes",
-  "Editar",
+  "Vídeo",
   "Publicar",
 ] as const;
 
@@ -16,86 +15,86 @@ export function LandingPage() {
   const [pulse, setPulse] = useState(0);
 
   useEffect(() => {
-    const t = setInterval(() => setPulse((p) => (p + 1) % STAGES.length), 2200);
+    const t = setInterval(() => setPulse((p) => (p + 1) % STAGES.length), 2000);
     return () => clearInterval(t);
   }, []);
 
   return (
-    <main className="relative min-h-screen overflow-hidden fase-landing">
+    <main className="relative min-h-screen fase-landing">
       <div className="fase-landing-glow" aria-hidden />
       <div className="fase-landing-grain" aria-hidden />
 
       <header className="relative z-10 mx-auto flex max-w-6xl items-center justify-between px-5 py-6 sm:px-8">
-        <p className="font-display text-2xl font-extrabold tracking-tight text-[color:var(--fase-cream)]">
+        <p className="font-display text-2xl font-extrabold tracking-tight text-white">
           FASE
         </p>
         <div className="flex items-center gap-3">
           <Link
-            href="/central"
-            className="text-sm font-semibold text-[color:var(--fase-cream)]/70 transition hover:text-[color:var(--fase-cream)]"
+            href="/dashboard"
+            className="text-sm font-semibold text-white/65 transition hover:text-white"
           >
-            Entrar
+            Entrar no CRM
           </Link>
           <Link
-            href="/studio?mode=central"
-            className="rounded-lg bg-[color:var(--fase-ember)] px-3.5 py-2 text-sm font-semibold text-[#1a0f08] transition hover:brightness-110"
+            href="/dashboard"
+            className="rounded-lg bg-[color:var(--fase-accent)] px-3.5 py-2 text-sm font-bold text-[color:var(--fase-accent-ink)] transition hover:brightness-105"
           >
-            Abrir Studio
+            Abrir Dashboard
           </Link>
         </div>
       </header>
 
-      <section className="relative z-10 mx-auto flex min-h-[78vh] max-w-6xl flex-col justify-center px-5 pb-16 pt-6 sm:px-8">
+      <section className="relative z-10 mx-auto flex min-h-[78vh] max-w-6xl flex-col justify-center px-5 pb-16 pt-4 sm:px-8">
         <p
-          className="font-display text-[clamp(3.5rem,14vw,8.5rem)] font-extrabold leading-[0.9] tracking-[-0.04em] text-[color:var(--fase-cream)] animate-fase-rise"
+          className="font-display text-[clamp(4rem,16vw,9rem)] font-extrabold leading-[0.85] tracking-[-0.05em] text-white animate-fase-rise"
           style={{ animationDelay: "40ms" }}
         >
           FASE
         </p>
         <h1
-          className="mt-5 max-w-xl text-xl font-medium leading-snug text-[color:var(--fase-cream)]/90 sm:text-2xl animate-fase-rise"
-          style={{ animationDelay: "160ms" }}
+          className="mt-6 max-w-lg text-xl font-medium leading-snug text-white/85 sm:text-2xl animate-fase-rise"
+          style={{ animationDelay: "140ms" }}
         >
-          Do radar ao post — sua central pessoal de conteúdo.
+          CRM de conteúdo com motion — do radar ao post, num só dashboard.
         </h1>
         <p
-          className="mt-4 max-w-md text-sm leading-relaxed text-[color:var(--fase-cream)]/55 animate-fase-rise"
-          style={{ animationDelay: "280ms" }}
+          className="mt-4 max-w-md text-sm leading-relaxed text-white/45 animate-fase-rise"
+          style={{ animationDelay: "240ms" }}
         >
-          Tendências, roteiros, artes, edição com skills e fila de publicação.
-          Um SaaS só seu, rodando no Grok.
+          Inspirado no ritmo de Motionsites, Godly e Spline: agentes, pipeline,
+          artes e publicação com interface viva.
         </p>
 
         <div
           className="mt-8 flex flex-wrap items-center gap-3 animate-fase-rise"
-          style={{ animationDelay: "400ms" }}
+          style={{ animationDelay: "340ms" }}
         >
           <Link
-            href="/central"
-            className="rounded-lg bg-[color:var(--fase-cream)] px-5 py-3 text-sm font-bold text-[#1c1510] transition hover:bg-white"
+            href="/dashboard"
+            className="rounded-lg bg-white px-5 py-3 text-sm font-bold text-[#0a0d12] transition hover:bg-[color:var(--fase-accent)]"
           >
-            Abrir Central
+            Entrar no CRM
           </Link>
           <Link
-            href="/grupos"
-            className="rounded-lg border border-[color:var(--fase-cream)]/25 px-5 py-3 text-sm font-semibold text-[color:var(--fase-cream)]/90 transition hover:border-[color:var(--fase-cream)]/50"
+            href="/studio?mode=central"
+            className="rounded-lg border border-white/20 px-5 py-3 text-sm font-semibold text-white/90 transition hover:border-white/45"
           >
-            Ver grupos de agentes
+            Studio IA
           </Link>
         </div>
 
         <div
           className="mt-14 flex flex-wrap gap-2 animate-fase-rise"
-          style={{ animationDelay: "520ms" }}
-          aria-label="Etapas do pipeline"
+          style={{ animationDelay: "440ms" }}
+          aria-label="Etapas"
         >
           {STAGES.map((label, i) => (
             <span
               key={label}
-              className={`rounded-md px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] transition-all duration-500 ${
+              className={`rounded-md px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] transition-all duration-500 ${
                 i === pulse
-                  ? "bg-[color:var(--fase-ember)] text-[#1a0f08] scale-105"
-                  : "bg-white/5 text-[color:var(--fase-cream)]/45"
+                  ? "scale-105 bg-[color:var(--fase-accent)] text-[color:var(--fase-accent-ink)]"
+                  : "bg-white/5 text-white/40"
               }`}
             >
               {label}
@@ -104,31 +103,31 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section className="relative z-10 border-t border-white/10 bg-black/20 px-5 py-14 sm:px-8">
+      <section className="relative z-10 border-t border-white/10 bg-black/25 px-5 py-14 sm:px-8">
         <div className="mx-auto grid max-w-6xl gap-10 sm:grid-cols-3">
           {[
             {
-              title: "Pipeline vivo",
-              body: "Kanban idea → published com aprovação, roteiro, artes e fila de post.",
+              title: "Dashboard CRM",
+              body: "Métricas, pipeline, times e todos os módulos num painel.",
             },
             {
-              title: "Agentes no Studio",
-              body: "Radar, Roteirista, Arte, Editor, YouTube/España e Bit — um modo Central une tudo.",
+              title: "Agentes animados",
+              body: "Radar, roteiro, artes, editor e salas Dev / España.",
             },
             {
-              title: "Publicação pronta",
-              body: "Fila local + hook Buffer/APIs. Notion e packs já saem do mesmo fluxo.",
+              title: "Fila de publicação",
+              body: "Do ready ao post — Instagram, YouTube, X e Notion.",
             },
           ].map((block, i) => (
             <div
               key={block.title}
               className="animate-fase-rise"
-              style={{ animationDelay: `${600 + i * 80}ms` }}
+              style={{ animationDelay: `${520 + i * 70}ms` }}
             >
-              <h2 className="font-display text-lg font-bold text-[color:var(--fase-cream)]">
+              <h2 className="font-display text-lg font-bold text-white">
                 {block.title}
               </h2>
-              <p className="mt-2 text-sm leading-relaxed text-[color:var(--fase-cream)]/50">
+              <p className="mt-2 text-sm leading-relaxed text-white/45">
                 {block.body}
               </p>
             </div>

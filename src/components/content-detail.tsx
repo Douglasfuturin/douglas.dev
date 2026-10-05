@@ -97,55 +97,49 @@ export function ContentDetail({ id }: { id: string }) {
 
   if (error && !item) {
     return (
-      <main className="mx-auto max-w-3xl px-4 py-16">
+      <div className="py-8">
         <p className="text-sm text-red-700">{error}</p>
         <Link href="/central" className="mt-4 inline-block text-sm underline">
-          ← Central
+          ← Pipeline
         </Link>
-      </main>
+      </div>
     );
   }
 
   if (!item) {
     return (
-      <main className="mx-auto max-w-3xl px-4 py-16 text-sm text-[color:var(--fase-muted)]">
+      <div className="py-8 text-sm text-[color:var(--fase-muted)]">
         Carregando…
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <Link
-          href="/central"
-          className="text-sm font-semibold text-[color:var(--fase-muted)] hover:text-[color:var(--fase-ink)]"
-        >
-          ← Central
-        </Link>
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap gap-2">
           <Link
             href={`/studio?mode=central&q=${encodeURIComponent(`Atualiza e avança o item ${item.id}: ${item.title}`)}`}
-            className="rounded-lg bg-[color:var(--fase-accent)] px-3 py-1.5 text-xs font-bold text-[color:var(--fase-accent-ink)]"
+            className="crm-btn crm-btn-primary"
           >
             Operar com IA
           </Link>
           <button
             type="button"
             onClick={() => void advance()}
-            className="rounded-lg bg-[color:var(--fase-ink)] px-3 py-1.5 text-xs font-semibold text-white"
+            className="crm-btn crm-btn-dark"
           >
             Avançar estágio
           </button>
         </div>
       </div>
 
-      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--fase-muted)]">
+      <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[color:var(--fase-muted)]">
         {STAGE_LABELS[item.stage]} · {item.market.toUpperCase()} · {item.source}
       </p>
-      <h1 className="font-display mt-2 text-3xl font-extrabold tracking-tight text-[color:var(--fase-ink)]">
+      <h2 className="font-display text-2xl font-extrabold tracking-tight text-[color:var(--fase-ink)]">
         {item.title}
-      </h1>
+      </h2>
 
       <div className="mt-3 flex flex-wrap gap-1">
         {item.networks.map((n) => (
@@ -255,7 +249,7 @@ export function ContentDetail({ id }: { id: string }) {
           Vídeo: <code>{item.videoPath}</code>
         </p>
       ) : null}
-    </main>
+    </div>
   );
 }
 

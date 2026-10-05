@@ -1,10 +1,13 @@
-import { AppShell } from "@/components/app-shell";
+import { CrmShell } from "@/components/crm/crm-shell";
 import { SkillsDashboard } from "@/components/skills-dashboard";
 
 export default function KitsPage() {
   return (
-    <AppShell>
+    <CrmShell
+      title="Ninja Kits"
+      subtitle="Skills instaláveis e runners do ecossistema Ninja."
+    >
       <SkillsDashboard />
-    </AppShell>
+    </CrmShell>
   );
 }

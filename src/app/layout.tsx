@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DM_Sans, Geist_Mono, Syne } from "next/font/google";
+import { Geist_Mono, Outfit, Syne } from "next/font/google";
 import "./globals.css";
 
 const syne = Syne({
@@ -8,8 +8,8 @@ const syne = Syne({
   weight: ["600", "700", "800"],
 });
 
-const dmSans = DM_Sans({
-  variable: "--font-dm-sans",
+const outfit = Outfit({
+  variable: "--font-outfit",
   subsets: ["latin"],
 });
 
@@ -19,16 +19,16 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FASE — Central de Conteúdo Pessoal",
+  title: "FASE — Content CRM",
   description:
-    "SaaS pessoal do radar ao post: tendências, roteiros, artes, edição com skills e fila de publicação.",
+    "CRM pessoal de conteúdo: dashboard, pipeline, agentes e publicação — do radar ao post.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="pt-BR"
-      className={`${syne.variable} ${dmSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${syne.variable} ${outfit.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

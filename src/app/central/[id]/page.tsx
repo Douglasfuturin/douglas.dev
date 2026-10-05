@@ -1,4 +1,5 @@
-import { AppShell } from "@/components/app-shell";
+import Link from "next/link";
+import { CrmShell } from "@/components/crm/crm-shell";
 import { ContentDetail } from "@/components/content-detail";
 
 export default async function ContentItemPage({
@@ -8,8 +9,16 @@ export default async function ContentItemPage({
 }) {
   const { id } = await params;
   return (
-    <AppShell>
+    <CrmShell
+      title="Conteúdo"
+      subtitle="Detalhe do item no pipeline CRM."
+      actions={
+        <Link href="/central" className="crm-btn crm-btn-ghost">
+          ← Pipeline
+        </Link>
+      }
+    >
       <ContentDetail id={id} />
-    </AppShell>
+    </CrmShell>
   );
 }

@@ -18,7 +18,8 @@ SaaS pessoal (single-user) do **radar ao post**, em cima de Next.js + Vercel AI 
 
 | Rota | Função |
 | --- | --- |
-| `/` | Landing FASE |
+| `/` | Landing cinematográfica FASE |
+| `/dashboard` | **CRM Dashboard** — visão geral + todos os módulos |
 | `/central` | Kanban do pipeline (ideia → postado) |
 | `/central/[id]` | Detalhe do conteúdo |
 | `/studio` | Studio de agentes (chat + modos) |
@@ -26,6 +27,8 @@ SaaS pessoal (single-user) do **radar ao post**, em cima de Next.js + Vercel AI 
 | `/kits` | Hub de skills Ninja |
 | `/editor` | Editor visual EDVD |
 | `/radar` `/roteiro` `/pipeline` … | Atalhos → Studio |
+
+UI CRM inspirada em Motionsites / Godly / 21st / React Bits / Spline: sidebar escura, accent lime, mesh gradients e motion leve.
 
 ## Como rodar
 

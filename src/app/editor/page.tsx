@@ -1,19 +1,24 @@
 import { Suspense } from "react";
-import { AppShell } from "@/components/app-shell";
+import { CrmShell } from "@/components/crm/crm-shell";
 import { EditorApp } from "@/components/editor/editor-app";
 
 export default function EditorPage() {
   return (
-    <AppShell>
+    <CrmShell
+      title="Editor de vídeo"
+      subtitle="EDVD visual + skills do sistema para render automático."
+    >
       <Suspense
         fallback={
-          <div className="flex min-h-[60vh] items-center justify-center text-[color:var(--fase-muted)]">
+          <div className="flex min-h-[50vh] items-center justify-center text-[color:var(--fase-muted)]">
             Carregando editor…
           </div>
         }
       >
-        <EditorApp />
+        <div className="overflow-hidden rounded-[1.25rem] border border-[color:var(--fase-line)]">
+          <EditorApp />
+        </div>
       </Suspense>
-    </AppShell>
+    </CrmShell>
   );
 }

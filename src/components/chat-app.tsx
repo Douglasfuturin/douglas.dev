@@ -308,18 +308,24 @@ export function ChatApp() {
 
       <header className="relative z-10 mx-auto flex w-full max-w-3xl items-end justify-between gap-4 px-5 pt-8 pb-4">
         <div>
-          <p className="font-display text-4xl tracking-tight text-[var(--ink)] md:text-5xl">
+          <p className="font-display text-3xl tracking-tight text-[var(--ink)] md:text-4xl">
             Studio
           </p>
           <p className="mt-2 max-w-md text-sm leading-relaxed text-[var(--muted)]">
-            Motor FASE — Central, grupos, radar, roteiro, artes e edição.
+            Agentes FASE — grupos, radar, roteiro, artes e edição.
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             <Link
-              href="/central"
+              href="/dashboard"
               className="inline-flex rounded-lg bg-[var(--ink)] px-3 py-1.5 text-xs font-semibold text-[var(--panel)]"
             >
-              Central →
+              Dashboard →
+            </Link>
+            <Link
+              href="/central"
+              className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
+            >
+              Pipeline
             </Link>
             <Link
               href="/grupos"
