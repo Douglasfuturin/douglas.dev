@@ -45,13 +45,6 @@ const FIELD_AGENTS = [
   },
 ];
 
-function greeting() {
-  const h = new Date().getHours();
-  if (h < 12) return "Bom dia";
-  if (h < 18) return "Boa tarde";
-  return "Boa noite";
-}
-
 export function NexusOverview() {
   const [stats, setStats] = useState<Stats | null>(null);
   const groupCount = AGENT_GROUPS.length;
@@ -72,30 +65,6 @@ export function NexusOverview() {
 
   return (
     <div className="space-y-8 animate-nexus-rise">
-      <section className="relative overflow-hidden rounded-2xl border border-[color:var(--border)] bg-[color:var(--card)] p-6 md:p-8">
-        <div className="nexus-hero-glow pointer-events-none absolute inset-0" aria-hidden />
-        <div className="relative z-10 max-w-2xl">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--primary)]">
-            Nexus OS · Central de comando
-          </p>
-          <h2 className="mt-3 text-3xl font-semibold tracking-tight text-[color:var(--foreground)] md:text-4xl">
-            {greeting()}, Douglas.
-          </h2>
-          <p className="mt-3 text-base text-[color:var(--muted-foreground)]">
-            Sua equipe de agentes está pronta — orquestre conteúdo, vídeo e publicação
-            em um só lugar.
-          </p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Link href="/app" className="nexus-btn-primary">
-              Iniciar missão
-            </Link>
-            <Link href="/central" className="nexus-btn-ghost">
-              Ver atividade
-            </Link>
-          </div>
-        </div>
-      </section>
-
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {[
           {
