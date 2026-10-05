@@ -23,7 +23,7 @@ const MODULES: NavItem[] = [
   { href: "/github", label: "GitHub + Reels", ico: "GH" },
   { href: "/radar", label: "Radar", ico: "RD" },
   { href: "/roteiro", label: "Roteirista", ico: "RT" },
-  { href: "/studio?mode=arte-realista", label: "Artes", ico: "AR" },
+  { href: "/studio?mode=arte-realista", label: "Carrossel DD", ico: "DD" },
   { href: "/editor", label: "Editor vídeo", ico: "ED", match: ["/editor"] },
   { href: "/kits", label: "Ninja Kits", ico: "KT", match: ["/kits"] },
   { href: "/pipeline", label: "Pack Scout", ico: "PK" },
@@ -57,14 +57,12 @@ export function CrmShell({
   const sidebar = (
     <>
       <div className="px-2">
-        <Link href="/" className="group block">
-          <p className="font-display text-2xl font-extrabold tracking-tight text-white">
-            FASE
-          </p>
-          <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">
-            Content CRM
-          </p>
-        </Link>
+          <Link href="/" className="group block">
+            <p className="font-display text-2xl text-white">Douglas</p>
+            <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">
+              Dev · FASE CRM
+            </p>
+          </Link>
       </div>
 
       <div className="px-1">
@@ -175,7 +173,7 @@ export function CrmShell({
               <div>
                 <p className="crm-pill">FASE CRM</p>
                 {title ? (
-                  <h1 className="font-display mt-2 text-3xl font-extrabold tracking-tight text-[color:var(--fase-ink)] sm:text-4xl">
+                  <h1 className="font-display mt-2 text-3xl tracking-tight text-white sm:text-4xl">
                     {title}
                   </h1>
                 ) : null}

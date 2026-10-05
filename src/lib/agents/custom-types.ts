@@ -49,12 +49,12 @@ export type CustomAgentStore = {
 };
 
 export const AGENT_COLORS = [
-  "#c8f542",
+  "#f26522",
+  "#ff6a1a",
+  "#ffffff",
+  "#a8a8a8",
   "#5eead4",
-  "#ff7a59",
-  "#5B9DFF",
   "#F5C84C",
-  "#C084FC",
   "#FB7185",
   "#34D399",
 ] as const;

@@ -121,6 +121,14 @@ function toolsForMemberMode(
     case "arte-realista":
       return {
         ...artDirectorTools("realista"),
+        ...spainContentTools(),
+        ...grokBotTools(),
+      };
+    case "carrossel":
+      return {
+        ...spainContentTools(),
+        ...artDirectorTools("realista"),
+        ...ninjaKitTools(),
         ...grokBotTools(),
       };
     case "bit":
@@ -159,13 +167,6 @@ function toolsForMemberMode(
         ...spainContentTools(),
         ...ninjaKitTools(),
         ...reelsScriptTools(),
-        ...grokBotTools(),
-      };
-    case "carrossel":
-      return {
-        ...spainContentTools(),
-        ...ninjaKitTools(),
-        ...artDirectorTools("twitter"),
         ...grokBotTools(),
       };
     case "capas":

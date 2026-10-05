@@ -44,10 +44,17 @@ const FEATURES = [
     tag: "Script",
   },
   {
+    href: "/studio?mode=arte-realista&q=Planeja%20um%20carrossel%20realista%20Douglas%20Dev%20(Antes%2FDepois)%20sobre%205%20automa%C3%A7%C3%B5es%20com%20IA%20usando%20plan_carrossel_realista_douglas",
+    title: "Carrossel realista",
+    blurb: "Antes/Depois fotorealista · preto + laranja Douglas Dev",
+    glow: "rgba(242, 101, 34, 0.4)",
+    tag: "Visual",
+  },
+  {
     href: "/studio?mode=arte-realista",
     title: "Direção de arte",
-    blurb: "Twitter, realista, capas e thumbnails",
-    glow: "rgba(255, 122, 89, 0.28)",
+    blurb: "Twitter + realista + capas no brand kit",
+    glow: "rgba(242, 101, 34, 0.28)",
     tag: "Visual",
   },
   {
@@ -145,26 +152,26 @@ export function CrmDashboard() {
   return (
     <div className="space-y-8">
       {/* Hero composition */}
-      <section className="relative overflow-hidden rounded-[1.75rem] border border-[color:var(--fase-ink)]/10 bg-[color:var(--fase-ink)] px-6 py-8 text-white sm:px-8 sm:py-10 animate-fase-rise">
+      <section className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#141414] px-6 py-8 text-white sm:px-8 sm:py-10 animate-fase-rise">
         <div
           className="pointer-events-none absolute inset-0"
           style={{
             background:
-              "radial-gradient(600px 320px at 15% 20%, rgba(200,245,66,0.28), transparent 55%), radial-gradient(500px 280px at 90% 10%, rgba(94,234,212,0.18), transparent 50%)",
+              "radial-gradient(600px 320px at 15% 20%, rgba(242,101,34,0.35), transparent 55%), radial-gradient(500px 280px at 90% 10%, rgba(120,30,10,0.25), transparent 50%)",
           }}
           aria-hidden
         />
         <div className="relative z-10 flex flex-wrap items-end justify-between gap-6">
           <div className="max-w-xl">
-            <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[color:var(--fase-accent)]">
-              Content operations
+            <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[color:var(--dd-orange)]">
+              Content operations · @o.douglas.dev
             </p>
-            <h2 className="font-display mt-3 text-4xl font-extrabold tracking-tight sm:text-5xl">
+            <h2 className="font-display mt-3 text-4xl tracking-tight text-white sm:text-5xl">
               <span className="fase-shimmer-text">FASE</span>
             </h2>
-            <p className="mt-3 text-sm leading-relaxed text-white/60 sm:text-base">
-              CRM pessoal do radar ao post. Dashboard único para agentes,
-              pipeline, artes, vídeo e publicação.
+            <p className="mt-3 text-sm leading-relaxed text-white/55 sm:text-base">
+              Identidade Douglas Dev — preto, laranja e carrosséis realistas.
+              Dashboard único para agentes, pipeline e publicação.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -204,7 +211,7 @@ export function CrmDashboard() {
       {/* Quick actions */}
       <section className="animate-fase-rise" style={{ animationDelay: "80ms" }}>
         <div className="mb-3 flex items-center justify-between">
-          <h3 className="font-display text-lg font-bold text-[color:var(--fase-ink)]">
+          <h3 className="font-display text-lg font-bold text-white">
             Ações rápidas
           </h3>
         </div>
@@ -220,7 +227,7 @@ export function CrmDashboard() {
       {/* Feature grid — all SaaS functions */}
       <section>
         <div className="mb-3 flex items-end justify-between gap-3">
-          <h3 className="font-display text-lg font-bold text-[color:var(--fase-ink)]">
+          <h3 className="font-display text-lg font-bold text-white">
             Todas as funcionalidades
           </h3>
           <p className="text-xs text-[color:var(--fase-muted)]">
@@ -241,7 +248,7 @@ export function CrmDashboard() {
               }
             >
               <span className="crm-pill">{f.tag}</span>
-              <p className="font-display relative z-10 text-xl font-bold text-[color:var(--fase-ink)]">
+              <p className="font-display relative z-10 text-xl font-bold text-white">
                 {f.title}
               </p>
               <p className="relative z-10 text-xs leading-relaxed text-[color:var(--fase-muted)]">
@@ -259,7 +266,7 @@ export function CrmDashboard() {
             <h3 className="font-display text-lg font-bold">Pipeline recente</h3>
             <Link
               href="/central"
-              className="text-xs font-semibold text-[color:var(--fase-muted)] hover:text-[color:var(--fase-ink)]"
+              className="text-xs font-semibold text-[color:var(--fase-muted)] hover:text-white"
             >
               Abrir kanban →
             </Link>
@@ -277,7 +284,7 @@ export function CrmDashboard() {
                     className="flex items-start justify-between gap-3 rounded-xl border border-[color:var(--fase-line)] bg-white/80 px-3 py-2.5 transition hover:border-[color:var(--fase-ink)]/20"
                   >
                     <div>
-                      <p className="text-sm font-semibold text-[color:var(--fase-ink)]">
+                      <p className="text-sm font-semibold text-white">
                         {item.title}
                       </p>
                       <p className="mt-0.5 text-[11px] text-[color:var(--fase-muted)]">
