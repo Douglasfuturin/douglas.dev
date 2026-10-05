@@ -1,4 +1,5 @@
 import { AGENT_GROUPS, getAgentGroup as getBuiltinGroup } from "./groups";
+import { applyBuiltinMemberOrder } from "./group-pipeline";
 import { getUserGroup, listUserGroups } from "./group-store";
 import type {
   OperationId,
@@ -6,7 +7,9 @@ import type {
   ResolvedGroupMember,
 } from "./group-types";
 
-function builtinToResolved(id: string): ResolvedAgentGroup | null {
+async function builtinToResolved(
+  id: string,
+): Promise<ResolvedAgentGroup | null> {
   const g = getBuiltinGroup(id);
   if (!g) return null;
   const operation: OperationId =
@@ -17,7 +20,8 @@ function builtinToResolved(id: string): ResolvedAgentGroup | null {
         : g.id === "conteudo-dev"
           ? "visual"
           : "ideacao";
-  const members: ResolvedGroupMember[] = g.members.map((m) => ({
+  const orderedMembers = await applyBuiltinMemberOrder(g.id, g.members);
+  const members: ResolvedGroupMember[] = orderedMembers.map((m) => ({
     id: m.id,
     name: m.name,
     mode: m.mode,
@@ -46,7 +50,7 @@ export async function resolveAgentGroup(
   groupId: string | undefined | null,
 ): Promise<ResolvedAgentGroup | null> {
   if (!groupId) return null;
-  const builtin = builtinToResolved(groupId);
+  const builtin = await builtinToResolved(groupId);
   if (builtin) return builtin;
   const user = await getUserGroup(groupId);
   if (!user) return null;
@@ -84,7 +88,10 @@ export async function resolveGroupMember(
 }
 
 export async function listAllResolvedGroups(): Promise<ResolvedAgentGroup[]> {
-  const builtins = AGENT_GROUPS.map((g) => builtinToResolved(g.id)!);
+  const builtins = await Promise.all(
+    AGENT_GROUPS.map((g) => builtinToResolved(g.id)),
+  );
+  const builtinResolved = builtins.filter(Boolean) as ResolvedAgentGroup[];
   const users = await listUserGroups();
   const custom = users.map(
     (user): ResolvedAgentGroup => ({
@@ -110,5 +117,5 @@ export async function listAllResolvedGroups(): Promise<ResolvedAgentGroup[]> {
       builtin: false,
     }),
   );
-  return [...custom, ...builtins];
+  return [...custom, ...builtinResolved];
 }

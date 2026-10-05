@@ -130,13 +130,21 @@ export function AgentsManager() {
         <p className="text-sm text-[color:var(--fase-muted)]">
           Crie agentes com persona, toolkit e instruções próprias.
         </p>
-        <button
-          type="button"
-          className="crm-btn crm-btn-primary"
-          onClick={() => setShowForm((v) => !v)}
-        >
-          {showForm ? "Fechar formulário" : "+ Criar agente"}
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href="/app?q=Crie%20um%20agente%20por%20linguagem%20natural&autosend=1"
+            className="crm-btn crm-btn-ghost"
+          >
+            Pedir ao orquestrador
+          </Link>
+          <button
+            type="button"
+            className="crm-btn crm-btn-primary"
+            onClick={() => setShowForm((v) => !v)}
+          >
+            {showForm ? "Fechar formulário" : "+ Criar agente"}
+          </button>
+        </div>
       </div>
 
       <section className="animate-fase-rise" style={{ animationDelay: "40ms" }}>
@@ -322,6 +330,12 @@ export function AgentsManager() {
                     className="crm-btn crm-btn-primary"
                   >
                     Abrir no Studio
+                  </Link>
+                  <Link
+                    href={`/app?q=${encodeURIComponent(`Melhore o agente ${agent.name}: revise prompt, entradas e saídas`)}&autosend=1`}
+                    className="crm-btn crm-btn-ghost"
+                  >
+                    Orquestrador melhorar
                   </Link>
                   <button
                     type="button"

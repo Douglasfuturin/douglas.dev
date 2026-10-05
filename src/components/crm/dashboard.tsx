@@ -7,14 +7,6 @@ import { STAGE_LABELS } from "@/lib/content/types";
 import { AGENT_GROUPS, type AgentGroup, type AgentMember } from "@/lib/agents/groups";
 import { GroupsManager } from "@/components/crm/groups-manager";
 
-type Stats = {
-  total: number;
-  byStage: Record<string, number>;
-  queued: number;
-  scheduled: number;
-  published: number;
-};
-
 /** Pipeline steps shown on dashboard (excludes orchestrator from the numbered flow). */
 function pipelineMembers(group: AgentGroup): AgentMember[] {
   return group.members.filter((m) => m.mode !== "bit" && m.id !== "bit");

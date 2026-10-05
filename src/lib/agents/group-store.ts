@@ -2,6 +2,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { getCatalogAgent } from "./agent-catalog";
 import { listCustomAgents } from "./custom-store";
+import { getRegistryAgent } from "./registry/store";
 import type {
   AgentGroupStore,
   GroupMemberRef,
@@ -82,9 +83,9 @@ function defaultWorkflow(name: string): string[] {
 
 export async function listUserGroups(): Promise<UserAgentGroup[]> {
   const store = await ensureStore();
-  return [...store.groups].sort((a, b) =>
-    b.updatedAt.localeCompare(a.updatedAt),
-  );
+  return [...store.groups]
+    .filter((g) => g.status !== "archived")
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 }
 
 export async function getUserGroup(
@@ -231,20 +232,48 @@ export async function addMemberToGroup(
       isOrchestrator: false,
     };
   } else {
-    const custom = (await listCustomAgents()).find((a) => a.id === sourceId);
-    if (!custom) throw new Error("agent_not_found");
-    member = {
-      id: id("mem"),
-      sourceId: custom.id,
-      kind: "custom",
-      name: custom.name,
-      role: custom.role,
-      mode: "custom",
-      color: custom.color,
-      icon: "circle",
-      isOrchestrator: false,
-      customAgentId: custom.id,
-    };
+    const reg = await getRegistryAgent(sourceId);
+    if (reg?.seedKey) {
+      const seeded = getCatalogAgent(reg.seedKey);
+      if (seeded) {
+        member = {
+          id: id("mem"),
+          sourceId: seeded.id,
+          kind: "builtin",
+          name: reg.name,
+          role: reg.role,
+          mode: seeded.mode,
+          color: reg.color,
+          icon: seeded.icon,
+          isOrchestrator: false,
+        };
+      }
+    }
+    if (!member) {
+      const custom =
+        (await listCustomAgents()).find((a) => a.id === sourceId) ||
+        (reg
+          ? {
+              id: reg.id,
+              name: reg.name,
+              role: reg.role,
+              color: reg.color,
+            }
+          : null);
+      if (!custom) throw new Error("agent_not_found");
+      member = {
+        id: id("mem"),
+        sourceId: custom.id,
+        kind: "custom",
+        name: custom.name,
+        role: custom.role,
+        mode: "custom",
+        color: custom.color,
+        icon: "circle",
+        isOrchestrator: false,
+        customAgentId: custom.id,
+      };
+    }
   }
 
   group.members.push(member);

@@ -11,6 +11,9 @@ import {
   RadarApprovalCards,
   type RadarCardItem,
 } from "@/components/radar-approval-cards";
+import { OrchestratorActionLog } from "@/components/orchestrator/orchestrator-action-log";
+import { OrchestratorProposalCard } from "@/components/orchestrator/orchestrator-proposal-card";
+import { extractOrchestratorUiFromPart } from "@/lib/orchestrator/parse-tool-ui";
 import {
   DEFAULT_VIDEO_OPTIONS,
   FONT_LABELS,
@@ -883,6 +886,9 @@ export function ChatApp({
         ) : null}
 
         <div className="flex flex-1 flex-col gap-4 overflow-y-auto py-2">
+          {variant === "hub" ? (
+            <OrchestratorActionLog compact />
+          ) : null}
           {messages.length === 0 ? (
             <EmptyState
               mode={mode}
@@ -914,6 +920,17 @@ export function ChatApp({
                   if (part.type.startsWith("tool-")) {
                     const toolName = part.type.replace(/^tool-/, "");
                     const briefing = extractRadarBriefing(part);
+                    const orchUi = extractOrchestratorUiFromPart(part);
+                    if (orchUi?.type === "agent_proposal") {
+                      return (
+                        <OrchestratorProposalCard
+                          key={`${message.id}-${index}`}
+                          proposalId={orchUi.proposalId}
+                          kind={orchUi.kind}
+                          preview={orchUi.preview as Record<string, string>}
+                        />
+                      );
+                    }
                     return (
                       <div key={`${message.id}-${index}`} className="space-y-2">
                         <p className="rounded-md bg-[var(--chip)] px-2 py-1 font-mono text-xs text-[var(--accent-ink)]">
