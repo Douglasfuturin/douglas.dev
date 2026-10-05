@@ -18,6 +18,7 @@ import {
   groupConductorPersona,
   KITS_PERSONA,
   NOTION_AGENT_PERSONA,
+  ORQUESTRADOR_PRINCIPAL_PERSONA,
   PIPELINE_PERSONA,
   RADAR_PERSONA,
   RESEARCH_PERSONA,
@@ -46,11 +47,13 @@ import {
 } from "./custom-tools";
 import { getKitById } from "@/lib/kits/discover";
 import {
-  getAgentGroup,
-  getGroupMember,
-  type AgentGroupId,
   type MemberMode,
 } from "./groups";
+import {
+  resolveAgentGroup,
+  resolveGroupMember,
+} from "./group-resolve";
+import type { ResolvedAgentGroup } from "./group-types";
 import {
   DEFAULT_VIDEO_OPTIONS,
   type VideoEditOptions,
@@ -218,12 +221,24 @@ Você também atua como Radar GitHub no grupo Conteúdo Dev Vídeo.`;
   }
 }
 
-function toolsForGroup(groupId: AgentGroupId, videoOptions: VideoEditOptions) {
-  const group = getAgentGroup(groupId);
-  const tools: Record<string, unknown> = { ...bitCoordinatorTools() };
-  if (!group) return tools;
+function toolsForResolvedGroup(
+  group: ResolvedAgentGroup,
+  videoOptions: VideoEditOptions,
+) {
+  const tools: Record<string, unknown> = {
+    ...bitCoordinatorTools(),
+    ...centralContentTools(),
+  };
   for (const member of group.members) {
-    Object.assign(tools, toolsForMemberMode(member.mode, videoOptions));
+    if (member.kind === "custom") {
+      Object.assign(tools, toolsForToolkit("full", videoOptions));
+      continue;
+    }
+    const mode = (member.mode === "bit" ? "bit" : member.mode) as MemberMode;
+    if (member.isOrchestrator || mode === ("bit" as MemberMode)) {
+      continue;
+    }
+    Object.assign(tools, toolsForMemberMode(mode, videoOptions));
   }
   return tools;
 }
@@ -247,7 +262,74 @@ export async function resolveAgent(
     ...input.videoOptions,
   };
 
-  // Agente custom criado pelo usuário
+  // Grupo explícito: membro específico ou sala inteira (builtin + custom)
+  // (antes de customAgentId avulso — membro custom no grupo mantém contexto da sala)
+  if (input.groupId) {
+    const group = await resolveAgentGroup(input.groupId);
+    const member = await resolveGroupMember(input.groupId, input.memberId);
+    if (group && member) {
+      if (member.kind === "custom" && member.customAgentId) {
+        const custom = await getCustomAgent(member.customAgentId);
+        if (custom) {
+          return {
+            mode: "custom",
+            model: custom.toolkit === "research" ? multiAgentModel : chatModel,
+            instructions: `${buildCustomAgentInstructions(custom)}
+
+Você está no grupo "${group.name}" como **${member.name}**.
+Siga o fluxo do grupo e devolva o handoff ao Orquestrador.`,
+            tools: toolsForToolkit(custom.toolkit, videoOptions),
+          };
+        }
+      }
+      if (member.isOrchestrator || member.mode === "bit") {
+        const orchName =
+          group.members.find((m) => m.isOrchestrator)?.name || member.name;
+        return {
+          mode: "grupo",
+          model: chatModel,
+          instructions: groupConductorPersona(
+            group.name,
+            group.members.map((m) => `${m.name} — ${m.role}`),
+            group.workflow,
+            orchName,
+          ),
+          tools: toolsForResolvedGroup(group, videoOptions),
+        };
+      }
+      const mode = memberModeToAgentMode(member.mode as MemberMode);
+      const spain = group.id === "conteudos-espanha";
+      const base = personaForMemberMode(member.mode as MemberMode, videoOptions);
+      return {
+        mode,
+        model: chatModel,
+        instructions: `${base}
+
+${spain ? "Trabajas en el grupo Contenidos España. Responde en español de España." : `Você está no grupo "${group.name}" como **${member.name}**.`}
+Papel / Rol: ${member.role}
+Miembro: ${member.name}
+`,
+        tools: toolsForMemberMode(member.mode as MemberMode, videoOptions),
+      };
+    }
+    if (group) {
+      const orchName =
+        group.members.find((m) => m.isOrchestrator)?.name || "Orquestrador";
+      return {
+        mode: "grupo",
+        model: chatModel,
+        instructions: groupConductorPersona(
+          group.name,
+          group.members.map((m) => `${m.name} — ${m.role}`),
+          group.workflow,
+          orchName,
+        ),
+        tools: toolsForResolvedGroup(group, videoOptions),
+      };
+    }
+  }
+
+  // Agente custom criado pelo usuário (fora de grupo)
   if (input.customAgentId || input.mode === "custom") {
     const custom = input.customAgentId
       ? await getCustomAgent(input.customAgentId)
@@ -276,46 +358,36 @@ Nenhum agente custom selecionado. Peça para criar um em /agentes ou escolha um 
     }
   }
 
-  // Grupo explícito: membro específico ou sala inteira
-  if (input.groupId) {
-    const group = getAgentGroup(input.groupId);
-    const member = getGroupMember(input.groupId, input.memberId);
-    if (group && member) {
-      const mode = memberModeToAgentMode(member.mode);
-      const spain = group.id === "conteudos-espanha";
-      const base = personaForMemberMode(member.mode, videoOptions);
-      return {
-        mode,
-        model: chatModel,
-        instructions: `${base}
-
-${spain ? "Trabajas en el grupo Contenidos España. Responde en español de España." : `Você está no grupo "${group.name}" como **${member.name}**.`}
-Papel / Rol: ${member.role}
-Miembro: ${member.name}
-`,
-        tools: toolsForMemberMode(member.mode, videoOptions),
-      };
-    }
-    if (group) {
-      return {
-        mode: "grupo",
-        model: chatModel,
-        instructions: groupConductorPersona(
-          group.name,
-          group.members.map((m) => `${m.name} — ${m.role}`),
-          group.workflow,
-        ),
-        tools: toolsForGroup(group.id, videoOptions),
-      };
-    }
-  }
-
   let mode: ConcreteMode =
     input.mode === "auto"
       ? await routeMode(latestUserText)
       : input.mode === "grupo"
         ? "grupo"
         : input.mode;
+
+  if (mode === "orquestrador") {
+    return {
+      mode: "orquestrador",
+      model: multiAgentModel,
+      instructions: ORQUESTRADOR_PRINCIPAL_PERSONA,
+      tools: {
+        ...bitCoordinatorTools(),
+        ...centralContentTools(),
+        ...radarTools(),
+        ...reelsScriptTools(),
+        ...nicheScoutTools(),
+        ...githubScoutTools(),
+        ...artDirectorTools("twitter"),
+        ...artDirectorTools("realista"),
+        ...pipelineTools(),
+        ...notionRepoTools(),
+        ...spainContentTools(),
+        ...videoEditorTools(videoOptions),
+        ...ninjaKitTools(),
+        ...grokBotTools(),
+      },
+    };
+  }
 
   if (mode === "grupo") {
     const guessed = /\b(españa|espanha|spain|carrusel|youtube|thumbnail|miniatura)\b/i.test(
@@ -325,7 +397,7 @@ Miembro: ${member.name}
       : /\b(v[ií]deo|reels?|editor|github)\b/i.test(latestUserText)
         ? "conteudo-dev-video"
         : "conteudo-dev";
-    const group = getAgentGroup(guessed)!;
+    const group = (await resolveAgentGroup(guessed))!;
     return {
       mode: "grupo",
       model: chatModel,
@@ -333,8 +405,9 @@ Miembro: ${member.name}
         group.name,
         group.members.map((m) => `${m.name} — ${m.role}`),
         group.workflow,
+        group.members.find((m) => m.isOrchestrator)?.name || "Orquestrador",
       ),
-      tools: toolsForGroup(group.id, videoOptions),
+      tools: toolsForResolvedGroup(group, videoOptions),
     };
   }
 
@@ -567,6 +640,7 @@ Modos: central, github, radar, roteiro, arte-twitter, arte-realista, bit, editor
 async function routeMode(latestUserText: string): Promise<ConcreteMode> {
   if (!latestUserText) return "chat";
   if (heuristicCentral(latestUserText)) return "central";
+  if (heuristicOrquestrador(latestUserText)) return "orquestrador";
   if (heuristicKits(latestUserText)) return "kits";
   if (heuristicGrupo(latestUserText)) return "grupo";
   if (heuristicRadar(latestUserText)) return "radar";
@@ -612,6 +686,7 @@ async function routeMode(latestUserText: string): Promise<ConcreteMode> {
       "carrossel",
       "capas",
       "central",
+      "orquestrador",
       "custom",
       "grupo",
       "chat",
@@ -627,6 +702,12 @@ async function routeMode(latestUserText: string): Promise<ConcreteMode> {
 
 function heuristicCentral(text: string): boolean {
   return /\b(central(\s+de)?\s+conte[uú]do|fase\b|kanban|pipeline\s+(editorial|de\s+conte[uú]do)|agenda(r)?\s+(o\s+)?post|fila\s+de\s+publica[cç][aã]o|schedule\s+post|do\s+zero\s+ao\s+post|opera[cç][oõ]es\s+de\s+conte[uú]do)\b/i.test(
+    text,
+  );
+}
+
+function heuristicOrquestrador(text: string): boolean {
+  return /\b(orquestrador(\s+principal)?|orquestra(r)?\s+(os\s+)?agentes|coordena(r)?\s+todos(\s+os)?\s+grupos|agente\s+principal)\b/i.test(
     text,
   );
 }
@@ -699,6 +780,7 @@ function heuristicVideo(text: string): boolean {
 
 function heuristicRoute(text: string): ConcreteMode {
   if (heuristicCentral(text)) return "central";
+  if (heuristicOrquestrador(text)) return "orquestrador";
   if (heuristicKits(text)) return "kits";
   if (heuristicGrupo(text)) return "grupo";
   if (heuristicRadar(text)) return "radar";

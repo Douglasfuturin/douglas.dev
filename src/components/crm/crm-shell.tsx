@@ -16,7 +16,7 @@ const PRIMARY: NavItem[] = [
   { href: "/central", label: "Pipeline", ico: "PL", match: ["/central"] },
   { href: "/studio", label: "Studio IA", ico: "AI", match: ["/studio"] },
   { href: "/agentes", label: "Criar agente", ico: "+", match: ["/agentes"] },
-  { href: "/grupos", label: "Agentes", ico: "AG", match: ["/grupos"] },
+  { href: "/grupos", label: "Grupos", ico: "GR", match: ["/grupos"] },
 ];
 
 const MODULES: NavItem[] = [

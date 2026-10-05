@@ -5,7 +5,7 @@ export default function DashboardPage() {
   return (
     <CrmShell
       title="Dashboard"
-      subtitle="Visão geral da Central de Agentes — pipeline, agentes e módulos."
+      subtitle="Visão por operação — Orquestrador, grupos, pipeline e módulos."
       actions={
         <>
           <a href="/studio?mode=central" className="crm-btn crm-btn-primary">

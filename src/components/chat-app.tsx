@@ -5,10 +5,7 @@ import { DefaultChatTransport } from "ai";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { AgentMode, ResearchDepth } from "@/lib/agents/models";
-import {
-  getAgentGroup,
-  listAgentGroups,
-} from "@/lib/agents/groups";
+import type { ResolvedAgentGroup } from "@/lib/agents/group-types";
 import {
   extractRadarBriefing,
   RadarApprovalCards,
@@ -50,6 +47,7 @@ const MODE_LABELS: Record<AgentMode, string> = {
   carrossel: "Carrusel",
   capas: "Capas y Thumbnails",
   central: "Central de Agentes",
+  orquestrador: "Orquestrador Principal",
   custom: "Agente custom",
   notion: "Notion Guide",
   pipeline: "Pack Scout→Reels→Notion",
@@ -143,6 +141,7 @@ export function ChatApp() {
   const [customAgents, setCustomAgents] = useState<
     Array<{ id: string; name: string; role: string; color: string }>
   >([]);
+  const [groups, setGroups] = useState<ResolvedAgentGroup[]>([]);
   const [kitOptions, setKitOptions] = useState<Array<{ id: string; name: string }>>(
     [],
   );
@@ -196,6 +195,13 @@ export function ChatApp() {
         },
       )
       .catch(() => undefined);
+    fetch("/api/groups")
+      .then((r) => r.json())
+      .then((data: { groups?: ResolvedAgentGroup[] }) => {
+        if (!alive) return;
+        setGroups(data.groups || []);
+      })
+      .catch(() => undefined);
     return () => {
       alive = false;
     };
@@ -229,8 +235,7 @@ export function ChatApp() {
   const busy = status === "submitted" || status === "streaming";
   const showVideoPanel =
     mode === "video" || mode === "editor-reels" || mode === "auto";
-  const activeGroup = getAgentGroup(groupId);
-  const groups = listAgentGroups();
+  const activeGroup = groups.find((g) => g.id === groupId) || null;
 
   function approveTrendForRoteirista(item: RadarCardItem) {
     void fetch("/api/content", {
@@ -528,8 +533,15 @@ export function ChatApp() {
                   const next = e.target.value;
                   setMemberId(next);
                   const member = activeGroup.members.find((m) => m.id === next);
-                  if (member) setMode(member.mode as AgentMode);
-                  else setMode("grupo");
+                  if (member) {
+                    if (member.isOrchestrator || member.mode === "bit") {
+                      setMode("grupo");
+                    } else if (member.kind === "custom") {
+                      setMode("grupo");
+                    } else {
+                      setMode(member.mode as AgentMode);
+                    }
+                  } else setMode("grupo");
                 }}
               >
                 <option value="">Sala inteira</option>

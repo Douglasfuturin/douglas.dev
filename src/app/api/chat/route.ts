@@ -65,6 +65,7 @@ export async function POST(req: Request) {
       agent.mode === "radar" ||
       agent.mode === "pipeline" ||
       agent.mode === "central" ||
+      agent.mode === "orquestrador" ||
       agent.mode === "github" ||
       agent.mode === "custom" ||
       agent.mode === "grupo" ||
