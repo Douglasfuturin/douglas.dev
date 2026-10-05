@@ -371,7 +371,7 @@ export function GroupsManager({ compact = false }: { compact?: boolean }) {
                   {group.members.map((m) => (
                     <li
                       key={m.id}
-                      className="flex items-center justify-between gap-2 rounded-xl border border-[color:var(--fase-line)] bg-white/5 px-3 py-2"
+                      className="flex items-center justify-between gap-2 rounded-xl border border-[color:var(--fase-line)] bg-white px-3 py-2"
                     >
                       <div className="flex min-w-0 items-center gap-2">
                         <span
@@ -381,11 +381,11 @@ export function GroupsManager({ compact = false }: { compact?: boolean }) {
                           {m.name.slice(0, 2).toUpperCase()}
                         </span>
                         <span className="min-w-0">
-                          <span className="block truncate text-sm font-semibold text-white">
+                          <span className="block truncate text-sm font-semibold text-black">
                             {m.name}
                             {m.isOrchestrator ? " · Orquestrador" : ""}
                           </span>
-                          <span className="block truncate text-[11px] text-[color:var(--fase-muted)]">
+                          <span className="block truncate text-[11px] text-black/60">
                             {m.role}
                           </span>
                         </span>
