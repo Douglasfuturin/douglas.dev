@@ -394,149 +394,99 @@ export function ChatApp({
       }`}
     >
       {variant === "studio" ? (
-        <div className="pointer-events-none absolute inset-0 atmosphere" aria-hidden />
-      ) : null}
-      {variant === "studio" ? (
-        <div className="pointer-events-none absolute inset-0 grid-fade" aria-hidden />
-      ) : null}
-
-      {variant === "studio" ? (
-      <header className="relative z-10 mx-auto flex w-full max-w-3xl items-end justify-between gap-4 px-5 pt-8 pb-4">
-        <div>
-          <p className="font-display text-3xl tracking-tight text-[var(--ink)] md:text-4xl">
-            Studio
-          </p>
-          <p className="mt-2 max-w-md text-sm leading-relaxed text-[var(--muted)]">
-            Agentes — grupos, radar, roteiro, artes e edição.
-          </p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <Link
-              href="/app"
-              className="inline-flex rounded-lg bg-[var(--ink)] px-3 py-1.5 text-xs font-semibold text-[var(--panel)]"
-            >
-              Chat Orquestrador →
-            </Link>
-            <Link
-              href="/dashboard"
-              className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
-            >
-              Dashboard
-            </Link>
-            <Link
-              href="/central"
-              className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
-            >
-              Pipeline
-            </Link>
-            <Link
-              href="/grupos"
-              className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
-            >
-              Grupos
-            </Link>
-            <Link
-              href="/kits"
-              className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
-            >
-              Skills
-            </Link>
-            <button
-              type="button"
-              onClick={() => {
-                setGroupId("conteudo-dev");
-                setMemberId("");
-                setMode("grupo");
-              }}
-              className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
-            >
-              Conteúdo Dev — Imagem
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setGroupId("conteudo-dev-video");
-                setMemberId("");
-                setMode("grupo");
-              }}
-              className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
-            >
-              Conteúdo Dev — Vídeo
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setGroupId("conteudos-espanha");
-                setMemberId("");
-                setMode("grupo");
-              }}
-              className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
-            >
-              Conteúdo Espanha
-            </button>
-            <Link
-              href="/agentes"
-              className="inline-flex rounded-lg border border-[var(--line)] bg-[var(--accent)] px-3 py-1.5 text-xs font-bold text-[var(--accent-ink)]"
-            >
-              + Criar agente
-            </Link>
-            <button
-              type="button"
-              onClick={() => setMode("radar")}
-              className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
-            >
-              Radar
-            </button>
-            <Link
-              href="/editor"
-              className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
-            >
-              Editor EDVD
-            </Link>
-          </div>
-        </div>
-        <div className="flex flex-col items-end gap-2">
-          <label className="text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">
-            Modo
-            <select
-              className="mt-1 block rounded-md border border-[var(--line)] bg-[var(--panel)] px-2 py-1.5 text-sm text-[var(--ink)]"
-              value={mode}
-              onChange={(e) => setMode(e.target.value as AgentMode)}
-            >
-              {(Object.keys(MODE_LABELS) as AgentMode[]).map((key) => (
-                <option key={key} value={key}>
-                  {MODE_LABELS[key]}
-                </option>
-              ))}
-            </select>
-          </label>
-          {mode === "research" ? (
-            <label className="text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">
-              Agentes
-              <select
-                className="mt-1 block rounded-md border border-[var(--line)] bg-[var(--panel)] px-2 py-1.5 text-sm text-[var(--ink)]"
-                value={researchDepth}
-                onChange={(e) =>
-                  setResearchDepth(e.target.value as ResearchDepth)
-                }
+      <header className="relative z-10 border-b border-[color:var(--border)] px-4 py-4 md:px-5">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div className="min-w-0">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[color:var(--muted-foreground)]">
+              Modo agente
+            </p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setGroupId("conteudo-dev");
+                  setMemberId("");
+                  setMode("grupo");
+                }}
+                className="nexus-chip"
               >
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
+                Sala Imagem
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setGroupId("conteudo-dev-video");
+                  setMemberId("");
+                  setMode("grupo");
+                }}
+                className="nexus-chip"
+              >
+                Sala Vídeo
+              </button>
+              <button
+                type="button"
+                onClick={() => setMode("radar")}
+                className="nexus-chip"
+              >
+                Radar
+              </button>
+              <Link href="/agentes" className="nexus-chip nexus-chip-on">
+                + Agente
+              </Link>
+              <Link href="/ferramentas/editor" className="nexus-chip">
+                Editor
+              </Link>
+              <Link href="/ferramentas/skills" className="nexus-chip">
+                Skills
+              </Link>
+              <Link href="/ferramentas/pack" className="nexus-chip">
+                Pack
+              </Link>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-end gap-3">
+            <label className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--muted-foreground)]">
+              Modo
+              <select
+                className="nexus-field mt-1 block min-w-[160px]"
+                value={mode}
+                onChange={(e) => setMode(e.target.value as AgentMode)}
+              >
+                {(Object.keys(MODE_LABELS) as AgentMode[]).map((key) => (
+                  <option key={key} value={key}>
+                    {MODE_LABELS[key]}
+                  </option>
+                ))}
               </select>
             </label>
-          ) : null}
-          {mode === "custom" || customAgents.length > 0 ? (
-            <label className="text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">
-              Agente custom
-              <select
-                className="mt-1 block max-w-[220px] rounded-md border border-[var(--line)] bg-[var(--panel)] px-2 py-1.5 text-sm text-[var(--ink)]"
-                value={customAgentId}
-                onChange={(e) => {
-                  const id = e.target.value;
-                  setCustomAgentId(id);
-                  if (id) setMode("custom");
-                }}
-              >
+            {mode === "research" ? (
+              <label className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--muted-foreground)]">
+                Agentes
+                <select
+                  className="nexus-field mt-1 block"
+                  value={researchDepth}
+                  onChange={(e) =>
+                    setResearchDepth(e.target.value as ResearchDepth)
+                  }
+                >
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                </select>
+              </label>
+            ) : null}
+            {mode === "custom" || customAgents.length > 0 ? (
+              <label className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--muted-foreground)]">
+                Custom
+                <select
+                  className="nexus-field mt-1 block max-w-[200px]"
+                  value={customAgentId}
+                  onChange={(e) => {
+                    const id = e.target.value;
+                    setCustomAgentId(id);
+                    if (id) setMode("custom");
+                  }}
+                >
                 <option value="">(nenhum)</option>
                 {customAgents.map((a) => (
                   <option key={a.id} value={a.id}>
@@ -615,6 +565,7 @@ export function ChatApp({
               </select>
             </label>
           ) : null}
+          </div>
         </div>
       </header>
       ) : null}

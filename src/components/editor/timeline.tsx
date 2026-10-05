@@ -47,10 +47,10 @@ export function Timeline({
   }
 
   return (
-    <section className="rounded-2xl border border-white/10 bg-[#12151a] p-3">
-      <div className="mb-2 flex items-center justify-between gap-3 text-xs text-white/55">
+    <section className="rounded-2xl border border-[color:var(--border)] bg-[color:var(--background)] p-3">
+      <div className="mb-2 flex items-center justify-between gap-3 text-xs text-[color:var(--muted-foreground)]">
         <div className="flex items-center gap-2">
-          <span className="font-mono text-white/80">
+          <span className="font-mono text-[color:var(--foreground)]/85">
             {formatClock(currentTime)} / {formatClock(duration)}
           </span>
         </div>
@@ -63,18 +63,18 @@ export function Timeline({
             step={0.1}
             value={zoom}
             onChange={(e) => onZoom(Number(e.target.value))}
-            className="accent-[#ff7a1a]"
+            className="accent-[color:var(--primary)]"
           />
         </label>
       </div>
 
-      <div className="overflow-x-auto pb-1">
+      <div className="nexus-editor-timeline-track pb-1">
         <div style={{ width: `${widthPct}%` }} className="min-w-full">
           <div className="relative mb-1 h-4">
             {ticks.map((t) => (
               <span
                 key={t}
-                className="absolute top-0 -translate-x-1/2 font-mono text-[10px] text-white/35"
+                className="absolute top-0 -translate-x-1/2 font-mono text-[10px] text-[color:var(--muted-foreground)]"
                 style={{ left: `${(t / Math.max(duration, 0.001)) * 100}%` }}
               >
                 {formatClock(t)}
@@ -96,7 +96,7 @@ export function Timeline({
               window.addEventListener("pointerup", up);
             }}
           >
-            <div className="mb-2 flex h-14 overflow-hidden rounded-lg border border-white/10 bg-black/40">
+            <div className="mb-2 flex h-14 overflow-hidden rounded-lg border border-[color:var(--border)] bg-black/40">
               {filmstrip.length ? (
                 filmstrip.map((src, i) => (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -108,28 +108,28 @@ export function Timeline({
                   />
                 ))
               ) : (
-                <div className="flex w-full items-center justify-center text-xs text-white/30">
+                <div className="flex w-full items-center justify-center text-xs text-[color:var(--muted-foreground)]">
                   filmstrip
                 </div>
               )}
             </div>
 
-            <div className="relative mb-2 h-16 overflow-hidden rounded-lg border border-white/10 bg-[#0e1116]">
-              <div className="absolute left-2 top-1 text-[10px] uppercase tracking-[0.16em] text-[#f5d76e]">
+            <div className="relative mb-2 h-16 overflow-hidden rounded-lg border border-[color:var(--border)] bg-[color:var(--background)]">
+              <div className="absolute left-2 top-1 text-[10px] uppercase tracking-[0.16em] text-[color:var(--primary)]">
                 Audio
               </div>
               <div className="flex h-full items-end gap-px px-1 pb-1 pt-5">
                 {waveform.map((p, i) => (
                   <div
                     key={i}
-                    className="min-w-px flex-1 rounded-sm bg-[#f5d76e]"
+                    className="min-w-px flex-1 rounded-sm bg-[color:var(--primary)]"
                     style={{ height: `${Math.max(6, p * 100)}%`, opacity: 0.85 }}
                   />
                 ))}
               </div>
             </div>
 
-            <div className="relative h-12 rounded-lg border border-white/10 bg-black/30">
+            <div className="relative h-12 rounded-lg border border-[color:var(--border)] bg-black/30">
               {takes.map((take) => {
                 const left = (take.start / Math.max(duration, 0.001)) * 100;
                 const width =
@@ -137,17 +137,17 @@ export function Timeline({
                 return (
                   <div
                     key={take.id}
-                    className="absolute top-1 bottom-1 overflow-hidden rounded-md border border-[#ff7a1a]/60 bg-[#ff7a1a]/20"
+                    className="absolute top-1 bottom-1 overflow-hidden rounded-md border border-[color:var(--primary)]/60 bg-[color:var(--primary)]/20"
                     style={{ left: `${left}%`, width: `${Math.max(width, 0.8)}%` }}
                     title={take.label}
                   >
-                    <span className="px-1 text-[10px] text-white/80">
+                    <span className="px-1 text-[10px] text-[color:var(--foreground)]/85">
                       {take.label}
                     </span>
                     <button
                       type="button"
                       aria-label="ajustar início"
-                      className="absolute inset-y-0 left-0 w-2 cursor-ew-resize bg-white/30"
+                      className="absolute inset-y-0 left-0 w-2 cursor-ew-resize bg-[color:var(--foreground)]/30"
                       onPointerDown={(e) => {
                         e.stopPropagation();
                         const move = (ev: PointerEvent) => {
@@ -165,7 +165,7 @@ export function Timeline({
                     <button
                       type="button"
                       aria-label="ajustar fim"
-                      className="absolute inset-y-0 right-0 w-2 cursor-ew-resize bg-white/30"
+                      className="absolute inset-y-0 right-0 w-2 cursor-ew-resize bg-[color:var(--foreground)]/30"
                       onPointerDown={(e) => {
                         e.stopPropagation();
                         const move = (ev: PointerEvent) => {
@@ -186,18 +186,18 @@ export function Timeline({
             </div>
 
             <div
-              className="pointer-events-none absolute top-0 bottom-0 z-10 w-[2px] bg-[#ff7a1a]"
+              className="pointer-events-none absolute top-0 bottom-0 z-10 w-[2px] bg-[color:var(--primary)]"
               style={{
                 left: `${(currentTime / Math.max(duration, 0.001)) * 100}%`,
               }}
             >
-              <div className="absolute -top-1 left-1/2 h-3 w-3 -translate-x-1/2 rounded-full bg-[#ff7a1a] shadow-[0_0_12px_#ff7a1a]" />
+              <div className="absolute -top-1 left-1/2 h-3 w-3 -translate-x-1/2 rounded-full bg-[color:var(--primary)] shadow-[0_0_12px_color-mix(in_oklab,var(--primary)_45%,transparent)]" />
             </div>
           </div>
         </div>
       </div>
 
-      <p className="mt-2 text-[11px] text-white/35">
+      <p className="mt-2 text-[11px] text-[color:var(--muted-foreground)]">
         espaço play/pause · setas frame a frame · shift+setas 1s · arraste as bordas
         de um take · clique na timeline para seek
       </p>

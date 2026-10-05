@@ -152,7 +152,7 @@ export function SkillRunner({
 
       <div
         ref={scrollerRef}
-        className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 py-3"
+        className="flex flex-col gap-3 px-4 py-3"
       >
         <article className="ml-auto max-w-[95%] rounded-2xl bg-[var(--ink)] px-3 py-2.5 text-sm leading-relaxed text-[var(--panel)]">
           <p className="mb-1 text-[10px] uppercase tracking-[0.14em] opacity-60">

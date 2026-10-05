@@ -469,6 +469,48 @@ textarea.field {
   font-family: var(--font-display), Impact, sans-serif;
 }
 
+.nexus-editor {
+  background: var(--card);
+  color: var(--foreground);
+  overflow: visible;
+}
+
+.nexus-editor,
+.nexus-editor * {
+  scrollbar-width: none;
+}
+
+.nexus-editor *::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.nexus-editor-timeline-track {
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.nexus-editor-timeline-track::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.nexus-editor-visual {
+  align-items: start;
+}
+
+.nexus-editor-preview {
+  max-width: 100%;
+}
+
+.nexus-editor select,
+.nexus-editor input[type="text"],
+.nexus-editor input:not([type]) {
+  accent-color: var(--primary);
+}
+
 .crm-kanban {
   display: flex;
   gap: 0.75rem;
@@ -1037,4 +1079,158 @@ textarea.field {
     background: var(--border);
     z-index: 1;
   }
+}
+
+/* —— Nexus tools workspace —— */
+.nexus-tool-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.nexus-tool-kicker {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+.nexus-tool-switcher {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.nexus-tool-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0.25rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border);
+  background: color-mix(in oklab, var(--card) 80%, transparent);
+}
+
+.nexus-tool-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 0.5rem;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.nexus-tool-tab:hover {
+  color: var(--foreground);
+  background: var(--sidebar-accent);
+}
+
+.nexus-tool-tab[data-active="true"] {
+  color: var(--primary-foreground);
+  background: var(--primary);
+}
+
+.nexus-tool-body {
+  min-width: 0;
+}
+
+.nexus-tool-body-flush {
+  min-width: 0;
+}
+
+.nexus-tool-card {
+  display: block;
+  border-radius: 1rem;
+  border: 1px solid var(--border);
+  background:
+    radial-gradient(500px 180px at 0% 0%, color-mix(in oklab, var(--primary) 12%, transparent), transparent 55%),
+    var(--card);
+  padding: 1.25rem 1.35rem;
+  text-decoration: none;
+  transition: border-color 180ms ease, transform 180ms ease;
+}
+
+.nexus-tool-card:hover {
+  border-color: color-mix(in oklab, var(--primary) 45%, var(--border));
+  transform: translateY(-2px);
+}
+
+.nexus-studio-frame {
+  min-height: min(78vh, 900px);
+}
+
+.nexus-skills-skin .crm-panel,
+.nexus-skills-skin .crm-card,
+.nexus-skills-skin .crm-card-sm {
+  border-color: var(--border);
+  background: var(--card);
+  color: var(--foreground);
+}
+
+.nexus-skills-skin .field {
+  border-color: var(--border);
+  background: color-mix(in oklab, var(--card) 80%, transparent);
+  color: var(--foreground);
+}
+
+.nexus-skills-skin .field:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 25%, transparent);
+}
+
+.nexus-skills-skin .crm-btn-primary {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.nexus-skills-workspace,
+.nexus-skills-skin {
+  overflow: visible;
+}
+
+.nexus-skills-workspace *,
+.nexus-skills-skin * {
+  scrollbar-width: none;
+}
+
+.nexus-skills-workspace *::-webkit-scrollbar,
+.nexus-skills-skin *::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.nexus-skill-tile {
+  border-radius: 0.85rem;
+  border: 1px solid var(--border);
+  background: var(--card);
+  padding: 0.95rem 1rem;
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.nexus-skill-tile:hover {
+  border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
+  transform: translateY(-1px);
+}
+
+.nexus-skill-tile-on {
+  border-color: color-mix(in oklab, var(--primary) 55%, var(--border));
+  background: color-mix(in oklab, var(--primary) 10%, var(--card));
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--primary) 25%, transparent);
+}
+
+.nexus-scroll-hidden {
+  scrollbar-width: none;
+}
+
+.nexus-scroll-hidden::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }

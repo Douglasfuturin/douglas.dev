@@ -41,7 +41,7 @@ const FIELD_AGENTS = [
     status: "Disponível",
     detail: "Corte 9:16 e render local",
     tone: "idle" as const,
-    href: "/editor",
+    href: "/ferramentas/editor",
   },
 ];
 
