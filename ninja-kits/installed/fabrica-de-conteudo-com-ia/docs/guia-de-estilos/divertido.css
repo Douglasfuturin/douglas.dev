@@ -1,0 +1,29 @@
+/* Divertido: chão creme com bolinha colorida, letra redonda, cores vivas, canto bem
+   redondo, borda grossa e sombra dura. O neobrutalista de festa.
+   Copie para marca/tema.css e troque as quatro cores e a letra (docs/guia-de-estilos.md).
+   A letra: Fredoka (Google Fonts, OFL), em marca/fontes/Fredoka.ttf. */
+
+@font-face{font-family:'Marca';font-weight:100 900;src:url(fontes/Fredoka.ttf) format('truetype')}
+
+html.marca{
+  /* as cores: chão, letra e borda, bloco, marcador */
+  --pp:#FFF6E9; --ink:#2B2238; --ac:#E52E71; --mk:#FFD23F;
+  --ok:#21B8A5;
+  --ink9:var(--ink); --sur:#FFFFFF;
+  --ac2:color-mix(in srgb,var(--ac) 16%,white); --act:color-mix(in srgb,var(--ac) 26%,white);
+  --fd:'Marca',system-ui,sans-serif; --ls:-.01em;
+
+  /* a forma: borda grossa, sombra dura, canto bem redondo, bolinha na cor do bloco */
+  --bw:4px; --sh:8px; --raio:28px; --raio-s:16px;
+  --dot:color-mix(in srgb,var(--ac) 22%,transparent);
+  --tex:radial-gradient(circle,var(--dot) 4px,transparent 4.6px) 0 0/56px 56px;
+
+  /* o reel editorial e a capa */
+  --ed-sans:'Marca',system-ui,sans-serif;
+  --ed-pp:var(--pp); --ed-pp-luz:color-mix(in srgb,var(--pp) 40%,white);
+  --ed-tx:var(--ink);
+  --ed-dg-azul:linear-gradient(180deg,color-mix(in srgb,var(--ac) 50%,white) 0%,var(--ac) 70%);
+  --ed-dg-ouro:linear-gradient(180deg,color-mix(in srgb,var(--mk) 30%,white) 8%,var(--mk) 58%,color-mix(in srgb,var(--mk) 80%,black) 100%);
+  --ed-dg-some-azul:linear-gradient(180deg,var(--ac) 0%,color-mix(in srgb,var(--ac) 55%,transparent) 55%,color-mix(in srgb,var(--ac) 6%,transparent) 100%);
+  --ed-dg-some-ouro:linear-gradient(180deg,var(--mk) 0%,color-mix(in srgb,var(--mk) 55%,transparent) 55%,color-mix(in srgb,var(--mk) 6%,transparent) 100%);
+}

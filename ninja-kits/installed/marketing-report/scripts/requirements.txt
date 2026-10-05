@@ -1,0 +1,11 @@
+# Required for render_report.py
+jinja2>=3.1
+
+# Required for pull_ga4.py
+google-analytics-data>=0.18.0
+
+# Required for pull_meta_ads.py and pull_hyros.py
+requests>=2.31
+
+# Optional: only if rendering report to PDF later
+# playwright>=1.40

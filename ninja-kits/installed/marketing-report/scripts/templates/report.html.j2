@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ meta.brand_name }} — {{ meta.period_label }} Marketing Report</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+
+:root {
+  --bg:         #0a0a0a;
+  --surface:    #141414;
+  --surface-2:  #1a1a1a;
+  --border:     rgba(255, 255, 255, 0.08);
+  --border-2:   rgba(255, 255, 255, 0.14);
+  --text:       #ededed;
+  --text-muted: #8a8a8a;
+  --text-dim:   #5a5a5a;
+  --brand:      {{ meta.brand_color | default('#ff8c42') }};
+  --brand-glow: {{ meta.brand_glow | default('rgba(255, 140, 66, 0.25)') }};
+  --up:         #4ade80;
+  --up-bg:      rgba(74, 222, 128, 0.08);
+  --down:       #f87171;
+  --down-bg:    rgba(248, 113, 113, 0.08);
+  --neutral:    #94a3b8;
+  --font-sans:  'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-mono:  'JetBrains Mono', ui-monospace, monospace;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.page { max-width: 1080px; margin: 0 auto; padding: 56px 32px 96px; }
+
+/* ---- Top bar ---- */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 32px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 56px;
+}
+.topbar__brand { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 15px; letter-spacing: -0.01em; }
+.topbar__brand-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--brand); box-shadow: 0 0 12px var(--brand-glow); }
+.topbar__meta { font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); letter-spacing: 0.05em; }
+.topbar__meta span { color: var(--text-muted); }
+
+/* ---- Eyebrow ---- */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 10px;
+  border: 1px solid var(--brand);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+  text-transform: uppercase;
+  color: var(--brand);
+}
+.eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--brand); animation: pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+/* ---- Hero card ---- */
+.hero {
+  position: relative;
+  padding: 48px;
+  background: linear-gradient(180deg, var(--surface) 0%, var(--surface-2) 100%);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  overflow: hidden;
+  margin-bottom: 80px;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: -40% -20% auto auto;
+  width: 480px;
+  height: 480px;
+  background: radial-gradient(circle, var(--brand) 0%, transparent 70%);
+  opacity: 0.12;
+  pointer-events: none;
+}
+.hero h1 {
+  margin: 16px 0 24px;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  max-width: 720px;
+}
+.hero h1 .accent { color: var(--brand); }
+.hero__lede {
+  color: var(--text-muted);
+  font-size: 15px;
+  line-height: 1.7;
+  max-width: 640px;
+  margin: 0 0 32px;
+}
+.hero__kpis {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.hero__kpi {
+  padding: 20px 24px;
+  background: var(--surface);
+}
+.hero__kpi-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); }
+.hero__kpi-value { font-family: var(--font-mono); font-size: 28px; font-weight: 700; letter-spacing: -0.04em; margin: 6px 0 4px; }
+.hero__kpi-delta { display: inline-flex; }
+
+/* ---- Section ---- */
+.section { margin-bottom: 80px; }
+.section__head { margin-bottom: 32px; }
+.section h2 {
+  margin: 14px 0 6px;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.section__lede { color: var(--text-muted); font-size: 14px; margin: 0; max-width: 640px; }
+
+/* ---- KPI tile grid ---- */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+.kpi {
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  transition: border-color 0.2s;
+}
+.kpi:hover { border-color: var(--border-2); }
+.kpi__label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); }
+.kpi__value { font-family: var(--font-mono); font-size: 32px; font-weight: 700; letter-spacing: -0.04em; margin: 4px 0 6px; }
+.kpi__delta { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.kpi__sub { font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); }
+.kpi__spark { margin-top: auto; }
+@media (max-width: 880px) {
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .hero__kpis { grid-template-columns: 1fr; }
+}
+
+/* ---- Delta pill ---- */
+.delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: -0.5px;
+}
+.delta--up   { color: var(--up);      background: var(--up-bg); }
+.delta--down { color: var(--down);    background: var(--down-bg); }
+.delta--flat { color: var(--neutral); background: rgba(148, 163, 184, 0.08); }
+
+/* ---- Chart card ---- */
+.chart-card {
+  padding: 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+.chart-card__title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 4px;
+}
+.chart-card__title h3 { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+.chart-card__title .legend { display: inline-flex; gap: 14px; font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); }
+.chart-card__title .legend span { display: inline-flex; align-items: center; gap: 6px; }
+.chart-card__title .legend i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; }
+.chart-card__meta { font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); margin-bottom: 16px; }
+
+/* ---- Two-column grid for chart blocks ---- */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+@media (max-width: 880px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+/* ---- Insight cards ---- */
+.insights { display: flex; flex-direction: column; gap: 16px; }
+.insight {
+  position: relative;
+  padding: 28px 28px 28px 32px;
+  background: linear-gradient(180deg, var(--surface) 0%, var(--surface-2) 100%);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.insight::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--brand);
+}
+.insight__tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--brand);
+}
+.insight__title {
+  margin: 8px 0 12px;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--text);
+}
+.insight__body { font-size: 14px; line-height: 1.7; color: var(--text-muted); margin: 0; }
+.insight__action {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--border);
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+.insight__action-label {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  padding-top: 2px;
+  min-width: 110px;
+}
+.insight__action-text { font-size: 14px; line-height: 1.5; color: var(--text); }
+
+/* ---- Focus list ---- */
+.focus { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.focus__col { padding: 24px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; }
+.focus__col h4 {
+  margin: 0 0 16px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.focus__col--start h4 { color: var(--up); }
+.focus__col--stop h4 { color: var(--down); }
+.focus__col--test h4 { color: var(--brand); }
+.focus__col ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.focus__col li { padding-left: 18px; position: relative; color: var(--text); font-size: 14px; line-height: 1.5; }
+.focus__col li::before { content: ''; position: absolute; left: 0; top: 8px; width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: 0.6; }
+.focus__col--start li { color: var(--text); }
+.focus__col--start li::before { background: var(--up); }
+.focus__col--stop li::before { background: var(--down); }
+.focus__col--test li::before { background: var(--brand); }
+@media (max-width: 880px) { .focus { grid-template-columns: 1fr; } }
+
+/* ---- Tables ---- */
+.tbl-card { padding: 24px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; }
+.tbl { width: 100%; border-collapse: collapse; }
+.tbl th, .tbl td {
+  padding: 12px 8px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.tbl th {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  font-weight: 600;
+  padding-bottom: 14px;
+}
+.tbl td.num { font-family: var(--font-mono); text-align: right; }
+.tbl tbody tr:last-child td { border-bottom: none; }
+.tbl tbody tr:hover { background: rgba(255,255,255,0.015); }
+
+/* ---- Footer ---- */
+.footer {
+  margin-top: 96px;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.footer__sources { display: flex; gap: 16px; flex-wrap: wrap; }
+.footer__sources span { display: inline-flex; align-items: center; gap: 6px; }
+.footer__sources span::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--up); }
+.footer__sources span.missing::before { background: var(--down); }
+
+a { color: var(--brand); text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <div class="topbar__brand">
+      <span class="topbar__brand-dot"></span>
+      {{ meta.brand_name }} · Marketing Report
+    </div>
+    <div class="topbar__meta">
+      <span>{{ meta.period_label | upper }}</span> · GENERATED {{ meta.generated_at }}
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <span class="eyebrow"><span class="dot"></span> {{ meta.period_tag | upper }}</span>
+    <h1>{{ headline.title | safe }}</h1>
+    <p class="hero__lede">{{ headline.lede }}</p>
+    <div class="hero__kpis">
+      {% for k in headline.kpis %}
+      <div class="hero__kpi">
+        <div class="hero__kpi-label">{{ k.label }}</div>
+        <div class="hero__kpi-value">{{ k.value }}</div>
+        <div class="hero__kpi-delta">{{ k.delta_html | safe }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- KPI tile grid -->
+  <section class="section">
+    <div class="section__head">
+      <span class="eyebrow"><span class="dot"></span> CORE METRICS · {{ kpis | length }} TILES</span>
+      <h2>Where the numbers landed.</h2>
+      <p class="section__lede">{{ kpi_section_lede }}</p>
+    </div>
+    <div class="kpi-grid">
+      {% for tile in kpis %}{{ tile | safe }}{% endfor %}
+    </div>
+  </section>
+
+  <!-- Channel performance -->
+  {% if channels %}
+  <section class="section">
+    <div class="section__head">
+      <span class="eyebrow"><span class="dot"></span> CHANNEL PERFORMANCE</span>
+      <h2>{{ channels.title }}</h2>
+      <p class="section__lede">{{ channels.lede }}</p>
+    </div>
+    <div class="chart-card" style="margin-bottom: 16px;">
+      <div class="chart-card__title">
+        <h3>{{ channels.web.title }}</h3>
+        <div class="legend">
+          {% for s in channels.web.series %}<span><i style="background:{{ s.color }}"></i> {{ s.name }}</span>{% endfor %}
+        </div>
+      </div>
+      <div class="chart-card__meta">{{ channels.web.meta }}</div>
+      {{ channels.web.svg | safe }}
+    </div>
+    <div class="grid-2">
+      <div class="chart-card">
+        <div class="chart-card__title"><h3>{{ channels.ads.title }}</h3></div>
+        <div class="chart-card__meta">{{ channels.ads.meta }}</div>
+        {{ channels.ads.svg | safe }}
+      </div>
+      <div class="chart-card">
+        <div class="chart-card__title"><h3>{{ channels.spend.title }}</h3></div>
+        <div class="chart-card__meta">{{ channels.spend.meta }}</div>
+        <div style="display:flex; align-items:center; gap:24px;">
+          {{ channels.spend.svg | safe }}
+          <div style="flex:1;">
+            {% for slice in channels.spend.legend %}
+            <div style="display:flex; align-items:center; gap:10px; padding:6px 0; border-bottom:1px solid var(--border); font-size:13px;">
+              <i style="display:inline-block; width:10px; height:10px; border-radius:2px; background:{{ slice.color }}"></i>
+              <span style="flex:1; color:var(--text-muted);">{{ slice.name }}</span>
+              <span style="font-family:var(--font-mono); color:var(--text);">{{ slice.label }}</span>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Content performance -->
+  {% if content %}
+  <section class="section">
+    <div class="section__head">
+      <span class="eyebrow"><span class="dot"></span> CONTENT &amp; SOCIAL</span>
+      <h2>{{ content.title }}</h2>
+      <p class="section__lede">{{ content.lede }}</p>
+    </div>
+    <div class="chart-card" style="margin-bottom: 16px;">
+      <div class="chart-card__title"><h3>{{ content.heatmap.title }}</h3></div>
+      <div class="chart-card__meta">{{ content.heatmap.meta }}</div>
+      {{ content.heatmap.svg | safe }}
+    </div>
+    <div class="grid-2">
+      <div class="tbl-card">
+        <h3 style="margin:0 0 16px; font-size:14px;">Top performing posts</h3>
+        <table class="tbl">
+          <thead><tr><th>Post</th><th>Platform</th><th class="num">Reach</th><th class="num">Engage %</th></tr></thead>
+          <tbody>
+            {% for row in content.top_posts %}
+            <tr><td>{{ row.title }}</td><td style="color:var(--text-muted)">{{ row.platform }}</td><td class="num">{{ row.reach }}</td><td class="num" style="color:var(--brand)">{{ row.engagement }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="tbl-card">
+        <h3 style="margin:0 0 16px; font-size:14px;">Underperformers (low signal)</h3>
+        <table class="tbl">
+          <thead><tr><th>Post</th><th>Platform</th><th class="num">Reach</th><th class="num">Engage %</th></tr></thead>
+          <tbody>
+            {% for row in content.bottom_posts %}
+            <tr><td>{{ row.title }}</td><td style="color:var(--text-muted)">{{ row.platform }}</td><td class="num">{{ row.reach }}</td><td class="num" style="color:var(--text-muted)">{{ row.engagement }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Insights -->
+  {% if insights %}
+  <section class="section">
+    <div class="section__head">
+      <span class="eyebrow"><span class="dot"></span> INVESTIGATOR · {{ insights | length }} OBSERVATIONS</span>
+      <h2>{{ insights_title | default("Patterns worth your attention.") }}</h2>
+      <p class="section__lede">{{ insights_lede | default("Cross-channel patterns and anomalies surfaced by analysis of this period’s data against the trailing baseline.") }}</p>
+    </div>
+    <div class="insights">
+      {% for it in insights %}
+      <div class="insight">
+        <div class="insight__tag">● INSIGHT {{ "%02d" | format(loop.index) }} · {{ it.tag }}</div>
+        <h3 class="insight__title">{{ it.title }}</h3>
+        <p class="insight__body">{{ it.body }}</p>
+        {% if it.action %}
+        <div class="insight__action">
+          <span class="insight__action-label">Recommended action</span>
+          <span class="insight__action-text">{{ it.action }}</span>
+        </div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Focus next period -->
+  {% if focus %}
+  <section class="section">
+    <div class="section__head">
+      <span class="eyebrow"><span class="dot"></span> RECOMMENDED FOCUS</span>
+      <h2>{{ focus.title | default("Where to spend the next " ~ meta.period_tag | lower ~ ".") }}</h2>
+      <p class="section__lede">{{ focus.lede | default("A short list of moves prioritized by leverage — the marginal hour spent on these should return the most.") }}</p>
+    </div>
+    <div class="focus">
+      <div class="focus__col focus__col--start">
+        <h4>● Start</h4>
+        <ul>{% for x in focus.start %}<li>{{ x }}</li>{% endfor %}</ul>
+      </div>
+      <div class="focus__col focus__col--stop">
+        <h4>● Stop</h4>
+        <ul>{% for x in focus.stop %}<li>{{ x }}</li>{% endfor %}</ul>
+      </div>
+      <div class="focus__col focus__col--test">
+        <h4>● Test</h4>
+        <ul>{% for x in focus.test %}<li>{{ x }}</li>{% endfor %}</ul>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer__sources">
+      {% for s in meta.sources %}
+      <span class="{{ 'missing' if s.status == 'missing' else '' }}">{{ s.name }}{% if s.status == 'missing' %} <em style="font-style:normal;color:var(--text-dim);">— not connected</em>{% endif %}</span>
+      {% endfor %}
+    </div>
+    <div>
+      Window {{ meta.window_start }} → {{ meta.window_end }} · vs. prior {{ meta.period_tag | lower }}
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

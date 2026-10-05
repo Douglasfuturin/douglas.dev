@@ -1,0 +1,21 @@
+{
+ "_leia": "Exemplo de lote: duas cenas do banco, sem rosto. Só estima, sem gastar: uv run python tools/video-use/helpers/lote.py exemplos/criativo/banco/lote.json. Com --gera, cobra na Higgsfield e baixa as cenas nesta pasta, cada uma com a ficha no cenas.json. O formato inteiro está no topo de tools/video-use/helpers/lote.py; para pôr o seu rosto na cena, 'rosto' com duas fotos e o modelo 'wan' (docs/linguagem-do-criativo.md, 'Você dentro da cena').",
+ "estetica": "documento-neutro",
+ "cenas": {
+  "escritorio-3h": {
+   "modelo": "kling",
+   "acabamento": "cctv",
+   "hora": "03:12:47",
+   "cam": "02",
+   "ilustra": ["o trabalho que anda sozinho de madrugada"],
+   "prompt": "Ceiling security camera footage at night of an empty open-plan office lit by fluorescent lights. On one desk, a stack of paper taller than a person slowly tips over, and an empty office chair rolls in by itself and catches it just in time. Static camera, high corner angle, wide view of the whole room."
+  },
+  "reporter-na-rua": {
+   "modelo": "kling",
+   "acabamento": "telejornal",
+   "hora": "14:32:10",
+   "ilustra": ["todo mundo correndo atrás de conteúdo"],
+   "prompt": "Live TV news field footage on a city sidewalk on a sunny day. A reporter in a yellow raincoat, seen from behind, holds a plain microphone with no logo and stands calmly while dozens of office workers run past behind her holding open laptops over their heads, as if escaping heavy rain, under a clear blue sky. Handheld camera at eye level."
+  }
+ }
+}

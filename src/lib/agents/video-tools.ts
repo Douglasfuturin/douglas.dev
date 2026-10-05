@@ -13,6 +13,9 @@ import {
   transcribeVideo,
   writePlan,
 } from "@/lib/video/runner";
+import { getKitById, listInstalledKits } from "@/lib/kits/discover";
+import { runKitHelper } from "@/lib/kits/runner";
+import { VISUAL_KITS } from "@/lib/kits/visual";
 
 const styleSchema = z.enum(VIDEO_STYLES);
 
@@ -203,6 +206,50 @@ export function videoEditorTools(defaults: VideoEditOptions) {
       },
     }),
 
+    list_video_skills: tool({
+      description:
+        "Lista skills/kits de vídeo do sistema (editar-video, hyperframes, fabrica, etc.) prontos para edição automática.",
+      inputSchema: z.object({}),
+      execute: async () => {
+        const installed = await listInstalledKits();
+        const videoKits = installed.filter(
+          (k) =>
+            k.kind === "video" ||
+            k.id === "editar-video" ||
+            k.id === "hyperframes" ||
+            k.id.includes("video") ||
+            k.id.includes("fabrica") ||
+            Boolean(VISUAL_KITS[k.id] && VISUAL_KITS[k.id].kind === "video"),
+        );
+        const seeded = [
+          {
+            id: "editar-video",
+            name: "Editor EDVD (kit-edicao-video)",
+            path: "kit-edicao-video/",
+            pipeline: "auto_edit_video / fabrica.py",
+          },
+          {
+            id: "hyperframes",
+            name: "HyperFrames",
+            path: "ninja-kits/installed/hyperframes/",
+            pipeline: "skill HyperFrames + helpers",
+          },
+        ];
+        return {
+          ok: true,
+          pythonReady: await kitPythonReady(),
+          seeded,
+          installedVideoSkills: videoKits.map((k) => ({
+            id: k.id,
+            name: k.name,
+            helpers: k.helpers.map((h) => h.name),
+            hasSkillMd: Boolean(k.skillBody),
+          })),
+          tip: "Para edição automática de MP4 use auto_edit_with_system_skills ou auto_edit_video.",
+        };
+      },
+    }),
+
     auto_edit_video: tool({
       description:
         "Pipeline automático: transcreve → cria plano → dry-run → (se autoRender) renderiza. Ideal para edição sem microgestão.",
@@ -290,6 +337,140 @@ export function videoEditorTools(defaults: VideoEditOptions) {
           renderLog: (rendered.stdout || rendered.stderr).slice(-6000),
           transcriptPath,
           transcriptLog,
+        };
+      },
+    }),
+
+    auto_edit_with_system_skills: tool({
+      description:
+        "Edita vídeo automaticamente usando as skills do sistema: inventaria kits de vídeo (editar-video/hyperframes), aplica a skill escolhida e roda o pipeline EDVD (transcribe→plano→dry-run→render).",
+      inputSchema: z.object({
+        videoPath: z.string().describe("Caminho absoluto do MP4"),
+        skillId: z
+          .enum(["editar-video", "hyperframes", "auto"])
+          .optional()
+          .describe("Skill preferida (default auto → editar-video)"),
+        estilo: styleSchema.optional(),
+        forceRender: z.boolean().optional(),
+        helper: z
+          .string()
+          .optional()
+          .describe("Helper opcional da skill (ex.: estilo.py) antes do edit"),
+        helperArgs: z.array(z.string()).optional(),
+      }),
+      execute: async ({
+        videoPath,
+        skillId = "auto",
+        estilo,
+        forceRender,
+        helper,
+        helperArgs,
+      }) => {
+        const chosen =
+          skillId === "auto"
+            ? ((await getKitById("editar-video")) ? "editar-video" : "editar-video")
+            : skillId;
+
+        const skill = await getKitById(chosen);
+        let helperRun: Record<string, unknown> | null = null;
+        if (skill && helper) {
+          const result = await runKitHelper({
+            kitId: chosen,
+            helper,
+            args: helperArgs,
+            timeoutMs: 5 * 60 * 1000,
+          });
+          helperRun = {
+            ok: result.ok,
+            helper,
+            stdout: result.stdout.slice(-3000),
+            stderr: result.stderr.slice(-1500) || undefined,
+          };
+        }
+
+        if (!(await kitPythonReady())) {
+          return {
+            ok: false,
+            skillId: chosen,
+            skillInstalled: Boolean(skill),
+            skillPreview: skill?.skillBody?.slice(0, 1200) || null,
+            helperRun,
+            error:
+              "Kit Python (EDVD) não instalado. Rode: cd kit-edicao-video/skill && uv sync",
+          };
+        }
+
+        const opts = mergeOptions(defaults, {
+          estilo: estilo ?? defaults.estilo,
+        });
+
+        let transcriptPath: string | undefined;
+        const tr = await transcribeVideo({
+          videoPath,
+          language: opts.language,
+          model: opts.whisperModel,
+        });
+        if (!tr.ok) {
+          return {
+            ok: false,
+            skillId: chosen,
+            step: "transcribe",
+            skillInstalled: Boolean(skill),
+            error: (tr.stderr || tr.stdout).slice(-2000),
+          };
+        }
+        transcriptPath = tr.transcriptPath;
+
+        const { planPath, plan } = await writePlan({
+          videoPath,
+          transcriptPath,
+          options: opts,
+        });
+        const dry = await dryRunPlan(planPath);
+        if (!dry.ok) {
+          return {
+            ok: false,
+            skillId: chosen,
+            step: "dry_run",
+            planPath,
+            skillInstalled: Boolean(skill),
+            helperRun,
+            report: (dry.stdout || dry.stderr).slice(-6000),
+          };
+        }
+
+        const shouldRender =
+          forceRender ?? (opts.autoRender && opts.autoConfirm);
+        if (!shouldRender) {
+          return {
+            ok: true,
+            skillId: chosen,
+            skillInstalled: Boolean(skill),
+            skillName: skill?.name || chosen,
+            skillPreview: skill?.skillBody?.slice(0, 1500) || null,
+            helperRun,
+            step: "awaiting_confirm",
+            planPath,
+            plan,
+            dryRun: dry.stdout.slice(-6000),
+            message:
+              "Skills do sistema aplicadas (EDVD). Dry-run OK — confirme para render_edit ou forceRender=true.",
+          };
+        }
+
+        const rendered = await renderPlan(planPath);
+        return {
+          ok: rendered.ok,
+          skillId: chosen,
+          skillInstalled: Boolean(skill),
+          skillName: skill?.name || chosen,
+          helperRun,
+          step: "render",
+          planPath,
+          plan,
+          dryRun: dry.stdout.slice(-3000),
+          renderLog: (rendered.stdout || rendered.stderr).slice(-6000),
+          transcriptPath,
         };
       },
     }),

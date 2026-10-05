@@ -1,0 +1,17 @@
+/* 16:9 — YouTube e aulas. Carrega DEPOIS do direcao-v2.css e só mexe em
+   medida: cor, fonte e movimento continuam os da v2.
+
+   Dose: contido na aula (sombra 8, sem inclinação, peça pequena e no canto),
+   forte nos ganchos (abertura, capítulo e recap usam a escala cheia).
+
+   ZONA DO ROSTO: canto inferior direito, 440×280 a 40px das bordas
+   (x 1440–1880, y 760–1040). Peça alfa não entra ali: é onde fica a bolha do
+   apresentador quando a tela está compartilhada. */
+html.h{--piso:32px;--t-hd:84px;--t-big:260px;--t-item:40px;--t-apoio:28px;--t-kick:22px;
+  --sh:8px;--pad:64px;--marg:120px}
+html.h,html.h body{width:1920px;height:1080px}
+html.h #stage{width:1920px;height:1080px;padding:0;display:block}
+html.h .kick{margin-bottom:24px}
+html.h .hd{text-wrap:balance}
+/* vídeo-ensaio em camadas (ensaio.js): cada passe mostra só a sua camada */
+html.c-tras [data-c="frente"],html.c-frente [data-c="tras"]{visibility:hidden!important}

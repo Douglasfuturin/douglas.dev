@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<!-- TIPOGRAFIA — a frase ocupa a tela, uma batida por vez. 1080x1920 ou 1920x1080 (?ar=).
+     Cada batida (|) enche a largura do quadro e chega empurrando a anterior pra
+     cima, cada uma num chão (papel → tinta → azul). *palavra vira o bloco amarelo
+     com sombra dura. @ marca o instante de cada batida; sem @, uma a cada `passo`.
+     fundo=alterna|papel|tinta|azul · ?alfa=1 tira o chão da 1ª batida (sobre o vídeo)
+       ?l=Você não|precisa|*programar|pra ter um|*agente&passo=0.45&t0=0.2&dur=3.6 -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body,#stage{width:1080px;height:1920px}
+html.h,html.h body,html.h #stage{width:1920px;height:1080px}
+#stage{position:relative;overflow:hidden;padding:0;display:block;background:var(--pp)}
+.bt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border-top:10px solid var(--ink)}
+.bt:first-child{border-top:0}
+.bt.papel{background:var(--tex),var(--pp);color:var(--ink);--sb:var(--ink)}
+.bt.tinta{background:var(--ink);color:#fff;--sb:var(--ac)}
+.bt.azul{background:var(--ac);color:#fff;--sb:var(--ink)}
+html.alfa #stage,html.alfa .bt:first-child{background:none}
+.tx{display:flex;align-items:baseline;gap:.22em;white-space:nowrap;font:700 100px/.92 var(--fd);letter-spacing:-.045em}
+.w{display:inline-block}
+.w.a{background:var(--mk);color:var(--ink);padding:.02em .16em .08em;border:.045em solid var(--ink);border-radius:.08em;box-shadow:.07em .07em 0 var(--sb)}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+const R = document.documentElement, HZ = D.q('ar', '1080x1920').startsWith('1920');
+if (HZ) R.classList.add('h');
+const W = HZ ? 1920 : 1080, H = HZ ? 1080 : 1920, MARG = HZ ? 140 : 70;
+const t0 = D.n('t0', '0.2'), passo = D.n('passo', '0.45');
+const bats = D.q('l', 'Você não|precisa|*programar|pra ter um|*agente').split('|').map((s, i) => {
+  const [tx, at] = s.split('@'); return {tx: tx.trim(), t: at ? parseFloat(at) : t0 + i * passo};
+}).filter(b => b.tx);
+const fim = bats[bats.length - 1].t;
+const dur = Math.max(fim + .9, D.n('dur', String(+(fim + 1.2).toFixed(2))));
+const fundo = D.q('fundo', 'alterna'), ciclo = ['papel', 'tinta', 'azul'];
+const st = document.getElementById('stage');
+bats.forEach((b, i) => {
+  const el = document.createElement('div');
+  el.className = 'bt ' + (fundo === 'alterna' ? ciclo[i % 3] : (ciclo.includes(fundo) ? fundo : 'papel'));
+  const tx = document.createElement('div'); tx.className = 'tx';
+  b.tx.split(/\s+/).forEach(p => { const w = document.createElement('span'), a = p.startsWith('*'); w.className = 'w' + (a ? ' a' : ''); w.textContent = a ? p.slice(1) : p; tx.appendChild(w); });
+  el.appendChild(tx); st.appendChild(el); b.el = el; b.txEl = tx; b.acento = !!tx.querySelector('.a');
+});
+D.monta(tl => {
+  // cada batida enche a largura: mede a 100px e escala até a margem
+  bats.forEach(b => { const fs = Math.min(HZ ? 300 : 340, H * .3, 100 * (W - MARG * 2) / b.txEl.scrollWidth); b.txEl.style.fontSize = fs + 'px'; });
+  D.camera(dur, 1, 1.035);
+  bats.forEach((b, i) => {
+    if (i > 0) {
+      tl.fromTo(b.el, {yPercent: 100}, {yPercent: 0, duration: .34, ease: 'power4.out'}, D.at(b.t));
+      tl.to(bats[i - 1].el, {yPercent: -22, duration: .34, ease: 'power4.out'}, D.at(b.t));
+    }
+    b.el.querySelectorAll('.w').forEach((w, k) => {
+      const a = w.classList.contains('a');
+      tl.fromTo(w, {opacity: 0, scale: a ? 1.5 : 1.25, rotation: a ? -7 : 0, yPercent: a ? 0 : 30},
+        {opacity: 1, scale: 1, rotation: a ? -2 : 0, yPercent: 0, duration: a ? .42 : .3, ease: a ? D.P.HEROI : 'power4.out'}, D.at(b.t) + .04 + k * .05);
+    });
+    D.cue(b.t, b.acento ? 'hit' : 'pop');
+  });
+  return dur;
+});
+</script>
+</body>
+</html>

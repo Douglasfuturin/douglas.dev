@@ -1,0 +1,27 @@
+/* Minimalista: muito branco, uma cor de acento só, borda fina, canto quase reto, nenhuma
+   sombra e nenhuma textura. O marcador é um tom claro, quase sem cor.
+   Copie para marca/tema.css e troque as quatro cores e a letra (docs/guia-de-estilos.md).
+   A letra: Manrope (Google Fonts, OFL), em marca/fontes/Manrope.ttf. */
+
+@font-face{font-family:'Marca';font-weight:100 900;src:url(fontes/Manrope.ttf) format('truetype')}
+
+html.marca{
+  /* as cores: chão, letra e borda, bloco, marcador */
+  --pp:#FAFAF8; --ink:#1C1C1C; --ac:#3A5A40; --mk:#E6E1D3;
+  --ink9:var(--ink); --sur:#FFFFFF;
+  --ac2:color-mix(in srgb,var(--ac) 12%,white); --act:color-mix(in srgb,var(--ac) 20%,white);
+  --fd:'Marca',system-ui,sans-serif; --ls:-.03em;
+
+  /* a forma: borda fina, sem sombra, canto quase reto, chão liso */
+  --bw:2px; --sh:0px; --sombra:transparent; --raio:6px; --raio-s:4px;
+  --tex:none;
+
+  /* o reel editorial e a capa */
+  --ed-sans:'Marca',system-ui,sans-serif;
+  --ed-pp:var(--pp); --ed-pp-luz:#FFFFFF; --ed-folha:transparent;
+  --ed-tx:var(--ink);
+  --ed-dg-azul:linear-gradient(180deg,var(--ac) 0%,var(--ac) 100%);
+  --ed-dg-ouro:linear-gradient(180deg,var(--ink) 0%,var(--ink) 100%);
+  --ed-dg-some-azul:linear-gradient(180deg,var(--ac) 0%,color-mix(in srgb,var(--ac) 55%,transparent) 55%,color-mix(in srgb,var(--ac) 6%,transparent) 100%);
+  --ed-dg-some-ouro:linear-gradient(180deg,var(--ink) 0%,color-mix(in srgb,var(--ink) 55%,transparent) 55%,color-mix(in srgb,var(--ink) 6%,transparent) 100%);
+}

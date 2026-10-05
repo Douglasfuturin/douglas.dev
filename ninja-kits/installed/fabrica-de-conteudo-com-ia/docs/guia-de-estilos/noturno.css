@@ -1,0 +1,32 @@
+/* Neobrutalista noturno: o mesmo sistema sobre o chão escuro. Os objetos continuam claros
+   com borda escura, e a sombra dura vira a cor do marcador, pra existir sobre o escuro.
+   Copie para marca/tema.css e troque as quatro cores e a letra (docs/guia-de-estilos.md).
+   A letra: Space Grotesk (Google Fonts, OFL), em marca/fontes/SpaceGrotesk.ttf. */
+
+@font-face{font-family:'Marca';font-weight:100 900;src:url(fontes/SpaceGrotesk.ttf) format('truetype')}
+
+html.marca{
+  /* as cores: chão (escuro), letra e borda dos objetos, bloco, marcador */
+  --pp:#0B0D12; --ink:#0B0D12; --ac:#0640fb; --mk:#F2C744;
+  --ink9:var(--ink); --sur:#FFFFFF;
+  --ac2:color-mix(in srgb,var(--ac) 16%,white); --act:color-mix(in srgb,var(--ac) 26%,white);
+  --fd:'Marca',system-ui,sans-serif; --ls:-.035em;
+
+  /* a forma: a sombra sai na cor do marcador */
+  --bw:4px; --sh:10px; --raio:12px; --raio-s:8px;
+  --dot:rgba(255,255,255,.07); --sombra:var(--mk);
+
+  /* o reel editorial e a capa: o painel também escurece */
+  --ed-sans:'Marca',system-ui,sans-serif;
+  --ed-pp:var(--pp); --ed-pp-luz:color-mix(in srgb,var(--pp) 88%,white);
+  --ed-tx:#FFFFFF; --ed-folha:rgba(255,255,255,.04);
+  --ed-dg-apaga-tx:linear-gradient(180deg,#FFFFFF 0%,rgba(255,255,255,.82) 42%,rgba(255,255,255,.2) 95%);
+  --ed-dg-azul:linear-gradient(180deg,color-mix(in srgb,var(--ac) 50%,white) 0%,var(--ac) 70%);
+  --ed-dg-ouro:linear-gradient(180deg,color-mix(in srgb,var(--mk) 30%,white) 8%,var(--mk) 58%,color-mix(in srgb,var(--mk) 80%,black) 100%);
+  --ed-dg-some-azul:linear-gradient(180deg,var(--ac) 0%,color-mix(in srgb,var(--ac) 55%,transparent) 55%,color-mix(in srgb,var(--ac) 6%,transparent) 100%);
+  --ed-dg-some-ouro:linear-gradient(180deg,var(--mk) 0%,color-mix(in srgb,var(--mk) 55%,transparent) 55%,color-mix(in srgb,var(--mk) 6%,transparent) 100%);
+}
+/* texto solto no chão escuro fica branco; a palavra grifada continua escura sobre o marcador */
+html.marca .hd,html.marca .big{color:#FFFFFF}
+html.marca .hd b,html.marca .mkr{color:var(--ink)}
+html.marca .nb.cor-ink{border-color:color-mix(in srgb,var(--pp) 70%,white)}

@@ -48,6 +48,16 @@ kit-edicao-video/skill/**/*.egg-info/
 workspace/videos/
 workspace/edits/
 public/outputs/
+/outputs/
 *.mp4
 *.mov
 *.mkv
+
+# ninja kits runtime (keep README + installed skills; ignore bulky zips/venvs)
+ninja-kits/sources/*.zip
+ninja-kits/**/.venv/
+ninja-kits/**/__pycache__/
+ninja-kits/**/.staging-*
+ninja-kits/installed/**/__MACOSX/
+ninja-kits/installed/**/.DS_Store
+ninja-kits/installed/editar-video/

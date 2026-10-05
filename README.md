@@ -4,6 +4,11 @@ Starter em Next.js + Vercel AI SDK + xAI Grok para um sistema multi-agente com a
 
 - chat agentic com tools server-side
 - research multi-agente paralelo (`grok-4.20-multi-agent`)
+- GitHub Scout — busca e ranqueia os melhores repositórios open-source
+- Roteirista — roteiro de Reels ~60s sobre um repositório
+- Notion Guide — página/arquivo com link + instalação + uso
+- Pipeline — Scout → Roteiro → Notion numa tacada
+- Radar de Tendências — briefing diário (IA, automação, marketing) com aprovação → Roteirista
 - web search, X search, code execution, image generation
 
 ## Arquitetura (duas camadas)
@@ -22,13 +27,109 @@ Um roteador escolhe o modo:
 | --- | --- | --- |
 | `chat` | `grok-4.7` | conversa, código, imagens, fatos rápidos |
 | `research` | `grok-4.20-multi-agent` | investigação profunda com fontes |
+| `github` | `grok-4.7` | melhores repos GitHub, libs open-source, comparação |
+| `roteiro` | `grok-4.7` | roteiro de Reels ~60s sobre um repo |
+| `notion` | `grok-4.7` | guia no Notion (link + instalar + usar) |
+| `pipeline` | `grok-4.7` | pack completo Scout → Reels → Notion |
+| `radar` | `grok-4.7` | briefing diário IA / automação / marketing |
+| `kits` | `grok-4.7` | skills Ninja / ZIPs instalados |
+| `video` | `grok-4.7` | edição automática de vídeo |
 | `auto` | roteador + um dos acima | decide pelo conteúdo da mensagem |
 
 ```
-Usuário → /api/chat → orchestrator (auto|chat|research)
-                         ├─ chat: grok-4.7 + web/X/code/image tools
+Usuário → /api/chat → orchestrator (...|pipeline|radar|kits|video)
+                         ├─ radar: briefing diário → aprovar → Roteirista
+                         ├─ pipeline: Scout → Roteiro → Notion
+                         ├─ github / roteiro / notion
+                         ├─ kits / video
                          └─ research: grok-4.20-multi-agent + web/X
 ```
+
+## GitHub Scout
+
+Modo dedicado (UI: **GitHub Scout**, atalho `/github` ou `/?mode=github`) que usa a Search API do GitHub:
+
+- `search_best_github_repos` — busca + score (stars, forks, atividade, licença)
+- `get_github_repo` — detalhe + preview do README
+- `compare_github_repos` — comparativo lado a lado
+
+Opcional: defina `GITHUB_TOKEN` (ou `GH_TOKEN` / `GITHUB_PAT`) em `.env.local` para limites de rate maiores.
+
+## Roteirista (Reels 60s)
+
+Atalho `/roteiro` ou `/?mode=roteiro`:
+
+- `prepare_repo_for_reels` — fatos do repo + guia de timing
+- `deliver_reels_script` — roteiro estruturado (hook → CTA) com fala, texto de tela e visual
+
+## Notion Guide
+
+Atalho `/notion` ou `/?mode=notion`:
+
+- `publish_repo_guide_to_notion` — cria página Notion + arquivo `.md` local (e tenta anexar o arquivo)
+- `export_repo_guide_markdown` — só gera/salva o markdown em `outputs/repo-guides/`
+
+Configure no `.env.local`:
+
+```bash
+NOTION_TOKEN=ntn_...
+NOTION_PARENT_PAGE_ID=...   # página pai compartilhada com a integração
+```
+
+## Pipeline (Scout → Reels → Notion)
+
+Atalho `/pipeline` ou `/?mode=pipeline`:
+
+- `run_repo_content_pack` — escolhe o melhor repo, gera roteiro 60s e publica/exporta o guia
+- Salva o pack em `outputs/packs/`
+
+Exemplo: “Pacote completo sobre agentes de IA em TypeScript”.
+
+## Radar de Tendências
+
+Atalho `/radar` ou `/?mode=radar`:
+
+1. O agente pesquisa (web + X) notícias de **automação**, **IA** e **marketing**
+2. Entrega briefing ranqueado via `deliver_daily_radar_briefing` (salva em `outputs/radar/`)
+3. Você **aprova** um card → handoff automático para o **Roteirista** (`prepare_trend_for_reels`)
+
+Exemplo: “Monta o briefing diário de automação, IA e marketing”.
+
+## Grupos de agentes
+
+Atalho [`/grupos`](/grupos) — duas salas no estilo Grok (até 6 membros):
+
+### Conteúdo Dev
+1. Radar de Tendências  
+2. Roteirista  
+3. Diretor de Arte Twitter  
+4. Diretor de Arte Realista  
+5. Bit  
+6. Roteirista Pessoal  
+
+Fluxo: briefing → aprovação → roteiro → artes Twitter/realista → Bit fecha.
+
+### Conteúdo Dev Vídeo
+1. Roteirista Pessoal  
+2. Editor Reels Realista  
+3. Editor Vídeo Pessoal  
+4. Bit  
+5. Radar GitHub  
+
+Fluxo: repo/tema → roteiro pessoal → edição Reels → render EDVD → Bit.
+
+Abra a sala (`/?mode=grupo&group=conteudo-dev`) ou um membro específico (`&member=radar`).
+
+### Contenidos España
+1. Editor de Vídeo (skills do sistema)  
+2. Carrusel  
+3. YouTube  
+4. Guionista  
+5. Capas y Thumbnails  
+6. Bit  
+
+Fluxo: guion → YouTube/carrusel → capas → edición automática → Bit.  
+Atalho: `/?mode=grupo&group=conteudos-espanha`
 
 ## Como rodar
 
@@ -74,7 +175,25 @@ const { text, sources } = await generateText({
 });
 ```
 
-## Editor de vídeo (kit integrado)
+## Hub Ninja Kits
+
+Abra [http://localhost:3000/kits](http://localhost:3000/kits) para importar cada ZIP de `F:\NINJA CURSOS`:
+
+1. Cole os `.zip` em `ninja-kits/sources/` (ou upload na UI / anexe na conversa do Cloud Agent)
+2. Clique em **Instalar todos os ZIPs**
+3. Cada kit vira agente + helpers (`list_ninja_kits`, `describe_ninja_kit`, `run_ninja_kit_helper`)
+4. Modo **Ninja Kits** no chat, com kit ativo selecionável
+
+O Cloud Agent **não acessa** o disco `F:\` do Windows — os ZIPs precisam ser enviados/copiados.
+
+## Editor de vídeo (skills do sistema)
+
+O modo **Editor de Vídeo** usa:
+
+- `list_video_skills` — inventário (editar-video, hyperframes, …)
+- `auto_edit_with_system_skills` — edição automática via skills + EDVD
+- Helpers Ninja (`list_ninja_kits` / `run_ninja_kit_helper`)
+- Pipeline clássico: transcribe → plan → dry-run → render
 
 O modo **Editor de vídeo** usa o kit em `kit-edicao-video/`:
 
