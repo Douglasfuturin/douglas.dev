@@ -31,6 +31,7 @@ const MODE_LABELS: Record<AgentMode, string> = {
   github: "GitHub Scout",
   roteiro: "Roteirista Reels",
   notion: "Notion Guide",
+  pipeline: "Pack Scout→Reels→Notion",
   video: "Editor de vídeo",
   kits: "Skills Ninja",
 };
@@ -47,6 +48,7 @@ function readQueryMode(): AgentMode {
     m === "github" ||
     m === "roteiro" ||
     m === "notion" ||
+    m === "pipeline" ||
     m === "auto"
   ) {
     return m;
@@ -244,6 +246,13 @@ export function ChatApp() {
             >
               Painel de Skills →
             </Link>
+            <button
+              type="button"
+              onClick={() => setMode("pipeline")}
+              className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
+            >
+              Pack completo
+            </button>
             <button
               type="button"
               onClick={() => setMode("github")}
@@ -769,11 +778,17 @@ function EmptyState({
                   "Crie um arquivo/página Notion com link + como usar o repo supabase/supabase",
                   "Exporte o markdown de guia do repositório facebook/react",
                 ]
-              : [
-                  "O que é o modelo grok-4.20-multi-agent e quando usar?",
-                  "Pesquise nas últimas notícias o que está rolando sobre agentes de IA",
-                  "Lista os kits Ninja disponíveis e o que cada um faz",
-                ];
+              : mode === "pipeline"
+                ? [
+                    "Pacote completo: melhores repos de agentes IA em TypeScript + roteiro 60s + guia Notion",
+                    "Gera o pack Scout→Reels→Notion sobre edição de vídeo open-source",
+                    "Roda o pipeline no repo vercel/ai (roteiro + Notion)",
+                  ]
+                : [
+                    "O que é o modelo grok-4.20-multi-agent e quando usar?",
+                    "Pesquise nas últimas notícias o que está rolando sobre agentes de IA",
+                    "Lista os kits Ninja disponíveis e o que cada um faz",
+                  ];
 
   return (
     <section className="animate-rise mt-2 space-y-4">
@@ -788,7 +803,9 @@ function EmptyState({
                 ? "Passe o owner/repo — o roteirista entrega um Reels de ~60s (fala + tela + visual)."
                 : mode === "notion"
                   ? "Passe o repo — o agente gera arquivo/página Notion com link, instalação e uso."
-                  : "Chat, research, Scout, roteiros, Notion, kits Ninja ou editor de vídeo."}
+                  : mode === "pipeline"
+                    ? "Uma tacada: escolhe o melhor repo → roteiro Reels 60s → guia Notion."
+                    : "Chat, research, Scout, pack, roteiros, Notion, kits ou editor."}
       </p>
       <ul className="space-y-2">
         {prompts.map((prompt) => (

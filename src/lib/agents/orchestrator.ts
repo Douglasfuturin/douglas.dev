@@ -10,6 +10,7 @@ import {
   GITHUB_SCOUT_PERSONA,
   KITS_PERSONA,
   NOTION_AGENT_PERSONA,
+  PIPELINE_PERSONA,
   RESEARCH_PERSONA,
   ROTEIRISTA_PERSONA,
   ROUTER_PROMPT,
@@ -19,6 +20,7 @@ import { grokBotTools, researchTools } from "./tools";
 import { githubScoutTools } from "./github-tools";
 import { reelsScriptTools } from "./reels-tools";
 import { notionRepoTools } from "./notion-tools";
+import { pipelineTools } from "./pipeline-tools";
 import { videoEditorTools } from "./video-tools";
 import { kitPersona, ninjaKitTools } from "./kit-tools";
 import { getKitById } from "@/lib/kits/discover";
@@ -178,6 +180,21 @@ Installed ZIP/SKILL: ${installed ? "yes" : "no — still deliver the kit's job w
     };
   }
 
+  if (mode === "pipeline") {
+    return {
+      mode,
+      model: chatModel,
+      instructions: PIPELINE_PERSONA,
+      tools: {
+        ...pipelineTools(),
+        ...githubScoutTools(),
+        ...reelsScriptTools(),
+        ...notionRepoTools(),
+        ...grokBotTools(),
+      },
+    };
+  }
+
   return {
     mode: "chat",
     model: chatModel,
@@ -186,13 +203,15 @@ Installed ZIP/SKILL: ${installed ? "yes" : "no — still deliver the kit's job w
 You can also inventory Ninja kits with list_ninja_kits when the user mentions kits/ZIPs/cursos.
 For GitHub repo discovery, prefer mode github / search_best_github_repos.
 For Reels scripts about a repo, prefer mode roteiro.
-For Notion repo guides, prefer mode notion.`,
+For Notion repo guides, prefer mode notion.
+For the full Scout → Roteiro → Notion pack, prefer mode pipeline / run_repo_content_pack.`,
     tools: {
       ...grokBotTools(),
       ...ninjaKitTools(),
       ...githubScoutTools(),
       ...reelsScriptTools(),
       ...notionRepoTools(),
+      ...pipelineTools(),
     },
   };
 }
@@ -200,6 +219,7 @@ For Notion repo guides, prefer mode notion.`,
 async function routeMode(latestUserText: string): Promise<ConcreteMode> {
   if (!latestUserText) return "chat";
   if (heuristicKits(latestUserText)) return "kits";
+  if (heuristicPipeline(latestUserText)) return "pipeline";
   if (heuristicRoteiro(latestUserText)) return "roteiro";
   if (heuristicNotion(latestUserText)) return "notion";
   if (heuristicGithub(latestUserText)) return "github";
@@ -222,6 +242,7 @@ async function routeMode(latestUserText: string): Promise<ConcreteMode> {
     if (parsed.mode === "github") return "github";
     if (parsed.mode === "roteiro") return "roteiro";
     if (parsed.mode === "notion") return "notion";
+    if (parsed.mode === "pipeline") return "pipeline";
     return "chat";
   } catch {
     return heuristicRoute(latestUserText);
@@ -230,6 +251,12 @@ async function routeMode(latestUserText: string): Promise<ConcreteMode> {
 
 function heuristicKits(text: string): boolean {
   return /\b(ninja\s*kits?|ninja\s*cursos|instala(r)?\s*kit|list(a|ar)\s*kits?|skill\.md|f:\\\\ninja|\.zip\b.*kit|kits?\s*ninja)\b/i.test(
+    text,
+  );
+}
+
+function heuristicPipeline(text: string): boolean {
+  return /\b(pipeline|content\s*pack|pacote\s+completo|scout\s*\+\s*roteiro|roteiro\s+e\s+notion|tudo\s+(junto|de\s+uma\s+vez)|gera(r)?\s+(o\s+)?pack|encade(ia|ar))\b/i.test(
     text,
   );
 }
@@ -260,6 +287,7 @@ function heuristicVideo(text: string): boolean {
 
 function heuristicRoute(text: string): ConcreteMode {
   if (heuristicKits(text)) return "kits";
+  if (heuristicPipeline(text)) return "pipeline";
   if (heuristicRoteiro(text)) return "roteiro";
   if (heuristicNotion(text)) return "notion";
   if (heuristicGithub(text)) return "github";

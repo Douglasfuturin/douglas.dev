@@ -278,6 +278,178 @@ async function uploadMarkdownAttachment(
   }
 }
 
+export type RepoGuideResult = {
+  ok: boolean;
+  localPath?: string;
+  markdown?: string;
+  notionPageId?: string | null;
+  notionUrl?: string | null;
+  title?: string;
+  attachment?: Record<string, unknown> | null;
+  error?: string;
+  tip?: string;
+  repo?: { fullName: string; url: string; stars: number };
+};
+
+/** Exporta guia .md local (sem Notion). */
+export async function exportRepoGuideBundle(input: {
+  fullName: string;
+  extraNotes?: string;
+}): Promise<RepoGuideResult> {
+  const repo = await fetchRepoBundle(input.fullName);
+  const hints = extractInstallUsageHints(repo.readmePreview);
+  const markdown = buildMarkdownGuide({
+    fullName: repo.fullName,
+    url: repo.url,
+    description: repo.description,
+    language: repo.language,
+    stars: repo.stars,
+    topics: repo.topics,
+    license: repo.license,
+    homepage: repo.homepage,
+    install: hints.install,
+    usage: hints.usage,
+    extraNotes: input.extraNotes,
+  });
+  const safeName = repo.fullName.replace(/[^\w.-]+/g, "_");
+  const outDir = path.join(process.cwd(), "outputs", "repo-guides");
+  await mkdir(outDir, { recursive: true });
+  const localPath = path.join(outDir, `${safeName}.md`);
+  await writeFile(localPath, markdown, "utf8");
+  return {
+    ok: true,
+    localPath,
+    markdown,
+    repo: {
+      fullName: repo.fullName,
+      url: repo.url,
+      stars: repo.stars,
+    },
+  };
+}
+
+/** Publica guia no Notion + salva .md local. */
+export async function publishRepoGuideBundle(input: {
+  fullName: string;
+  parentPageId?: string;
+  title?: string;
+  extraNotes?: string;
+  attachMarkdownFile?: boolean;
+}): Promise<RepoGuideResult> {
+  const attachMarkdownFile = input.attachMarkdownFile !== false;
+  const exported = await exportRepoGuideBundle({
+    fullName: input.fullName,
+    extraNotes: input.extraNotes,
+  });
+  if (!exported.ok || !exported.localPath || !exported.markdown || !exported.repo) {
+    return exported;
+  }
+
+  const repo = await fetchRepoBundle(input.fullName);
+  const hints = extractInstallUsageHints(repo.readmePreview);
+  const pageTitle = input.title || `Guia: ${repo.fullName}`;
+  const parent = (input.parentPageId || defaultParentPageId()).replace(/-/g, "");
+
+  if (!parent) {
+    return {
+      ok: false,
+      localPath: exported.localPath,
+      markdown: exported.markdown,
+      repo: exported.repo,
+      error:
+        "Defina NOTION_PARENT_PAGE_ID (ou passe parentPageId) e compartilhe a página com a integração Notion (NOTION_TOKEN).",
+    };
+  }
+
+  if (!notionToken()) {
+    return {
+      ok: false,
+      localPath: exported.localPath,
+      markdown: exported.markdown,
+      repo: exported.repo,
+      error:
+        "NOTION_TOKEN ausente. Defina NOTION_TOKEN e compartilhe a página pai com a integração.",
+    };
+  }
+
+  const children = buildNotionChildren({
+    url: repo.url,
+    description: repo.description,
+    language: repo.language,
+    stars: repo.stars,
+    topics: repo.topics,
+    license: repo.license,
+    homepage: repo.homepage,
+    install: hints.install,
+    usage: hints.usage,
+    extraNotes: input.extraNotes,
+    localFileHint: exported.localPath,
+  });
+
+  const page = (await notionFetch("/pages", {
+    method: "POST",
+    body: JSON.stringify({
+      parent: { page_id: parent },
+      properties: {
+        title: {
+          title: [{ type: "text", text: { content: pageTitle } }],
+        },
+      },
+      children,
+    }),
+  })) as { id?: string; url?: string };
+
+  let attachment: Record<string, unknown> | null = null;
+  if (attachMarkdownFile && page.id) {
+    const safeName = repo.fullName.replace(/[^\w.-]+/g, "_");
+    const uploaded = await uploadMarkdownAttachment(
+      `${safeName}.md`,
+      exported.markdown,
+    );
+    if ("fileUploadId" in uploaded) {
+      try {
+        await notionFetch(`/blocks/${page.id}/children`, {
+          method: "PATCH",
+          body: JSON.stringify({
+            children: [
+              heading("Arquivo do guia", 2),
+              {
+                object: "block",
+                type: "file",
+                file: {
+                  type: "file_upload",
+                  file_upload: { id: uploaded.fileUploadId },
+                  name: `${safeName}.md`,
+                },
+              },
+            ],
+          }),
+        });
+        attachment = { ok: true, fileUploadId: uploaded.fileUploadId };
+      } catch (err) {
+        attachment = {
+          ok: false,
+          error: err instanceof Error ? err.message : "falha ao anexar arquivo",
+        };
+      }
+    } else {
+      attachment = { ok: false, skipped: uploaded.skipped };
+    }
+  }
+
+  return {
+    ok: true,
+    notionPageId: page.id || null,
+    notionUrl: page.url || null,
+    localPath: exported.localPath,
+    markdown: exported.markdown,
+    title: pageTitle,
+    repo: exported.repo,
+    attachment,
+    tip: "Se a página não aparecer, confira se a integração tem acesso à página pai no Notion.",
+  };
+}
+
 export function notionRepoTools() {
   return {
     publish_repo_guide_to_notion: tool({
@@ -301,133 +473,9 @@ export function notionRepoTools() {
           .optional()
           .describe("Tentar anexar .md na página (default true)"),
       }),
-      execute: async ({
-        fullName,
-        parentPageId,
-        title,
-        extraNotes,
-        attachMarkdownFile = true,
-      }) => {
+      execute: async (args) => {
         try {
-          const repo = await fetchRepoBundle(fullName);
-          const hints = extractInstallUsageHints(repo.readmePreview);
-          const pageTitle =
-            title || `Guia: ${repo.fullName}`;
-          const markdown = buildMarkdownGuide({
-            fullName: repo.fullName,
-            url: repo.url,
-            description: repo.description,
-            language: repo.language,
-            stars: repo.stars,
-            topics: repo.topics,
-            license: repo.license,
-            homepage: repo.homepage,
-            install: hints.install,
-            usage: hints.usage,
-            extraNotes,
-          });
-
-          const safeName = repo.fullName.replace(/[^\w.-]+/g, "_");
-          const outDir = path.join(process.cwd(), "outputs", "repo-guides");
-          await mkdir(outDir, { recursive: true });
-          const localPath = path.join(outDir, `${safeName}.md`);
-          await writeFile(localPath, markdown, "utf8");
-
-          const parent = (parentPageId || defaultParentPageId()).replace(
-            /-/g,
-            "",
-          );
-          if (!parent) {
-            return {
-              ok: false,
-              localPath,
-              markdownPreview: markdown.slice(0, 1500),
-              error:
-                "Defina NOTION_PARENT_PAGE_ID (ou passe parentPageId) e compartilhe a página com a integração Notion (NOTION_TOKEN).",
-            };
-          }
-
-          const children = buildNotionChildren({
-            url: repo.url,
-            description: repo.description,
-            language: repo.language,
-            stars: repo.stars,
-            topics: repo.topics,
-            license: repo.license,
-            homepage: repo.homepage,
-            install: hints.install,
-            usage: hints.usage,
-            extraNotes,
-            localFileHint: localPath,
-          });
-
-          const page = (await notionFetch("/pages", {
-            method: "POST",
-            body: JSON.stringify({
-              parent: { page_id: parent },
-              properties: {
-                title: {
-                  title: [{ type: "text", text: { content: pageTitle } }],
-                },
-              },
-              children,
-            }),
-          })) as { id?: string; url?: string };
-
-          let attachment: Record<string, unknown> | null = null;
-          if (attachMarkdownFile && page.id) {
-            const uploaded = await uploadMarkdownAttachment(
-              `${safeName}.md`,
-              markdown,
-            );
-            if ("fileUploadId" in uploaded) {
-              try {
-                await notionFetch(`/blocks/${page.id}/children`, {
-                  method: "PATCH",
-                  body: JSON.stringify({
-                    children: [
-                      heading("Arquivo do guia", 2),
-                      {
-                        object: "block",
-                        type: "file",
-                        file: {
-                          type: "file_upload",
-                          file_upload: { id: uploaded.fileUploadId },
-                          name: `${safeName}.md`,
-                        },
-                      },
-                    ],
-                  }),
-                });
-                attachment = { ok: true, fileUploadId: uploaded.fileUploadId };
-              } catch (err) {
-                attachment = {
-                  ok: false,
-                  error:
-                    err instanceof Error
-                      ? err.message
-                      : "falha ao anexar arquivo",
-                };
-              }
-            } else {
-              attachment = { ok: false, skipped: uploaded.skipped };
-            }
-          }
-
-          return {
-            ok: true,
-            notionPageId: page.id || null,
-            notionUrl: page.url || null,
-            localPath,
-            title: pageTitle,
-            repo: {
-              fullName: repo.fullName,
-              url: repo.url,
-              stars: repo.stars,
-            },
-            attachment,
-            tip: "Se a página não aparecer, confira se a integração tem acesso à página pai no Notion.",
-          };
+          return await publishRepoGuideBundle(args);
         } catch (err) {
           return {
             ok: false,
@@ -444,33 +492,15 @@ export function notionRepoTools() {
         fullName: z.string(),
         extraNotes: z.string().optional(),
       }),
-      execute: async ({ fullName, extraNotes }) => {
+      execute: async (args) => {
         try {
-          const repo = await fetchRepoBundle(fullName);
-          const hints = extractInstallUsageHints(repo.readmePreview);
-          const markdown = buildMarkdownGuide({
-            fullName: repo.fullName,
-            url: repo.url,
-            description: repo.description,
-            language: repo.language,
-            stars: repo.stars,
-            topics: repo.topics,
-            license: repo.license,
-            homepage: repo.homepage,
-            install: hints.install,
-            usage: hints.usage,
-            extraNotes,
-          });
-          const safeName = repo.fullName.replace(/[^\w.-]+/g, "_");
-          const outDir = path.join(process.cwd(), "outputs", "repo-guides");
-          await mkdir(outDir, { recursive: true });
-          const localPath = path.join(outDir, `${safeName}.md`);
-          await writeFile(localPath, markdown, "utf8");
+          const result = await exportRepoGuideBundle(args);
           return {
-            ok: true,
-            localPath,
-            markdown,
-            repoUrl: repo.url,
+            ok: result.ok,
+            localPath: result.localPath,
+            markdown: result.markdown,
+            repoUrl: result.repo?.url,
+            error: result.error,
           };
         } catch (err) {
           return {
