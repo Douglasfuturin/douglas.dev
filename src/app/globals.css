@@ -1146,3 +1146,49 @@ textarea.field {
   background: var(--primary);
   color: var(--primary-foreground);
 }
+
+.nexus-skills-workspace,
+.nexus-skills-skin {
+  overflow: visible;
+}
+
+.nexus-skills-workspace *,
+.nexus-skills-skin * {
+  scrollbar-width: none;
+}
+
+.nexus-skills-workspace *::-webkit-scrollbar,
+.nexus-skills-skin *::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.nexus-skill-tile {
+  border-radius: 0.85rem;
+  border: 1px solid var(--border);
+  background: var(--card);
+  padding: 0.95rem 1rem;
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.nexus-skill-tile:hover {
+  border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
+  transform: translateY(-1px);
+}
+
+.nexus-skill-tile-on {
+  border-color: color-mix(in oklab, var(--primary) 55%, var(--border));
+  background: color-mix(in oklab, var(--primary) 10%, var(--card));
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--primary) 25%, transparent);
+}
+
+.nexus-scroll-hidden {
+  scrollbar-width: none;
+}
+
+.nexus-scroll-hidden::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}

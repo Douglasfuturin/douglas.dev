@@ -280,7 +280,13 @@ export function NexusShell({
         ) : null}
 
         <div
-          className={`relative min-h-0 flex-1 ${isChat ? "flex flex-col" : "overflow-y-auto"}`}
+          className={`relative min-h-0 flex-1 ${
+          isChat
+            ? "flex flex-col"
+            : pathname.startsWith("/ferramentas/skills")
+              ? "overflow-y-auto nexus-scroll-hidden"
+              : "overflow-y-auto"
+        }`}
         >
           {!isChat && !hideHeader && (title || actions) ? (
             <div className={`mx-auto w-full ${contentMax} px-4 pb-2 pt-6 md:px-6`}>

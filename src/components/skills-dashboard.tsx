@@ -219,56 +219,22 @@ export function SkillsDashboard({ embedded = false }: { embedded?: boolean }) {
   }
 
   return (
-    <div
-      className={
-        embedded
-          ? "relative min-h-0 flex-1"
-          : "relative min-h-full flex-1 overflow-hidden"
-      }
-    >
+    <div className="nexus-skills-workspace relative w-full">
       {!embedded ? (
-        <>
-          <div className="pointer-events-none absolute inset-0 atmosphere" aria-hidden />
-          <div className="pointer-events-none absolute inset-0 grid-fade" aria-hidden />
-        </>
-      ) : null}
-
-      <div
-        className={
-          embedded
-            ? "relative z-10 flex w-full flex-col"
-            : "relative z-10 mx-auto flex h-[100dvh] w-full max-w-7xl flex-col px-4 py-5 md:px-6"
-        }
-      >
-        <header className="mb-4 flex flex-wrap items-end justify-between gap-3 animate-nexus-rise">
+        <header className="mb-6 flex flex-wrap items-end justify-between gap-3">
           <div>
-            {embedded ? (
-              <p className="text-sm text-[color:var(--muted-foreground)]">
-                {catalog?.manifestCount ?? "…"} skills · escolha, ajuste o brief e execute
-              </p>
-            ) : (
-              <>
-                <div className="flex flex-wrap items-center gap-3">
-                  <Link
-                    href="/ferramentas"
-                    className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]"
-                  >
-                    ← Ferramentas
-                  </Link>
-                  <span className="text-xs text-[var(--muted)]">/</span>
-                  <p className="text-xs uppercase tracking-[0.18em] text-[var(--accent-ink)]">
-                    Painel de Skills
-                  </p>
-                </div>
-                <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[var(--ink)] md:text-4xl">
-                  Skills
-                </h1>
-                <p className="mt-1 max-w-xl text-sm text-[var(--muted)]">
-                  Escolha a skill, ajuste o brief e execute —{" "}
-                  {catalog?.manifestCount ?? "…"} skills disponíveis.
-                </p>
-              </>
-            )}
+            <Link
+              href="/ferramentas"
+              className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[color:var(--muted-foreground)]"
+            >
+              ← Ferramentas
+            </Link>
+            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[color:var(--foreground)]">
+              Skills
+            </h1>
+            <p className="mt-1 text-sm text-[color:var(--muted-foreground)]">
+              {catalog?.manifestCount ?? "…"} skills · escolha, ajuste o brief e execute
+            </p>
           </div>
           <div className="flex flex-wrap gap-2">
             <button
@@ -278,65 +244,71 @@ export function SkillsDashboard({ embedded = false }: { embedded?: boolean }) {
             >
               {showManage ? "Fechar gestão" : "Gestão de ZIPs"}
             </button>
-            {!embedded ? (
-              <Link href="/ferramentas/editor" className="nexus-btn-ghost !py-2 text-sm">
-                Editor
-              </Link>
-            ) : null}
+            <Link href="/ferramentas/editor" className="nexus-btn-ghost !py-2 text-sm">
+              Editor
+            </Link>
           </div>
         </header>
-
-        {message ? (
-          <p className="mb-3 rounded-lg border border-[var(--line)] bg-[var(--chip)] px-3 py-2 text-sm text-[var(--accent-ink)]">
-            {message}
+      ) : (
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm text-[color:var(--muted-foreground)]">
+            {filtered.length} de {catalog?.manifestCount ?? "…"} skills
           </p>
-        ) : null}
-        {error ? (
-          <p className="mb-3 rounded-lg border border-red-300/40 bg-red-50 px-3 py-2 text-sm text-red-800">
-            {error}
-          </p>
-        ) : null}
-
-        {showManage ? (
-          <ManagePanel
-            catalog={catalog}
-            busy={busy}
-            onUpload={onUpload}
-            onInstallAll={installAll}
-            onRefresh={() => void refresh()}
-          />
-        ) : null}
-
-        <div
-          className={`grid min-h-0 flex-1 gap-4 ${
-            activeRun
-              ? "lg:grid-cols-[minmax(240px,320px)_minmax(0,1fr)]"
-              : selected?.visual
-                ? "lg:grid-cols-[minmax(0,0.9fr)_minmax(360px,460px)]"
-                : "lg:grid-cols-[minmax(0,1fr)_minmax(320px,400px)]"
-          }`}
-        >
-          <section
-            className={`flex min-h-0 flex-col animate-rise ${
-              activeRun ? "hidden md:flex" : ""
-            }`}
+          <button
+            type="button"
+            onClick={() => setShowManage((v) => !v)}
+            className="nexus-btn-ghost !py-1.5 text-xs"
           >
-            <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center">
-              <label className="relative min-w-0 flex-1">
-                <span className="sr-only">Buscar skills</span>
-                <input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Buscar por nome, categoria ou objetivo…"
-                  className="w-full rounded-xl border border-[var(--line)] bg-[var(--panel)]/90 px-3 py-2.5 text-sm text-[var(--ink)] outline-none ring-[var(--accent)] focus:ring-2"
-                />
-              </label>
-              <p className="shrink-0 text-xs text-[var(--muted)]">
-                {filtered.length} skill{filtered.length === 1 ? "" : "s"}
-              </p>
-            </div>
+            {showManage ? "Fechar gestão" : "Gestão de ZIPs"}
+          </button>
+        </div>
+      )}
 
-            <div className="mb-3 flex gap-1.5 overflow-x-auto pb-1">
+      {message ? (
+        <p className="mb-3 rounded-lg border border-[color:var(--border)] bg-[color:var(--chip)] px-3 py-2 text-sm">
+          {message}
+        </p>
+      ) : null}
+      {error ? (
+        <p className="mb-3 rounded-lg border border-red-400/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+          {error}
+        </p>
+      ) : null}
+
+      {showManage ? (
+        <ManagePanel
+          catalog={catalog}
+          busy={busy}
+          onUpload={onUpload}
+          onInstallAll={installAll}
+          onRefresh={() => void refresh()}
+        />
+      ) : null}
+
+      {activeRun ? (
+        <div className="nexus-panel !p-0 overflow-hidden">
+          <SkillRunner
+            key={activeRun.key}
+            runId={activeRun.key}
+            kitId={activeRun.kitId}
+            kitName={activeRun.kitName}
+            prompt={activeRun.prompt}
+            onClose={() => setActiveRun(null)}
+          />
+        </div>
+      ) : (
+        <div className="space-y-6">
+          <div className="flex flex-col gap-3">
+            <label className="relative block">
+              <span className="sr-only">Buscar skills</span>
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Buscar por nome, categoria ou objetivo…"
+                className="nexus-field w-full !py-2.5"
+              />
+            </label>
+            <div className="flex flex-wrap gap-1.5">
               <CategoryChip
                 active={category === "all"}
                 onClick={() => setCategory("all")}
@@ -351,181 +323,147 @@ export function SkillsDashboard({ embedded = false }: { embedded?: boolean }) {
                 />
               ))}
             </div>
+          </div>
 
-            <ul className="min-h-0 flex-1 space-y-1.5 overflow-y-auto pr-1">
-              {filtered.map((item, index) => {
-                const active = selected?.id === item.id;
-                return (
-                  <li key={item.id}>
-                    <button
-                      type="button"
-                      onClick={() => selectSkill(item)}
-                      style={{ animationDelay: `${Math.min(index, 12) * 30}ms` }}
-                      className={`animate-rise w-full rounded-xl border px-3 py-2.5 text-left transition ${
-                        active
-                          ? "border-[var(--accent)] bg-[var(--panel)] shadow-[0_0_0_1px_var(--accent)]"
-                          : "border-[var(--line)] bg-[var(--panel)] hover:border-[var(--accent)]/50 hover:bg-[color:var(--dd-elevated)]"
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-semibold text-[var(--ink)]">
-                            {item.name}
-                          </p>
-                          <p className="mt-0.5 line-clamp-1 text-xs text-[var(--muted)]">
-                            {item.description}
-                          </p>
-                        </div>
-                        <div className="flex shrink-0 flex-col items-end gap-1">
-                          <span className="text-[10px] uppercase tracking-[0.12em] text-[var(--muted)]">
-                            {item.categoryLabel}
-                          </span>
-                          <div className="flex items-center gap-1">
-                            {item.visual ? (
-                              <span className="rounded bg-[var(--chip)] px-1 py-0.5 text-[9px] text-[var(--accent-ink)]">
-                                Visual
-                              </span>
-                            ) : null}
-                            <StatusDot status={item.status} />
-                          </div>
-                        </div>
+          <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {filtered.map((item) => {
+              const active = selected?.id === item.id;
+              return (
+                <li key={item.id}>
+                  <button
+                    type="button"
+                    onClick={() => selectSkill(item)}
+                    className={`nexus-skill-tile w-full text-left ${active ? "nexus-skill-tile-on" : ""}`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-[color:var(--foreground)]">
+                          {item.name}
+                        </p>
+                        <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-[color:var(--muted-foreground)]">
+                          {item.description}
+                        </p>
                       </div>
-                    </button>
-                  </li>
-                );
-              })}
-              {!filtered.length ? (
-                <li className="rounded-xl border border-dashed border-[var(--line)] px-4 py-10 text-center text-sm text-[var(--muted)]">
-                  Nenhuma skill encontrada para “{query}”.
-                </li>
-              ) : null}
-            </ul>
-          </section>
-
-          {activeRun ? (
-            <SkillRunner
-              key={activeRun.key}
-              runId={activeRun.key}
-              kitId={activeRun.kitId}
-              kitName={activeRun.kitName}
-              prompt={activeRun.prompt}
-              onClose={() => setActiveRun(null)}
-            />
-          ) : (
-            <aside className="flex min-h-0 flex-col rounded-2xl border border-[var(--line)] bg-[var(--panel)]/90 p-4 animate-rise backdrop-blur md:p-5">
-              {selected ? (
-                <>
-                  <div className="mb-3 shrink-0">
-                    <p className="text-[10px] uppercase tracking-[0.16em] text-[var(--muted)]">
-                      {selected.categoryLabel}
-                    </p>
-                    <h2 className="mt-1 font-display text-2xl text-[var(--ink)]">
-                      {selected.name}
-                    </h2>
-                    <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">
-                      {selected.description}
-                    </p>
-                    <div className="mt-3 flex flex-wrap gap-2 text-[11px]">
-                      <StatusDot status={selected.status} withLabel />
-                      {selected.visual ? (
-                        <span className="rounded-md bg-[var(--chip)] px-2 py-0.5 text-[var(--accent-ink)]">
-                          Painel visual
-                        </span>
-                      ) : null}
-                      {selected.hasSkill ? (
-                        <span className="rounded-md bg-[var(--chip)] px-2 py-0.5 text-[var(--accent-ink)]">
-                          Skill instalada
-                        </span>
-                      ) : null}
-                      {selected.helpers > 0 ? (
-                        <span className="rounded-md bg-[var(--chip)] px-2 py-0.5 text-[var(--accent-ink)]">
-                          {selected.helpers} auxiliares
-                        </span>
+                      <StatusDot status={item.status} />
+                    </div>
+                    <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                      <span className="nexus-tag-muted nexus-tag">
+                        {item.categoryLabel}
+                      </span>
+                      {item.visual ? (
+                        <span className="nexus-tag">Visual</span>
                       ) : null}
                     </div>
-                  </div>
+                  </button>
+                </li>
+              );
+            })}
+            {!filtered.length ? (
+              <li className="col-span-full rounded-xl border border-dashed border-[color:var(--border)] px-4 py-12 text-center text-sm text-[color:var(--muted-foreground)]">
+                Nenhuma skill encontrada para “{query}”.
+              </li>
+            ) : null}
+          </ul>
 
+          {selected ? (
+            <section className="nexus-panel space-y-4">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[color:var(--muted-foreground)]">
+                  {selected.categoryLabel}
+                </p>
+                <h2 className="mt-1 text-xl font-semibold text-[color:var(--foreground)]">
+                  {selected.name}
+                </h2>
+                <p className="mt-2 text-sm leading-relaxed text-[color:var(--muted-foreground)]">
+                  {selected.description}
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2 text-[11px]">
+                  <StatusDot status={selected.status} withLabel />
                   {selected.visual ? (
-                    <VisualEditPanel
-                      key={selected.id}
-                      kitId={selected.id}
-                      kitName={selected.name}
-                      extraBrief={brief}
-                      onExtraBriefChange={setBrief}
-                      onRun={(prompt, inDashboard) =>
-                        runSkill(prompt, !inDashboard)
-                      }
-                    />
-                  ) : (
-                    <>
-                      <div className="mb-3">
-                        <p className="mb-1.5 text-[11px] uppercase tracking-[0.14em] text-[var(--muted)]">
-                          Atalhos
-                        </p>
-                        <div className="flex flex-wrap gap-1.5">
-                          {selected.starters.map((s) => (
-                            <button
-                              key={s.label}
-                              type="button"
-                              onClick={() => setBrief(s.prompt)}
-                              className="rounded-lg border border-[var(--line)] bg-[var(--panel)] px-2.5 py-1 text-xs text-[var(--ink)] hover:border-[var(--accent)]"
-                            >
-                              {s.label}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      <label className="flex min-h-0 flex-1 flex-col">
-                        <span className="mb-1.5 text-[11px] uppercase tracking-[0.14em] text-[var(--muted)]">
-                          Pedido
-                        </span>
-                        <textarea
-                          value={activeBrief}
-                          onChange={(e) => setBrief(e.target.value)}
-                          rows={8}
-                          className="min-h-[140px] flex-1 resize-none rounded-xl border border-[var(--line)] bg-[var(--panel)] px-3 py-2.5 text-sm leading-relaxed text-[var(--ink)] outline-none ring-[var(--accent)] focus:ring-2"
-                          placeholder="Descreva o que precisa. Troque os [placeholders] pelos seus dados."
-                        />
-                      </label>
-
-                      <div className="mt-3 flex flex-col gap-2">
-                        <button
-                          type="button"
-                          onClick={() => runSkill(activeBrief, false)}
-                          className="rounded-xl bg-[var(--ink)] px-4 py-3 text-sm font-semibold text-[var(--panel)] transition hover:brightness-110"
-                        >
-                          Executar no painel →
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => runSkill(activeBrief, true)}
-                          className="rounded-xl border border-[var(--line)] px-4 py-2.5 text-sm text-[var(--ink)]"
-                        >
-                          Abrir no agente completo
-                        </button>
-                      </div>
-                    </>
-                  )}
-
-                  {selected.id.includes("video") || selected.kind === "video" ? (
-                    <Link
-                      href="/ferramentas/editor"
-                      className="mt-2 rounded-xl border border-[var(--line)] px-4 py-2.5 text-center text-sm text-[var(--ink)]"
-                    >
-                      Abrir Editor EDVD
-                    </Link>
+                    <span className="nexus-tag">Painel visual</span>
                   ) : null}
-                </>
-              ) : (
-                <div className="flex flex-1 items-center justify-center text-sm text-[var(--muted)]">
-                  Selecione uma skill à esquerda.
+                  {selected.hasSkill ? (
+                    <span className="nexus-tag">Skill instalada</span>
+                  ) : null}
+                  {selected.helpers > 0 ? (
+                    <span className="nexus-tag-muted nexus-tag">
+                      {selected.helpers} auxiliares
+                    </span>
+                  ) : null}
                 </div>
+              </div>
+
+              {selected.visual ? (
+                <VisualEditPanel
+                  key={selected.id}
+                  kitId={selected.id}
+                  kitName={selected.name}
+                  extraBrief={brief}
+                  onExtraBriefChange={setBrief}
+                  onRun={(prompt, inDashboard) => runSkill(prompt, !inDashboard)}
+                />
+              ) : (
+                <>
+                  {selected.starters.length ? (
+                    <div>
+                      <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--muted-foreground)]">
+                        Atalhos
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {selected.starters.map((s) => (
+                          <button
+                            key={s.label}
+                            type="button"
+                            onClick={() => setBrief(s.prompt)}
+                            className="nexus-chip"
+                          >
+                            {s.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+
+                  <label className="block">
+                    <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--muted-foreground)]">
+                      Pedido
+                    </span>
+                    <textarea
+                      value={activeBrief}
+                      onChange={(e) => setBrief(e.target.value)}
+                      rows={5}
+                      className="nexus-field w-full resize-y !rounded-xl"
+                      placeholder="Descreva o que precisa. Troque os [placeholders] pelos seus dados."
+                    />
+                  </label>
+
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => runSkill(activeBrief, false)}
+                      className="nexus-btn-primary"
+                    >
+                      Executar no painel →
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => runSkill(activeBrief, true)}
+                      className="nexus-btn-ghost"
+                    >
+                      Abrir no Studio
+                    </button>
+                    {selected.id.includes("video") || selected.kind === "video" ? (
+                      <Link href="/ferramentas/editor" className="nexus-btn-ghost">
+                        Editor de vídeo
+                      </Link>
+                    ) : null}
+                  </div>
+                </>
               )}
-            </aside>
-          )}
+            </section>
+          ) : null}
         </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -543,11 +481,7 @@ function CategoryChip({
     <button
       type="button"
       onClick={onClick}
-      className={`shrink-0 rounded-lg px-2.5 py-1 text-xs transition ${
-        active
-          ? "bg-[var(--ink)] font-semibold text-[var(--panel)]"
-          : "border border-[var(--line)] bg-[var(--panel)]/70 text-[var(--muted)] hover:text-[var(--ink)]"
-      }`}
+      className={`nexus-chip ${active ? "nexus-chip-on" : ""}`}
     >
       {label}
     </button>
@@ -643,7 +577,7 @@ function ManagePanel({
         </div>
       </div>
       {catalog?.zips?.length ? (
-        <ul className="max-h-40 space-y-1 overflow-y-auto text-xs text-[var(--muted)]">
+        <ul className="space-y-1 text-xs text-[color:var(--muted-foreground)]">
           {catalog.zips.map((z) => (
             <li key={z.path} className="truncate font-mono">
               {z.filename} · {(z.size / (1024 * 1024)).toFixed(2)} MB
