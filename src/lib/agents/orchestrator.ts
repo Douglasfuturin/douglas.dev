@@ -248,6 +248,16 @@ function toolsForResolvedGroup(
   return tools;
 }
 
+async function resolveCustomAgentFromStores(agentId: string) {
+  const fromLegacy = await getCustomAgent(agentId);
+  if (fromLegacy) return fromLegacy;
+  const fromRegistry = await getRegistryAgent(agentId);
+  if (fromRegistry && fromRegistry.status === "active") {
+    return registryToCustomShape(fromRegistry);
+  }
+  return null;
+}
+
 export async function resolveAgent(
   messages: UIMessage[],
   input: Pick<
@@ -274,7 +284,7 @@ export async function resolveAgent(
     const member = await resolveGroupMember(input.groupId, input.memberId);
     if (group && member) {
       if (member.kind === "custom" && member.customAgentId) {
-        const custom = await getCustomAgent(member.customAgentId);
+        const custom = await resolveCustomAgentFromStores(member.customAgentId);
         if (custom) {
           return {
             mode: "custom",
@@ -335,20 +345,10 @@ Miembro: ${member.name}
     }
   }
 
-  async function resolveCustomAgent(agentId: string) {
-    const fromLegacy = await getCustomAgent(agentId);
-    if (fromLegacy) return fromLegacy;
-    const fromRegistry = await getRegistryAgent(agentId);
-    if (fromRegistry && fromRegistry.status === "active") {
-      return registryToCustomShape(fromRegistry);
-    }
-    return null;
-  }
-
   // Agente custom criado pelo usuário (fora de grupo)
   if (input.customAgentId || input.mode === "custom") {
     const custom = input.customAgentId
-      ? await resolveCustomAgent(input.customAgentId)
+      ? await resolveCustomAgentFromStores(input.customAgentId)
       : null;
     if (custom) {
       return {
