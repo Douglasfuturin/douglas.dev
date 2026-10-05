@@ -52,7 +52,7 @@ function PipelineGroupCard({
             <p className="mt-1 max-w-xl text-sm text-white/50">{group.blurb}</p>
           </div>
           <Link
-            href={`/studio?mode=grupo&group=${group.id}`}
+            href={`/app/studio?mode=grupo&group=${group.id}`}
             className="crm-btn crm-btn-primary"
           >
             Abrir sala
@@ -76,7 +76,7 @@ function PipelineGroupCard({
                 {step}
               </div>
               <Link
-                href={`/studio?mode=${member.mode}&group=${group.id}&member=${member.id}`}
+                href={`/app/studio?mode=${member.mode}&group=${group.id}&member=${member.id}`}
                 className="crm-card-sm group flex min-w-0 flex-1 items-center gap-3 !py-3 transition hover:border-[color:var(--dd-orange)]/45"
               >
                 <span

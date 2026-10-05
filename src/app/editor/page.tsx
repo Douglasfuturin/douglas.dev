@@ -4,10 +4,7 @@ import { EditorApp } from "@/components/editor/editor-app";
 
 export default function EditorPage() {
   return (
-    <CrmShell
-      title="Editor de vídeo"
-      subtitle="EDVD visual + skills do sistema para render automático."
-    >
+    <CrmShell bare>
       <Suspense
         fallback={
           <div className="flex min-h-[50vh] items-center justify-center text-[color:var(--fase-muted)]">

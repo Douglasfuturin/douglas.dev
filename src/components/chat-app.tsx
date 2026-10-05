@@ -387,7 +387,7 @@ export function ChatApp({
   return (
     <div
       className={`relative flex min-h-0 flex-1 flex-col overflow-hidden ${
-        variant === "hub" ? "grok-hub-chat" : ""
+        variant === "hub" ? "nexus-hub-chat" : ""
       }`}
     >
       {variant === "studio" ? (
@@ -956,8 +956,8 @@ export function ChatApp({
       </main>
 
       <form
-        className={`grok-composer fixed inset-x-0 bottom-0 z-20 border-t border-[var(--line)] bg-[var(--panel)]/85 px-5 py-4 backdrop-blur-xl ${
-          variant === "hub" ? "md:left-[268px]" : ""
+        className={`nexus-composer fixed inset-x-0 bottom-0 z-20 border-t border-[var(--line)] bg-[var(--panel)]/85 px-5 py-4 backdrop-blur-xl ${
+          variant === "hub" ? "md:left-[var(--nexus-sidebar-width)]" : ""
         }`}
         onSubmit={(e) => {
           e.preventDefault();

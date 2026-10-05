@@ -1,36 +1,35 @@
 import type { Metadata } from "next";
-import { Anton, Geist_Mono, Plus_Jakarta_Sans } from "next/font/google";
+import { IBM_Plex_Mono, Manrope } from "next/font/google";
+import type { ReactNode } from "react";
 import "./globals.css";
 
-const anton = Anton({
-  variable: "--font-display",
-  subsets: ["latin"],
-  weight: "400",
-});
-
-const jakarta = Plus_Jakarta_Sans({
+const manrope = Manrope({
   variable: "--font-body",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const ibmMono = IBM_Plex_Mono({
+  variable: "--font-mono",
   subsets: ["latin"],
+  weight: ["400", "500"],
 });
 
 export const metadata: Metadata = {
-  title: "Douglas Dev — Central de Agentes",
+  title: "Central de Agentes — Visão geral",
   description:
-    "CRM de conteúdo com identidade Douglas Dev: agentes, pipeline e carrosséis realistas.",
+    "Acompanhe agentes, tarefas e orquestrações em uma central inteligente.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       lang="pt-BR"
-      className={`${anton.variable} ${jakarta.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${manrope.variable} ${ibmMono.variable} nexus-theme h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col bg-[color:var(--background)] text-[color:var(--foreground)]">
+        {children}
+      </body>
     </html>
   );
 }

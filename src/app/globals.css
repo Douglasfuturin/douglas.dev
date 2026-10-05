@@ -46,14 +46,48 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-body);
-  --font-display: var(--font-display);
-  --font-mono: var(--font-geist-mono);
+  --font-mono: var(--font-mono);
+}
+
+/* Nexus OS theme (Lovable central-multi-agents) */
+.nexus-theme {
+  --background: oklch(12.9% 0.042 264.695);
+  --foreground: oklch(98.4% 0.003 247.858);
+  --card: oklch(17% 0.008 260);
+  --card-foreground: oklch(96% 0.006 255);
+  --muted: oklch(27.9% 0.041 260.031);
+  --muted-foreground: oklch(70.4% 0.04 256.788);
+  --border: oklch(28% 0.01 260);
+  --primary: oklch(83% 0.2 140);
+  --primary-foreground: oklch(14% 0.02 145);
+  --accent: oklch(27.9% 0.041 260.031);
+  --accent-foreground: oklch(98.4% 0.003 247.858);
+  --sidebar: oklch(10.5% 0.006 260);
+  --sidebar-foreground: oklch(92% 0.007 255);
+  --sidebar-accent: oklch(20% 0.009 260);
+  --sidebar-accent-foreground: oklch(96% 0.006 255);
+  --sidebar-border: oklch(25% 0.009 260);
+  --ring: oklch(83% 0.2 140);
+  --nexus-sidebar-width: 288px;
+
+  --ink: var(--foreground);
+  --muted: var(--muted-foreground);
+  --panel: var(--card);
+  --line: var(--border);
+  --accent: var(--primary);
+  --accent-ink: var(--primary-foreground);
+  --chip: color-mix(in oklab, var(--primary) 22%, transparent);
 }
 
 body {
-  background: var(--dd-black);
-  color: var(--dd-text);
-  font-family: var(--font-body), ui-sans-serif, sans-serif;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body), "Manrope", ui-sans-serif, sans-serif;
+}
+
+.font-mono,
+kbd {
+  font-family: var(--font-mono), "IBM Plex Mono", ui-monospace, monospace;
 }
 
 .font-display {
@@ -557,7 +591,8 @@ textarea.field {
   background: rgba(8, 8, 8, 0.92);
 }
 
-.grok-hub-chat .crm-card {
+.grok-hub-chat .crm-card,
+.nexus-hub-chat .crm-card {
   border-color: rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.04);
   color: rgba(255, 255, 255, 0.88);
@@ -566,4 +601,274 @@ textarea.field {
   font-size: 0.875rem;
   line-height: 1.45;
   padding: 0.75rem 1rem;
+}
+
+/* —— Nexus shell (Lovable layout) —— */
+.nexus-app {
+  display: flex;
+  min-height: 100vh;
+  height: 100dvh;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.nexus-sidebar {
+  width: var(--nexus-sidebar-width);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--sidebar);
+  color: var(--sidebar-foreground);
+  border-right: 1px solid var(--sidebar-border);
+}
+
+.nexus-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(900px 420px at 50% -20%, color-mix(in oklab, var(--primary) 14%, transparent), transparent 60%),
+    var(--background);
+}
+
+.nexus-topbar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in oklab, var(--background) 88%, transparent);
+  backdrop-filter: blur(12px);
+  padding: 0.65rem 1rem;
+}
+
+@media (min-width: 768px) {
+  .nexus-topbar {
+    padding: 0.75rem 1.5rem;
+  }
+}
+
+.nexus-nav-link {
+  display: flex;
+  height: 2.25rem;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: 0.375rem;
+  padding: 0 0.75rem;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.nexus-nav-link:hover,
+.nexus-nav-link[data-active="true"] {
+  background: var(--sidebar-accent);
+  color: var(--sidebar-accent-foreground);
+}
+
+.nexus-nav-link-subtle {
+  height: 2rem;
+  font-size: 0.8125rem;
+}
+
+.nexus-convo-link {
+  display: block;
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  transition: background 160ms ease;
+}
+
+.nexus-convo-link:hover {
+  background: var(--sidebar-accent);
+}
+
+.nexus-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  padding: 0.55rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: filter 160ms ease;
+}
+
+.nexus-btn-primary:hover {
+  filter: brightness(1.05);
+}
+
+.nexus-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  padding: 0.45rem 0.85rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.nexus-btn-ghost:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.nexus-icon-btn {
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+  padding: 0.35rem 0.55rem;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.nexus-search {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+  background: color-mix(in oklab, var(--card) 70%, transparent);
+  padding: 0.35rem 0.75rem;
+}
+
+.nexus-search-input {
+  min-width: 0;
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 0.875rem;
+  color: var(--foreground);
+  outline: none;
+}
+
+.nexus-search-input::placeholder {
+  color: var(--muted-foreground);
+}
+
+.nexus-kbd {
+  border-radius: 0.35rem;
+  border: 1px solid var(--border);
+  padding: 0.1rem 0.35rem;
+  font-size: 0.65rem;
+  color: var(--muted-foreground);
+}
+
+.nexus-banner-warn {
+  border-bottom: 1px solid color-mix(in oklab, var(--primary) 35%, transparent);
+  background: color-mix(in oklab, var(--primary) 12%, transparent);
+  color: var(--foreground);
+}
+
+.nexus-stat-card,
+.nexus-agent-card,
+.nexus-panel {
+  border-radius: 0.75rem;
+  border: 1px solid var(--border);
+  background: var(--card);
+  padding: 1rem 1.1rem;
+}
+
+.nexus-agent-card {
+  transition: border-color 160ms ease, transform 160ms ease;
+}
+
+.nexus-agent-card:hover {
+  border-color: color-mix(in oklab, var(--primary) 45%, var(--border));
+  transform: translateY(-1px);
+}
+
+.nexus-status {
+  border-radius: 999px;
+  padding: 0.15rem 0.55rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.nexus-status-active {
+  background: color-mix(in oklab, var(--primary) 22%, transparent);
+  color: var(--primary);
+}
+
+.nexus-status-running {
+  background: color-mix(in oklab, #5aa7ff 22%, transparent);
+  color: #8ec5ff;
+}
+
+.nexus-status-idle {
+  background: var(--muted);
+  color: var(--muted-foreground);
+}
+
+.nexus-live-pill {
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--primary) 40%, var(--border));
+  padding: 0.15rem 0.55rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.nexus-link {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.nexus-hero-glow {
+  background: radial-gradient(600px 280px at 20% 0%, color-mix(in oklab, var(--primary) 18%, transparent), transparent 70%);
+}
+
+.nexus-badge-soon {
+  font-size: 0.6rem;
+  color: var(--muted-foreground);
+}
+
+.nexus-hub-chat {
+  --ink: var(--foreground);
+  --muted: var(--muted-foreground);
+  --panel: var(--card);
+  --line: var(--border);
+  --accent: var(--primary);
+  --accent-ink: var(--primary-foreground);
+  --chip: color-mix(in oklab, var(--primary) 20%, transparent);
+  height: 100%;
+  min-height: 0;
+}
+
+.nexus-hub-chat .nexus-composer {
+  background: color-mix(in oklab, var(--background) 92%, transparent);
+}
+
+@keyframes nexus-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-nexus-rise {
+  animation: nexus-rise 520ms ease both;
+}
+
+/* CRM panels inside Nexus */
+.nexus-app .crm-panel,
+.nexus-app .crm-card,
+.nexus-app .crm-card-sm {
+  border-color: var(--border);
+  background: var(--card);
+  color: var(--foreground);
+}
+
+.nexus-app .crm-btn-primary {
+  background: var(--primary);
+  color: var(--primary-foreground);
 }

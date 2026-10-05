@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import { GrokShell } from "@/components/grok/grok-shell";
+import { NexusShell } from "@/components/nexus/nexus-shell";
 
 export default function AppHubLayout({ children }: { children: ReactNode }) {
-  return <GrokShell>{children}</GrokShell>;
+  return <NexusShell variant="chat">{children}</NexusShell>;
 }
