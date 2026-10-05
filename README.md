@@ -120,6 +120,17 @@ Fluxo: repo/tema → roteiro pessoal → edição Reels → render EDVD → Bit.
 
 Abra a sala (`/?mode=grupo&group=conteudo-dev`) ou um membro específico (`&member=radar`).
 
+### Contenidos España
+1. Editor de Vídeo (skills do sistema)  
+2. Carrusel  
+3. YouTube  
+4. Guionista  
+5. Capas y Thumbnails  
+6. Bit  
+
+Fluxo: guion → YouTube/carrusel → capas → edición automática → Bit.  
+Atalho: `/?mode=grupo&group=conteudos-espanha`
+
 ## Como rodar
 
 ```bash
@@ -175,7 +186,14 @@ Abra [http://localhost:3000/kits](http://localhost:3000/kits) para importar cada
 
 O Cloud Agent **não acessa** o disco `F:\` do Windows — os ZIPs precisam ser enviados/copiados.
 
-## Editor de vídeo (kit integrado)
+## Editor de vídeo (skills do sistema)
+
+O modo **Editor de Vídeo** usa:
+
+- `list_video_skills` — inventário (editar-video, hyperframes, …)
+- `auto_edit_with_system_skills` — edição automática via skills + EDVD
+- Helpers Ninja (`list_ninja_kits` / `run_ninja_kit_helper`)
+- Pipeline clássico: transcribe → plan → dry-run → render
 
 O modo **Editor de vídeo** usa o kit em `kit-edicao-video/`:
 

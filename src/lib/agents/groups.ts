@@ -12,9 +12,16 @@ export type AgentMemberId =
   | "roteirista-pessoal"
   | "editor-reels"
   | "editor-video"
-  | "radar-github";
+  | "radar-github"
+  | "youtube-es"
+  | "carrossel-es"
+  | "capas-es"
+  | "roteirista-es";
 
-export type AgentGroupId = "conteudo-dev" | "conteudo-dev-video";
+export type AgentGroupId =
+  | "conteudo-dev"
+  | "conteudo-dev-video"
+  | "conteudos-espanha";
 
 /** Modo do orquestrador associado ao membro. */
 export type MemberMode =
@@ -26,7 +33,10 @@ export type MemberMode =
   | "bit"
   | "editor-reels"
   | "video"
-  | "github";
+  | "github"
+  | "youtube"
+  | "carrossel"
+  | "capas";
 
 export type AgentMember = {
   id: AgentMemberId;
@@ -34,7 +44,7 @@ export type AgentMember = {
   mode: MemberMode;
   role: string;
   color: string;
-  icon: "cloud" | "square" | "triangle" | "circle" | "hex" | "drop";
+  icon: "cloud" | "square" | "triangle" | "circle" | "hex" | "drop" | "play";
 };
 
 export type AgentGroup = {
@@ -138,7 +148,7 @@ export const AGENT_GROUPS: AgentGroup[] = [
         id: "editor-video",
         name: "Editor Vídeo Pessoal",
         mode: "video",
-        role: "Pipeline EDVD completo (estilos, dry-run, render)",
+        role: "Pipeline EDVD + skills do sistema (auto edit)",
         color: "#34D399",
         icon: "circle",
       },
@@ -163,8 +173,72 @@ export const AGENT_GROUPS: AgentGroup[] = [
       "Radar GitHub escolhe o repo/tema",
       "Roteirista Pessoal escreve o script",
       "Editor Reels Realista monta o corte 9:16",
-      "Editor Vídeo Pessoal renderiza no kit EDVD se necessário",
+      "Editor Vídeo Pessoal renderiza com skills do sistema (EDVD/HyperFrames)",
       "Bit entrega checklist final",
+    ],
+  },
+  {
+    id: "conteudos-espanha",
+    name: "Contenidos España",
+    blurb:
+      "Sala en español (España): editor de vídeo, carrusel, YouTube, guionista y portadas/thumbnails.",
+    maxMembers: 6,
+    members: [
+      {
+        id: "editor-video",
+        name: "Editor de Vídeo",
+        mode: "video",
+        role: "Edición automática con skills del sistema (EDVD / HyperFrames)",
+        color: "#34D399",
+        icon: "play",
+      },
+      {
+        id: "carrossel-es",
+        name: "Carrusel",
+        mode: "carrossel",
+        role: "Vídeos/piezas para carrusel Instagram·LinkedIn",
+        color: "#F472B6",
+        icon: "square",
+      },
+      {
+        id: "youtube-es",
+        name: "YouTube",
+        mode: "youtube",
+        role: "Pack YouTube: guion, títulos, SEO, miniatura",
+        color: "#EF4444",
+        icon: "play",
+      },
+      {
+        id: "roteirista-es",
+        name: "Guionista",
+        mode: "roteiro",
+        role: "Guiones Reels/YouTube en español de España",
+        color: "#4F8CFF",
+        icon: "square",
+      },
+      {
+        id: "capas-es",
+        name: "Capas y Thumbnails",
+        mode: "capas",
+        role: "Portadas YouTube, covers Reels y thumbnails",
+        color: "#FBBF24",
+        icon: "triangle",
+      },
+      {
+        id: "bit",
+        name: "Bit",
+        mode: "bit",
+        role: "Coordina el grupo y los handoffs",
+        color: "#E5E7EB",
+        icon: "circle",
+      },
+    ],
+    workflow: [
+      "Guionista define el ángulo en español",
+      "YouTube o Carrusel monta el formato",
+      "Capas y Thumbnails genera portadas",
+      "Editor de Vídeo edita/renderiza con skills del sistema",
+      "Bit cierra el paquete",
     ],
   },
 ];

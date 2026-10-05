@@ -40,15 +40,18 @@ const MODE_LABELS: Record<AgentMode, string> = {
   grupo: "Grupo (sala)",
   radar: "Radar de Tendências",
   github: "Radar GitHub",
-  roteiro: "Roteirista",
+  roteiro: "Roteirista / Guionista",
   "roteiro-pessoal": "Roteirista Pessoal",
   "arte-twitter": "Diretor de Arte Twitter",
   "arte-realista": "Diretor de Arte Realista",
   bit: "Bit",
   "editor-reels": "Editor Reels Realista",
+  youtube: "YouTube (España)",
+  carrossel: "Carrusel",
+  capas: "Capas y Thumbnails",
   notion: "Notion Guide",
   pipeline: "Pack Scout→Reels→Notion",
-  video: "Editor Vídeo Pessoal",
+  video: "Editor de Vídeo (skills)",
   kits: "Skills Ninja",
 };
 
@@ -326,6 +329,17 @@ export function ChatApp() {
               className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
             >
               Dev Vídeo
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setGroupId("conteudos-espanha");
+                setMemberId("");
+                setMode("grupo");
+              }}
+              className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
+            >
+              Contenidos España
             </button>
             <button
               type="button"

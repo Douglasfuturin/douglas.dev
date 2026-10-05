@@ -13,6 +13,8 @@ function MemberIcon({ member }: { member: AgentMember }) {
           ? "rounded-lg"
           : member.icon === "drop"
             ? "rounded-[40%_40%_45%_45%]"
+            : member.icon === "play"
+              ? "rounded-2xl"
             : member.icon === "square"
               ? "rounded-xl"
               : "rounded-full";

@@ -25,6 +25,9 @@ export type AgentMode =
   | "arte-realista"
   | "bit"
   | "editor-reels"
+  | "youtube"
+  | "carrossel"
+  | "capas"
   | "grupo"
   | "auto";
 

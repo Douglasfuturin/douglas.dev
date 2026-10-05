@@ -9,6 +9,8 @@ import {
   ARTE_REALISTA_PERSONA,
   ARTE_TWITTER_PERSONA,
   BIT_PERSONA,
+  CAPAS_ES_PERSONA,
+  CARROSSEL_ES_PERSONA,
   EDITOR_REELS_PERSONA,
   GROK_PERSONA,
   GITHUB_SCOUT_PERSONA,
@@ -22,6 +24,7 @@ import {
   ROTEIRISTA_PESSOAL_PERSONA,
   ROUTER_PROMPT,
   VIDEO_EDITOR_PERSONA,
+  YOUTUBE_ES_PERSONA,
 } from "./prompts";
 import { grokBotTools, researchTools } from "./tools";
 import { githubScoutTools } from "./github-tools";
@@ -30,6 +33,7 @@ import { notionRepoTools } from "./notion-tools";
 import { pipelineTools } from "./pipeline-tools";
 import { radarTools } from "./radar-tools";
 import { artDirectorTools, bitCoordinatorTools } from "./art-tools";
+import { spainContentTools } from "./spain-tools";
 import { videoEditorTools } from "./video-tools";
 import { kitPersona, ninjaKitTools } from "./kit-tools";
 import { getKitById } from "@/lib/kits/discover";
@@ -126,9 +130,31 @@ function toolsForMemberMode(
       return {
         ...videoEditorTools(videoOptions),
         ...ninjaKitTools(),
+        ...grokBotTools(),
       };
     case "github":
       return { ...githubScoutTools(), ...grokBotTools() };
+    case "youtube":
+      return {
+        ...spainContentTools(),
+        ...ninjaKitTools(),
+        ...reelsScriptTools(),
+        ...grokBotTools(),
+      };
+    case "carrossel":
+      return {
+        ...spainContentTools(),
+        ...ninjaKitTools(),
+        ...artDirectorTools("twitter"),
+        ...grokBotTools(),
+      };
+    case "capas":
+      return {
+        ...spainContentTools(),
+        ...ninjaKitTools(),
+        ...artDirectorTools("realista"),
+        ...grokBotTools(),
+      };
     default:
       return { ...grokBotTools() };
   }
@@ -160,6 +186,12 @@ ${JSON.stringify(videoOptions, null, 2)}
       return `${GITHUB_SCOUT_PERSONA}
 
 Você também atua como Radar GitHub no grupo Conteúdo Dev Vídeo.`;
+    case "youtube":
+      return YOUTUBE_ES_PERSONA;
+    case "carrossel":
+      return CARROSSEL_ES_PERSONA;
+    case "capas":
+      return CAPAS_ES_PERSONA;
     default:
       return GROK_PERSONA;
   }
@@ -194,13 +226,16 @@ export async function resolveAgent(
     const member = getGroupMember(input.groupId, input.memberId);
     if (group && member) {
       const mode = memberModeToAgentMode(member.mode);
+      const spain = group.id === "conteudos-espanha";
+      const base = personaForMemberMode(member.mode, videoOptions);
       return {
         mode,
         model: chatModel,
-        instructions: `${personaForMemberMode(member.mode, videoOptions)}
+        instructions: `${base}
 
-Você está no grupo "${group.name}" como **${member.name}**.
-Papel: ${member.role}
+${spain ? "Trabajas en el grupo Contenidos España. Responde en español de España." : `Você está no grupo "${group.name}" como **${member.name}**.`}
+Papel / Rol: ${member.role}
+Miembro: ${member.name}
 `,
         tools: toolsForMemberMode(member.mode, videoOptions),
       };
@@ -227,9 +262,11 @@ Papel: ${member.role}
         : input.mode;
 
   if (mode === "grupo") {
-    const guessed =
-      getAgentGroup("conteudo-dev-video") &&
-      /\b(v[ií]deo|reels?|editor|github)\b/i.test(latestUserText)
+    const guessed = /\b(españa|espanha|spain|carrusel|youtube|thumbnail|miniatura)\b/i.test(
+      latestUserText,
+    )
+      ? "conteudos-espanha"
+      : /\b(v[ií]deo|reels?|editor|github)\b/i.test(latestUserText)
         ? "conteudo-dev-video"
         : "conteudo-dev";
     const group = getAgentGroup(guessed)!;
@@ -273,6 +310,33 @@ Papel: ${member.role}
       model: chatModel,
       instructions: EDITOR_REELS_PERSONA,
       tools: toolsForMemberMode("editor-reels", videoOptions),
+    };
+  }
+
+  if (mode === "youtube") {
+    return {
+      mode,
+      model: chatModel,
+      instructions: YOUTUBE_ES_PERSONA,
+      tools: toolsForMemberMode("youtube", videoOptions),
+    };
+  }
+
+  if (mode === "carrossel") {
+    return {
+      mode,
+      model: chatModel,
+      instructions: CARROSSEL_ES_PERSONA,
+      tools: toolsForMemberMode("carrossel", videoOptions),
+    };
+  }
+
+  if (mode === "capas") {
+    return {
+      mode,
+      model: chatModel,
+      instructions: CAPAS_ES_PERSONA,
+      tools: toolsForMemberMode("capas", videoOptions),
     };
   }
 
@@ -458,6 +522,9 @@ async function routeMode(latestUserText: string): Promise<ConcreteMode> {
       "arte-realista",
       "bit",
       "editor-reels",
+      "youtube",
+      "carrossel",
+      "capas",
       "grupo",
       "chat",
     ];
@@ -477,7 +544,7 @@ function heuristicKits(text: string): boolean {
 }
 
 function heuristicGrupo(text: string): boolean {
-  return /\b(grupo\s+conte[uú]do|conte[uú]do\s+dev(\s+v[ií]deo)?|sala\s+de\s+agentes|time\s+de\s+conte[uú]do)\b/i.test(
+  return /\b(grupo\s+conte[uú]do|conte[uú]do\s+dev(\s+v[ií]deo)?|contenidos?\s+españa|conte[uú]dos?\s+espanha|sala\s+de\s+agentes|time\s+de\s+conte[uú]do)\b/i.test(
     text,
   );
 }
