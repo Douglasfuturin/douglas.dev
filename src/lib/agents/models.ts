@@ -29,6 +29,7 @@ export type AgentMode =
   | "carrossel"
   | "capas"
   | "central"
+  | "custom"
   | "grupo"
   | "auto";
 

@@ -18,6 +18,7 @@ type ChatRequestBody = {
   kitId?: string;
   groupId?: string;
   memberId?: string;
+  customAgentId?: string;
 };
 
 export async function POST(req: Request) {
@@ -39,6 +40,7 @@ export async function POST(req: Request) {
   const kitId = body.kitId;
   const groupId = body.groupId;
   const memberId = body.memberId;
+  const customAgentId = body.customAgentId;
 
   const agent = await resolveAgent(messages, {
     mode,
@@ -47,6 +49,7 @@ export async function POST(req: Request) {
     kitId,
     groupId,
     memberId,
+    customAgentId,
   });
   const modelMessages = await convertToModelMessages(messages);
 
@@ -63,6 +66,7 @@ export async function POST(req: Request) {
       agent.mode === "pipeline" ||
       agent.mode === "central" ||
       agent.mode === "github" ||
+      agent.mode === "custom" ||
       agent.mode === "grupo" ||
       agent.mode === "editor-reels"
         ? stepCountIs(12)

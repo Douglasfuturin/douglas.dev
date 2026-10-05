@@ -15,6 +15,7 @@ const PRIMARY: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", ico: "DB", match: ["/dashboard"] },
   { href: "/central", label: "Pipeline", ico: "PL", match: ["/central"] },
   { href: "/studio", label: "Studio IA", ico: "AI", match: ["/studio"] },
+  { href: "/agentes", label: "Criar agente", ico: "+", match: ["/agentes"] },
   { href: "/grupos", label: "Agentes", ico: "AG", match: ["/grupos"] },
 ];
 

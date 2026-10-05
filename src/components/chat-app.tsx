@@ -50,6 +50,7 @@ const MODE_LABELS: Record<AgentMode, string> = {
   carrossel: "Carrusel",
   capas: "Capas y Thumbnails",
   central: "Central FASE",
+  custom: "Agente custom",
   notion: "Notion Guide",
   pipeline: "Pack Scout→Reels→Notion",
   video: "Editor de Vídeo (skills)",
@@ -64,6 +65,7 @@ function readQueryMode(): AgentMode {
   const params = new URLSearchParams(window.location.search);
   const m = params.get("mode");
   if (m && VALID_MODES.has(m)) return m as AgentMode;
+  if (params.get("agent")) return "custom";
   if (params.get("group")) return "grupo";
   if (params.get("kit")) return "kits";
   return "auto";
@@ -82,6 +84,11 @@ function readQueryMemberId(): string {
 function readQueryKitId(): string {
   if (typeof window === "undefined") return "";
   return new URLSearchParams(window.location.search).get("kit") || "";
+}
+
+function readQueryCustomAgentId(): string {
+  if (typeof window === "undefined") return "";
+  return new URLSearchParams(window.location.search).get("agent") || "";
 }
 
 function readQueryPrompt(): string {
@@ -130,6 +137,12 @@ export function ChatApp() {
   );
   const [groupId, setGroupId] = useState<string>(() => readQueryGroupId());
   const [memberId, setMemberId] = useState<string>(() => readQueryMemberId());
+  const [customAgentId, setCustomAgentId] = useState<string>(() =>
+    readQueryCustomAgentId(),
+  );
+  const [customAgents, setCustomAgents] = useState<
+    Array<{ id: string; name: string; role: string; color: string }>
+  >([]);
   const [kitOptions, setKitOptions] = useState<Array<{ id: string; name: string }>>(
     [],
   );
@@ -167,10 +180,30 @@ export function ChatApp() {
         },
       )
       .catch(() => undefined);
+    fetch("/api/agents")
+      .then((r) => r.json())
+      .then(
+        (data: {
+          agents?: Array<{
+            id: string;
+            name: string;
+            role: string;
+            color: string;
+          }>;
+        }) => {
+          if (!alive) return;
+          setCustomAgents(data.agents || []);
+        },
+      )
+      .catch(() => undefined);
     return () => {
       alive = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (customAgentId) setMode("custom");
+  }, [customAgentId]);
 
   const transport = useMemo(
     () =>
@@ -183,9 +216,10 @@ export function ChatApp() {
           kitId: kitId || undefined,
           groupId: groupId || undefined,
           memberId: memberId || undefined,
+          customAgentId: customAgentId || undefined,
         },
       }),
-    [mode, researchDepth, videoOptions, kitId, groupId, memberId],
+    [mode, researchDepth, videoOptions, kitId, groupId, memberId, customAgentId],
   );
 
   const { messages, sendMessage, status, error, stop } = useChat({
@@ -372,6 +406,12 @@ export function ChatApp() {
             >
               Contenidos España
             </button>
+            <Link
+              href="/agentes"
+              className="inline-flex rounded-lg border border-[var(--line)] bg-[var(--accent)] px-3 py-1.5 text-xs font-bold text-[var(--accent-ink)]"
+            >
+              + Criar agente
+            </Link>
             <button
               type="button"
               onClick={() => setMode("radar")}
@@ -415,6 +455,27 @@ export function ChatApp() {
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
                 <option value="high">High</option>
+              </select>
+            </label>
+          ) : null}
+          {mode === "custom" || customAgents.length > 0 ? (
+            <label className="text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">
+              Agente custom
+              <select
+                className="mt-1 block max-w-[220px] rounded-md border border-[var(--line)] bg-[var(--panel)] px-2 py-1.5 text-sm text-[var(--ink)]"
+                value={customAgentId}
+                onChange={(e) => {
+                  const id = e.target.value;
+                  setCustomAgentId(id);
+                  if (id) setMode("custom");
+                }}
+              >
+                <option value="">(nenhum)</option>
+                {customAgents.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.name}
+                  </option>
+                ))}
               </select>
             </label>
           ) : null}

@@ -16,6 +16,13 @@ type Stats = {
 
 const FEATURES = [
   {
+    href: "/agentes",
+    title: "Criar agente",
+    blurb: "Persona + toolkit + instruções — agentes só seus",
+    glow: "rgba(200, 245, 66, 0.4)",
+    tag: "Custom",
+  },
+  {
     href: "/studio?mode=github&q=Busca%20os%20melhores%20reposit%C3%B3rios%20do%20GitHub%20em%20diferentes%20nichos%20com%20mais%20stars%20e%20gera%20roteiro%20Reels%2060s%20de%20cada%20vencedor",
     title: "GitHub Scout",
     blurb: "Melhores repos por nicho + roteiro de vídeo 60s",
@@ -81,6 +88,10 @@ const FEATURES = [
 ] as const;
 
 const QUICK = [
+  {
+    href: "/agentes",
+    label: "Criar agente",
+  },
   {
     href: "/studio?mode=github&q=Busca%20os%20melhores%20reposit%C3%B3rios%20do%20GitHub%20em%20diferentes%20nichos%20(mais%20stars)%20e%20me%20entrega%20um%20roteiro%20de%20v%C3%ADdeo%20de%20at%C3%A9%2060s%20explicando%20o%20que%20cada%20vencedor%20faz",
     label: "GitHub + Reels 60s",

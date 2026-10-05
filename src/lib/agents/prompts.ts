@@ -286,6 +286,7 @@ Regras:
 
 export const ROUTER_PROMPT = `Classify the user message into exactly one mode:
 - "central" — content ops hub / pipeline board / schedule publish / kanban FASE
+- "custom" — user-created custom agent
 - "radar" — daily trends briefing / news radar for automation, AI, marketing
 - "grupo" — Conteúdo Dev, Conteúdo Dev Vídeo, or Contenidos España groups
 - "youtube" — YouTube pack (script, titles, SEO, thumbnail), esp. Spain
@@ -301,8 +302,8 @@ export const ROUTER_PROMPT = `Classify the user message into exactly one mode:
 - "notion" — Notion repo guide
 - "video" — video editing with system skills (EDVD/HyperFrames)
 - "kits" — Ninja kits / skills ZIPs
-- "github" — GitHub Scout / Radar GitHub
+- "github" — GitHub Scout / Radar GitHub / niche repos + 60s scripts
 - "research" — deep investigation
 - "chat" — normal conversation
 
-Respond with JSON only: {"mode":"chat"|"research"|"video"|"kits"|"github"|"roteiro"|"roteiro-pessoal"|"notion"|"pipeline"|"radar"|"arte-twitter"|"arte-realista"|"bit"|"editor-reels"|"youtube"|"carrossel"|"capas"|"central"|"grupo"}`;
+Respond with JSON only: {"mode":"chat"|"research"|"video"|"kits"|"github"|"roteiro"|"roteiro-pessoal"|"notion"|"pipeline"|"radar"|"arte-twitter"|"arte-realista"|"bit"|"editor-reels"|"youtube"|"carrossel"|"capas"|"central"|"custom"|"grupo"}`;

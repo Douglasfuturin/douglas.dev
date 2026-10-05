@@ -39,6 +39,11 @@ import { videoEditorTools } from "./video-tools";
 import { centralContentTools } from "./central-tools";
 import { nicheScoutTools } from "./niche-scout-tools";
 import { kitPersona, ninjaKitTools } from "./kit-tools";
+import { getCustomAgent } from "./custom-store";
+import {
+  buildCustomAgentInstructions,
+  toolsForToolkit,
+} from "./custom-tools";
 import { getKitById } from "@/lib/kits/discover";
 import {
   getAgentGroup,
@@ -58,6 +63,7 @@ export type OrchestratorInput = {
   kitId?: string;
   groupId?: string;
   memberId?: string;
+  customAgentId?: string;
   latestUserText: string;
 };
 
@@ -225,7 +231,13 @@ export async function resolveAgent(
   messages: UIMessage[],
   input: Pick<
     OrchestratorInput,
-    "mode" | "researchDepth" | "videoOptions" | "kitId" | "groupId" | "memberId"
+    | "mode"
+    | "researchDepth"
+    | "videoOptions"
+    | "kitId"
+    | "groupId"
+    | "memberId"
+    | "customAgentId"
   >,
 ): Promise<ResolvedAgent> {
   const latestUserText = extractLatestUserText(messages);
@@ -233,6 +245,35 @@ export async function resolveAgent(
     ...DEFAULT_VIDEO_OPTIONS,
     ...input.videoOptions,
   };
+
+  // Agente custom criado pelo usuário
+  if (input.customAgentId || input.mode === "custom") {
+    const custom = input.customAgentId
+      ? await getCustomAgent(input.customAgentId)
+      : null;
+    if (custom) {
+      return {
+        mode: "custom",
+        model: custom.toolkit === "research" ? multiAgentModel : chatModel,
+        instructions: buildCustomAgentInstructions(custom),
+        tools: toolsForToolkit(custom.toolkit, videoOptions),
+        providerOptions:
+          custom.toolkit === "research"
+            ? { xai: { reasoningEffort: input.researchDepth ?? "medium" } }
+            : undefined,
+      };
+    }
+    if (input.mode === "custom") {
+      return {
+        mode: "chat",
+        model: chatModel,
+        instructions: `${GROK_PERSONA}
+
+Nenhum agente custom selecionado. Peça para criar um em /agentes ou escolha um agente existente.`,
+        tools: { ...grokBotTools() },
+      };
+    }
+  }
 
   // Grupo explícito: membro específico ou sala inteira
   if (input.groupId) {
@@ -570,6 +611,7 @@ async function routeMode(latestUserText: string): Promise<ConcreteMode> {
       "carrossel",
       "capas",
       "central",
+      "custom",
       "grupo",
       "chat",
     ];
