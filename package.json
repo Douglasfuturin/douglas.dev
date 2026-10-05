@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:smoke": "node scripts/smoke-api.mjs && npx tsx scripts/smoke-video.ts"
   },
   "dependencies": {
     "@ai-sdk/react": "^4.0.130",

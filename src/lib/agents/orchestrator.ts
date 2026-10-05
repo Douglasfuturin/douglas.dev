@@ -360,7 +360,7 @@ Nenhum agente custom selecionado. Peça para criar um em /agentes ou escolha um 
     }
   }
 
-  let mode: ConcreteMode =
+  const mode: ConcreteMode =
     input.mode === "auto"
       ? await routeMode(latestUserText)
       : input.mode === "grupo"
