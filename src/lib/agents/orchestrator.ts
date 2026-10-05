@@ -305,7 +305,8 @@ Siga o fluxo do grupo e devolva o handoff ao Orquestrador.`,
         model: chatModel,
         instructions: `${base}
 
-${spain ? "Trabajas en el grupo Contenidos España. Responde en español de España." : `Você está no grupo "${group.name}" como **${member.name}**.`}
+${spain ? `Você está no grupo "${group.name}" como **${member.name}**.
+Fale com o usuário em português. O conteúdo final deste mercado deve sair em espanhol da Espanha.` : `Você está no grupo "${group.name}" como **${member.name}**.`}
 Papel / Rol: ${member.role}
 Miembro: ${member.name}
 `,

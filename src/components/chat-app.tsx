@@ -37,15 +37,15 @@ const MODE_LABELS: Record<AgentMode, string> = {
   grupo: "Grupo (sala)",
   radar: "Radar de Pesquisa",
   github: "GitHub Scout + Reels 60s",
-  roteiro: "Roteirista / Guionista",
+  roteiro: "Roteirista",
   "roteiro-pessoal": "Roteirista Pessoal",
   "arte-twitter": "Diretor de Arte Twitter",
   "arte-realista": "Diretor de Arte Realista",
   bit: "Orquestrador",
   "editor-reels": "Editor Reels Animação/Realismo",
-  youtube: "YouTube (España)",
-  carrossel: "Carrusel",
-  capas: "Capas y Thumbnails",
+  youtube: "YouTube ES",
+  carrossel: "Carrossel ES",
+  capas: "Capas e Miniaturas",
   central: "Central de Agentes",
   orquestrador: "Orquestrador Principal",
   custom: "Agente custom",
@@ -409,7 +409,7 @@ export function ChatApp() {
               }}
               className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
             >
-              Contenidos España
+              Conteúdo Espanha
             </button>
             <Link
               href="/agentes"

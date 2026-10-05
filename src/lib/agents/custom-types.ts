@@ -26,7 +26,7 @@ export const TOOLKIT_LABELS: Record<ToolkitPreset, string> = {
   notion: "Notion Guide",
   pipeline: "Pack Scout→Reels→Notion",
   central: "Central / pipeline CRM",
-  espanha: "YouTube / carrusel / capas ES",
+  espanha: "YouTube / carrossel / capas (mercado ES)",
   full: "Todas as tools",
 };
 

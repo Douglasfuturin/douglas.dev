@@ -278,7 +278,8 @@ export async function seedDemoIfEmpty(): Promise<ContentItem[]> {
     },
     {
       title: "Cómo montar un carrusel de LinkedIn en 24h",
-      summary: "Pack España: guion → carrusel → capas → publicación.",
+      summary:
+        "Pack Conteúdo Espanha: roteiro → carrossel → capas → publicação (conteúdo final em espanhol).",
       stage: "script" as const,
       source: "grupo" as const,
       market: "es" as const,

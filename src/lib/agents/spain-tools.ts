@@ -47,7 +47,7 @@ export function spainContentTools() {
   return {
     plan_youtube_es: tool({
       description:
-        "Monta un pack YouTube en español (España): títulos, guion, descripción, timestamps y brief de thumbnail. Usa skills youtube-* del sistema.",
+        "Monta um pack YouTube para o mercado espanhol (Espanha): títulos, roteiro, descrição, timestamps e brief de miniatura. Usa skills youtube-* do sistema. Conteúdo final em espanhol da Espanha; fale com o usuário em português.",
       inputSchema: z.object({
         tema: z.string(),
         duracionMin: z.number().optional(),
@@ -60,7 +60,7 @@ export function spainContentTools() {
         tema,
         duracionMin = 10,
         tono = "educativo",
-        audiencia = "audiencia en España / LATAM hispanohablante",
+        audiencia = "audiência na Espanha / LATAM hispanofalante",
       }) => {
         const skills = await skillStatus(YOUTUBE_KITS);
         const yt = await getKitById("youtube-pack");
@@ -97,14 +97,14 @@ export function spainContentTools() {
             },
           },
           nextStep:
-            "Escribe el guion completo, luego llama a plan_thumbnails_es y/o image_generation para la miniatura.",
+            "Escreva o roteiro completo e depois chame plan_thumbnails_es e/ou image_generation para a miniatura.",
         };
       },
     }),
 
     plan_carousel_es: tool({
       description:
-        "Planifica un carrusel (Instagram/LinkedIn) en español: slides, copy y dirección visual. Usa skills de carousel del sistema.",
+        "Planeja um carrossel (Instagram/LinkedIn) para o mercado espanhol: slides, copy e direção visual. Usa skills de carousel do sistema. Fale com o usuário em português.",
       inputSchema: z.object({
         tema: z.string(),
         slides: z.number().int().min(4).max(12).optional(),
@@ -133,10 +133,10 @@ export function spainContentTools() {
           slide: i + 1,
           rol:
             i === 0
-              ? "portada / gancho"
+              ? "capa / gancho"
               : i === slides - 1
                 ? "CTA final"
-                : `punto ${i}`,
+                : `ponto ${i}`,
           headline: i === 0 ? tema : `Idea ${i}`,
           body:
             i === 0
@@ -155,14 +155,14 @@ export function spainContentTools() {
           aspect: VISUAL_KITS[preferred]?.defaultAspect || "4:5",
           slides: slidePlan,
           nextStep:
-            "Refina copy por slide y genera artes con image_generation (o skill visual del kit).",
+            "Refine o copy por slide e gere artes com image_generation (ou skill visual do kit).",
         };
       },
     }),
 
     plan_thumbnails_es: tool({
       description:
-        "Genera briefs y prompts de portadas/thumbnails (YouTube 16:9, Reels 9:16, carrusel) en español. Usa skills youtube-thumbnail / instagram-thumbnail.",
+        "Gera briefs e prompts de capas/miniaturas (YouTube 16:9, Reels 9:16, carrossel) para o mercado espanhol. Usa skills youtube-thumbnail / instagram-thumbnail. Fale com o usuário em português.",
       inputSchema: z.object({
         tema: z.string(),
         formato: z
@@ -201,12 +201,12 @@ export function spainContentTools() {
           variaciones,
           formats,
           checklist: [
-            "Texto ≤ 4 palabras en la imagen",
-            "Contraste alto legible en móvil",
-            "Una emoción clara",
-            "Probar 3–4 variaciones con image_generation",
+            "Texto ≤ 4 palavras na imagem",
+            "Contraste alto legível no celular",
+            "Uma emoção clara",
+            "Testar 3–4 variações com image_generation",
           ],
-          nextStep: "Llama image_generation con cada prompt.",
+          nextStep: "Chame image_generation com cada prompt.",
         };
       },
     }),
