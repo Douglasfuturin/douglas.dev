@@ -19,6 +19,7 @@ const PRIMARY: NavItem[] = [
 ];
 
 const MODULES: NavItem[] = [
+  { href: "/github", label: "GitHub + Reels", ico: "GH" },
   { href: "/radar", label: "Radar", ico: "RD" },
   { href: "/roteiro", label: "Roteirista", ico: "RT" },
   { href: "/studio?mode=arte-realista", label: "Artes", ico: "AR" },
@@ -26,7 +27,6 @@ const MODULES: NavItem[] = [
   { href: "/kits", label: "Ninja Kits", ico: "KT", match: ["/kits"] },
   { href: "/pipeline", label: "Pack Scout", ico: "PK" },
   { href: "/notion", label: "Notion", ico: "NT" },
-  { href: "/github", label: "GitHub Scout", ico: "GH" },
 ];
 
 function isActive(pathname: string, item: NavItem) {

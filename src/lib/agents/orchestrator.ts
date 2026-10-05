@@ -37,6 +37,7 @@ import { artDirectorTools, bitCoordinatorTools } from "./art-tools";
 import { spainContentTools } from "./spain-tools";
 import { videoEditorTools } from "./video-tools";
 import { centralContentTools } from "./central-tools";
+import { nicheScoutTools } from "./niche-scout-tools";
 import { kitPersona, ninjaKitTools } from "./kit-tools";
 import { getKitById } from "@/lib/kits/discover";
 import {
@@ -140,7 +141,13 @@ function toolsForMemberMode(
         ...grokBotTools(),
       };
     case "github":
-      return { ...githubScoutTools(), ...grokBotTools() };
+      return {
+        ...githubScoutTools(),
+        ...nicheScoutTools(),
+        ...reelsScriptTools(),
+        ...centralContentTools(),
+        ...grokBotTools(),
+      };
     case "youtube":
       return {
         ...spainContentTools(),
@@ -378,7 +385,9 @@ Installed ZIP/SKILL: ${installed ? "yes" : "no — still deliver the kit's job w
     return {
       mode,
       model: chatModel,
-      instructions: personaForMemberMode("github", videoOptions),
+      instructions: `${personaForMemberMode("github", videoOptions)}
+
+Você também atua como Radar GitHub no CRM FASE: nichos + roteiros 60s.`,
       tools: toolsForMemberMode("github", videoOptions),
     };
   }
@@ -474,11 +483,12 @@ Installed ZIP/SKILL: ${installed ? "yes" : "no — still deliver the kit's job w
         ...centralContentTools(),
         ...radarTools(),
         ...reelsScriptTools(),
+        ...nicheScoutTools(),
+        ...githubScoutTools(),
         ...artDirectorTools("twitter"),
         ...artDirectorTools("realista"),
         ...pipelineTools(),
         ...notionRepoTools(),
-        ...githubScoutTools(),
         ...spainContentTools(),
         ...videoEditorTools(videoOptions),
         ...ninjaKitTools(),
@@ -494,11 +504,12 @@ Installed ZIP/SKILL: ${installed ? "yes" : "no — still deliver the kit's job w
     instructions: `${GROK_PERSONA}
 
 Central FASE: /central — SaaS pessoal do radar ao post.
-Grupos: /grupos. Studio: /studio.
-Modos: central, radar, roteiro, arte-twitter, arte-realista, bit, editor-reels, youtube, carrossel, capas, github, pipeline, notion, kits, video.`,
+Grupos: /grupos. Studio: /studio. GitHub + Reels 60s: /github.
+Modos: central, github, radar, roteiro, arte-twitter, arte-realista, bit, editor-reels, youtube, carrossel, capas, pipeline, notion, kits, video.`,
     tools: {
       ...grokBotTools(),
       ...centralContentTools(),
+      ...nicheScoutTools(),
       ...ninjaKitTools(),
       ...githubScoutTools(),
       ...reelsScriptTools(),

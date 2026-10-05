@@ -39,7 +39,7 @@ const MODE_LABELS: Record<AgentMode, string> = {
   research: "Pesquisa multiagente",
   grupo: "Grupo (sala)",
   radar: "Radar de Tendências",
-  github: "Radar GitHub",
+  github: "GitHub Scout + Reels 60s",
   roteiro: "Roteirista / Guionista",
   "roteiro-pessoal": "Roteirista Pessoal",
   "arte-twitter": "Diretor de Arte Twitter",
