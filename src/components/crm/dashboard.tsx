@@ -43,7 +43,7 @@ function PipelineGroupCard({
       >
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[color:var(--dd-orange)]">
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[color:var(--primary)]">
               Pipeline · {steps.length} etapas
             </p>
             <h3 className="font-display mt-1 text-2xl font-bold text-white">
@@ -72,12 +72,12 @@ function PipelineGroupCard({
                   aria-hidden
                 />
               ) : null}
-              <div className="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/15 bg-[#0a0a0a] font-display text-sm font-bold text-[color:var(--dd-orange)]">
+              <div className="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/15 bg-[#0a0a0a] font-display text-sm font-bold text-[color:var(--primary)]">
                 {step}
               </div>
               <Link
                 href={`/app/studio?mode=${member.mode}&group=${group.id}&member=${member.id}`}
-                className="crm-card-sm group flex min-w-0 flex-1 items-center gap-3 !py-3 transition hover:border-[color:var(--dd-orange)]/45"
+                className="crm-card-sm group flex min-w-0 flex-1 items-center gap-3 !py-3 transition hover:border-[color:var(--primary)]/45"
               >
                 <span
                   className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-xs font-bold text-[#0b0f14]"
@@ -90,7 +90,7 @@ function PipelineGroupCard({
                     .join("")}
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-semibold text-white group-hover:text-[color:var(--dd-orange)]">
+                  <span className="block text-sm font-semibold text-white group-hover:text-[color:var(--primary)]">
                     {member.name}
                   </span>
                   <span className="mt-0.5 block text-[12px] leading-snug text-white/50">
@@ -155,7 +155,7 @@ export function CrmDashboard() {
         />
         <div className="relative z-10 flex flex-wrap items-end justify-between gap-6">
           <div className="max-w-xl">
-            <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[color:var(--dd-orange)]">
+            <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[color:var(--primary)]">
               Fluxos por grupo · @o.douglas.dev
             </p>
             <h2 className="font-display mt-3 text-4xl tracking-tight text-white sm:text-5xl">
@@ -202,7 +202,7 @@ export function CrmDashboard() {
 
       <section className="space-y-6">
         <div>
-          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[color:var(--dd-orange)]">
+          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[color:var(--primary)]">
             Distribuição
           </p>
           <h3 className="font-display text-2xl font-bold text-white">
@@ -228,7 +228,7 @@ export function CrmDashboard() {
 
       <section className="animate-fase-rise" style={{ animationDelay: "120ms" }}>
         <div className="mb-3">
-          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[color:var(--dd-orange)]">
+          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[color:var(--primary)]">
             Operação
           </p>
           <h3 className="font-display text-2xl font-bold text-white">

@@ -12,7 +12,7 @@ export default function EditorPage() {
           </div>
         }
       >
-        <div className="overflow-hidden rounded-[1.25rem] border border-[color:var(--fase-line)]">
+        <div className="overflow-hidden rounded-[1.25rem] border border-[color:var(--border)]">
           <EditorApp />
         </div>
       </Suspense>

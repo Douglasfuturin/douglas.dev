@@ -279,7 +279,7 @@ export function GroupsManager({ compact = false }: { compact?: boolean }) {
                     onClick={() => toggleMember(a.id)}
                     className={`rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition ${
                       on
-                        ? "border-[color:var(--dd-orange)] bg-[color:var(--dd-orange)]/15 text-white"
+                        ? "border-[color:var(--primary)] bg-[color:var(--primary)]/15 text-white"
                         : "border-[color:var(--fase-line)] bg-[color:var(--dd-surface)] text-white/70"
                     }`}
                   >

@@ -16,9 +16,9 @@ const ibmMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Central de Agentes — Visão geral",
+  title: "Nexus OS · Central de Agentes",
   description:
-    "Acompanhe agentes, tarefas e orquestrações em uma central inteligente.",
+    "Orquestre agentes, pipelines de conteúdo e publicação no Nexus OS.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

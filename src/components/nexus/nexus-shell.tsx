@@ -10,7 +10,29 @@ import {
   NEXUS_TOOLS_NAV,
   type NexusShellProps,
 } from "./nexus-config";
+import { NEXUS_PRODUCT } from "@/lib/brand/nexus";
 import { NexusIcon } from "./nexus-icons";
+
+function NexusLogoMark({ onNavigate }: { onNavigate?: () => void }) {
+  return (
+    <Link
+      href="/dashboard"
+      className="flex items-center gap-2.5"
+      onClick={onNavigate}
+    >
+      <span className="flex size-8 items-center justify-center rounded-md bg-[color:var(--primary)] text-[color:var(--primary-foreground)] shadow-[0_0_24px_color-mix(in_oklab,var(--primary)_35%,transparent)]">
+        <NexusIcon name="orchestrations" className="size-4" />
+      </span>
+      <span className="text-base font-semibold tracking-tight text-[color:var(--foreground)]">
+        {NEXUS_PRODUCT.name}
+      </span>
+      <span className="rounded border border-[color:var(--border)] px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.08em] text-[color:var(--muted-foreground)]">
+        {NEXUS_PRODUCT.badge}
+      </span>
+      <span className="sr-only">{NEXUS_PRODUCT.tagline}</span>
+    </Link>
+  );
+}
 
 function SidebarNav({
   pathname,
@@ -124,17 +146,9 @@ export function NexusShell({
   const sidebar = (
     <>
       <div className="flex items-center justify-between gap-2 px-4 pt-4">
-        <Link href="/dashboard" className="flex items-center gap-2.5" onClick={() => setOpen(false)}>
-          <span className="flex size-8 items-center justify-center rounded-md bg-[color:var(--primary)] text-[color:var(--primary-foreground)]">
-            <NexusIcon name="orchestrations" className="size-4" />
-          </span>
-          <span className="text-base font-semibold tracking-tight text-[color:var(--foreground)]">
-            CENTRAL
-          </span>
-          <span className="rounded border border-[color:var(--border)] px-1.5 py-0.5 font-mono text-[9px] text-[color:var(--muted-foreground)]">
-            Agentes
-          </span>
-        </Link>
+        <div className="min-w-0">
+          <NexusLogoMark onNavigate={() => setOpen(false)} />
+        </div>
         <button
           type="button"
           className="nexus-icon-btn lg:hidden"
@@ -162,15 +176,15 @@ export function NexusShell({
 
       <div className="border-t border-[color:var(--sidebar-border)] p-3">
         <div className="flex items-center gap-3 rounded-lg px-2 py-2">
-          <span className="flex size-9 items-center justify-center rounded-full bg-[color:var(--sidebar-accent)] text-xs font-bold text-[color:var(--sidebar-accent-foreground)]">
-            DD
+          <span className="flex size-9 items-center justify-center rounded-full bg-[color:var(--sidebar-accent)] text-xs font-bold text-[color:var(--primary)]">
+            NX
           </span>
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold text-[color:var(--foreground)]">
-              Douglas Dev
+              {NEXUS_PRODUCT.tagline}
             </p>
             <p className="truncate text-[11px] text-[color:var(--muted-foreground)]">
-              Workspace Pro
+              {NEXUS_PRODUCT.name} {NEXUS_PRODUCT.badge} · Pro
             </p>
           </div>
         </div>
@@ -233,7 +247,7 @@ export function NexusShell({
             </div>
           ) : (
             <p className="flex-1 text-center text-[11px] font-medium uppercase tracking-[0.14em] text-[color:var(--muted-foreground)] md:text-left lg:hidden">
-              Central de Agentes
+              {NEXUS_PRODUCT.name} {NEXUS_PRODUCT.badge}
             </p>
           )}
 

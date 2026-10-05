@@ -335,15 +335,15 @@ export function EditorApp() {
     <div className="flex min-h-screen flex-col">
       <header className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
         <div className="flex items-center gap-4">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="flex flex-col gap-[3px]">
-              <i className="block h-[3px] w-7 rounded-full bg-[#ff7a1a]" />
-              <i className="block h-[3px] w-7 rounded-full bg-[#f5d76e]" />
-              <i className="block h-[3px] w-7 rounded-full bg-[#6dd3a7]" />
-              <i className="block h-[3px] w-7 rounded-full bg-[#5aa7ff]" />
+          <Link href="/dashboard" className="flex items-center gap-2.5">
+            <span className="flex size-8 items-center justify-center rounded-md bg-[color:var(--primary)] text-[11px] font-bold text-[color:var(--primary-foreground)]">
+              NX
             </span>
-            <span className="font-display text-lg font-bold tracking-[0.2em]">
-              EDVD
+            <span className="text-sm font-semibold tracking-tight text-[color:var(--foreground)]">
+              Editor{" "}
+              <span className="font-mono text-[9px] font-medium uppercase text-[color:var(--muted-foreground)]">
+                Nexus
+              </span>
             </span>
           </Link>
 
@@ -353,7 +353,7 @@ export function EditorApp() {
               onClick={() => setView("code")}
               className={`rounded-md px-3 py-1.5 text-sm ${
                 view === "code"
-                  ? "bg-[#ff7a1a] text-black font-semibold"
+                  ? "bg-[color:var(--primary)] text-[color:var(--primary-foreground)] font-semibold"
                   : "text-white/60"
               }`}
             >

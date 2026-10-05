@@ -106,8 +106,8 @@ export function NexusOverview() {
       <section className="relative overflow-hidden rounded-2xl border border-[color:var(--border)] bg-[color:var(--card)] p-6 md:p-8">
         <div className="nexus-hero-glow pointer-events-none absolute inset-0" aria-hidden />
         <div className="relative z-10 max-w-2xl">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--muted-foreground)]">
-            Sistema operacional · Central de comando
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--primary)]">
+            Nexus OS · Central de comando
           </p>
           <h2 className="mt-3 text-3xl font-semibold tracking-tight text-[color:var(--foreground)] md:text-4xl">
             {greeting()}, Douglas.
