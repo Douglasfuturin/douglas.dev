@@ -313,8 +313,6 @@ export const ROUTER_PROMPT = `Classify the user message into exactly one mode:
 - "radar" — daily trends briefing / news radar for automation, AI, marketing
 - "grupo" — Conteúdo Dev — Imagem, Conteúdo Dev — Vídeo, Conteúdo Espanha, or user groups
 - "youtube" — YouTube pack (script, titles, SEO, thumbnail) for Spain market
-- "carrossel" — carousel / Instagram carousel planning
-- "capas" — covers and thumbnails
 - "carrossel" — Instagram/LinkedIn carousel planning and visuals
 - "capas" — covers and thumbnails (YouTube/Reels)
 - "arte-twitter" — Twitter/X art direction
