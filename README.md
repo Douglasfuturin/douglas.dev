@@ -1,142 +1,293 @@
-# Central de Agentes — Central de Conteúdo Pessoal
+# Central de Agentes
 
-SaaS pessoal (single-user) do **radar ao post**, em cima de Next.js + Vercel AI SDK + xAI Grok.
+SaaS pessoal de **operações de conteúdo** — do radar ao post — com identidade **Douglas Dev** (preto + laranja `#F26522`).
 
-## O que é
+Stack: **Next.js 16** · **Vercel AI SDK** · **xAI Grok** (`grok-4.7` / `grok-4.20-multi-agent`).
 
-**Central de Agentes** une todas as etapas de operações de conteúdo numa única app:
+Uso single-user: dados em JSON local (`data/`), sem multi-tenant.
 
-1. **Ideia / Radar** — briefing diário (IA, automação, marketing) + GitHub Scout  
-2. **Aprovação** — cards → Roteirista  
-3. **Roteiro** — Reels 60s, guion España, roteiro pessoal  
-4. **Artes** — Twitter, realista, capas, carrossel  
-5. **Vídeo** — edição automática com skills Ninja + kit EDVD / HyperFrames  
-6. **Pacote** — Notion + `outputs/`  
-7. **Publicação** — fila local (`/api/publish`) + hook opcional Buffer  
+---
+
+## O que o sistema faz
+
+A Central de Agentes transforma ideias em conteúdo pronto para publicar, com **agentes especializados** que trabalham em **pipeline** (sequência) dentro de **grupos**.
+
+| Etapa | O que acontece |
+| --- | --- |
+| **1. Ideação** | Radar de Pesquisa e GitHub Scout encontram temas/repos |
+| **2. Roteiro** | Roteirista escreve Reels ~60s / copy de carrossel |
+| **3. Visual** | Diretores de arte (Twitter + realista Antes/Depois) |
+| **4. Vídeo** | Editores de Reels (animação/realismo) e Reels pessoal (você envia → recebe editado) |
+| **5. Pacote** | Notion + artefatos em `outputs/` |
+| **6. Publicação** | Kanban CRM + fila local (`/api/publish`) |
+
+Há um **Orquestrador Principal** que coordena todos os grupos e um **Orquestrador por grupo** que conduz o fluxo entre os membros.
+
+---
+
+## Como funciona (visão geral)
+
+```
+Você
+ ├─ /dashboard     → pipelines por grupo + stats
+ ├─ /grupos        → criar/editar times, add/remove agentes
+ ├─ /studio        → conversa com agentes (modos)
+ ├─ /central       → kanban ideia → postado
+ ├─ /agentes       → criar agentes custom
+ ├─ /kits          → instalar skills Ninja
+ └─ /editor        → edição visual de vídeo
+
+Studio / Chat
+ └─ POST /api/chat
+      └─ orchestrator.resolveAgent(mode, group, member…)
+           ├─ persona (prompts)
+           ├─ modelo (grok-4.7 ou multi-agent)
+           └─ tools (radar, arte, vídeo, central, github…)
+```
+
+1. Você escolhe um **grupo** ou **modo** no Studio (ou deixa `auto` rotear).
+2. O **orquestrador** resolve persona + tools.
+3. O agente usa tools (pesquisa, pipeline CRM, edição, etc.).
+4. Itens persistem em `data/content/store.json` e avançam no kanban.
+5. Quando `ready`, entram na fila de publicação.
+
+---
+
+## Pipelines de agentes (grupos padrão)
+
+### Conteúdo Dev — Imagem
+
+| # | Agente | Função |
+| --- | --- | --- |
+| 1 | Radar de Pesquisa | Briefing de IA, automação e marketing |
+| 2 | Roteirista | Roteiro / copy do carrossel |
+| 3 | Diretor de Arte Twitter | Peças estilo X/Twitter |
+| 4 | Diretor de Arte Realista | Carrossel Antes/Depois fotorealista Douglas Dev |
+
+Orquestrador do grupo coordena handoffs.
+
+### Conteúdo Dev — Vídeo
+
+| # | Agente | Função |
+| --- | --- | --- |
+| 1 | Radar de Pesquisa | Temas fortes para vídeo |
+| 2 | Roteirista | Script Reels ~60s |
+| 3 | Editor Reels Animação/Realismo | Corte 9:16, ritmo, legendas |
+| 4 | Editor Reels Pessoal | Você envia o vídeo → devolve pronto, editado |
+
+### Conteúdo Espanha
+
+Mercado ES (labels em português; conteúdo publicado em espanhol da Espanha):
+
+Roteirista ES → Carrossel ES → YouTube ES → Capas e Miniaturas → Editor de Vídeo ES → Orquestrador.
+
+### Grupos custom
+
+Em `/grupos` ou no dashboard você pode:
+
+- **Criar grupo** (já nasce com Orquestrador)
+- **Adicionar / remover agentes** (catálogo + agents custom)
+- Abrir a **sala** no Studio (`mode=grupo`)
+
+---
 
 ## Rotas do produto
 
 | Rota | Função |
 | --- | --- |
-| `/` | Landing cinematográfica Central de Agentes |
-| `/dashboard` | **CRM Dashboard** — visão geral + todos os módulos |
-| `/central` | Kanban do pipeline (ideia → postado) |
-| `/central/[id]` | Detalhe do conteúdo |
-| `/studio` | Studio de agentes (chat + modos) |
-| `/grupos` | Salas Conteúdo Dev / Vídeo / España |
-| `/kits` | Hub de skills Ninja |
+| `/` | Landing Douglas Dev / Central de Agentes |
+| `/dashboard` | CRM: pipelines Imagem/Vídeo + grupos custom + fila |
+| `/central` | Kanban do pipeline editorial |
+| `/central/[id]` | Detalhe do item (avançar estágio, publicar) |
+| `/studio` | Chat multi-agente (todos os modos) |
+| `/grupos` | Gerenciar grupos e membros |
+| `/agentes` | Criar agentes custom (persona + toolkit) |
+| `/kits` | Hub Ninja Kits (ZIP → instalar → usar) |
 | `/editor` | Editor visual EDVD |
-| `/radar` `/roteiro` `/pipeline` … | Atalhos → Studio |
+| `/radar` `/roteiro` `/github` `/pipeline` `/notion` | Atalhos → Studio |
 
-UI CRM inspirada em Motionsites / Godly / 21st / React Bits / Spline: sidebar escura, accent lime, mesh gradients e motion leve.
+---
+
+## Modos do Studio
+
+| Modo | Modelo | Uso |
+| --- | --- | --- |
+| `orquestrador` | multi-agent | Coordena todos os grupos/operações |
+| `grupo` | grok-4.7 | Sala do grupo (orquestra membros) |
+| `central` | grok-4.7 | Opera o kanban CRM + fila |
+| `radar` | grok-4.7 | Briefing diário |
+| `github` | grok-4.7 | Scout de repos + roteiro 60s |
+| `roteiro` / `roteiro-pessoal` | grok-4.7 | Scripts |
+| `arte-twitter` / `arte-realista` | grok-4.7 | Direção de arte |
+| `editor-reels` / `video` | grok-4.7 | Edição de vídeo |
+| `youtube` / `carrossel` / `capas` | grok-4.7 | Mercado Espanha |
+| `custom` | conforme toolkit | Agente criado por você |
+| `kits` / `pipeline` / `notion` / `research` | — | Skills, pack Scout→Reels→Notion, Notion, pesquisa profunda |
+| `auto` | roteador | Classifica a mensagem e escolhe o modo |
+
+Query params úteis:
+
+```
+/studio?mode=grupo&group=conteudo-dev
+/studio?mode=arte-realista&group=conteudo-dev&member=arte-realista
+/studio?mode=orquestrador
+/studio?mode=custom&agent=<id>
+```
+
+---
+
+## Pipeline CRM (conteúdo)
+
+Estágios:
+
+```
+idea → approved → script → art → video → packaged → ready → scheduled → published
+```
+
+- **Store:** `data/content/store.json`
+- **API:** `GET/POST /api/content`, `PATCH/DELETE /api/content/[id]`
+- **Publicação:** `POST /api/publish` (fila local; Buffer opcional via `BUFFER_ACCESS_TOKEN`)
+
+---
+
+## Dados locais
+
+```
+data/
+  content/store.json     # itens do pipeline + fila
+  agents/store.json      # agentes custom
+  agents/groups.json     # grupos criados por você
+```
+
+(`data/` está no `.gitignore` — criado em runtime.)
+
+---
+
+## Estrutura do repositório
+
+```
+src/
+  app/
+    page.tsx                 # landing
+    dashboard/               # CRM + pipelines
+    central/                 # kanban + detalhe
+    studio/                  # chat de agentes
+    grupos/                  # CRUD de grupos
+    agentes/                 # CRUD de agentes custom
+    kits/ editor/ …          # módulos
+    api/
+      chat/                  # streaming (AI SDK)
+      content/ publish/      # pipeline + fila
+      agents/ groups/        # agents e grupos
+      kits/ editor/ upload/  # skills e mídia
+
+  components/
+    crm/
+      dashboard.tsx          # pipelines por grupo
+      groups-manager.tsx     # criar/add/remove
+      agents-manager.tsx
+      crm-shell.tsx          # shell lateral
+    chat-app.tsx             # Studio
+    central-board.tsx
+    landing-page.tsx
+    …
+
+  lib/
+    agents/
+      orchestrator.ts        # resolve mode → persona + tools
+      groups.ts              # grupos padrão (Imagem / Vídeo / Espanha)
+      group-store.ts         # grupos custom
+      agent-catalog.ts       # agentes disponíveis para times
+      prompts.ts             # personas
+      *-tools.ts             # tools por domínio
+    content/                 # types + store do CRM
+    kits/                    # descoberta/instalação de skills
+    video/                   # opções e runner de edição
+    brand/douglas-dev.ts     # identidade visual
+```
+
+---
+
+## Identidade visual
+
+- **Marca:** Douglas Dev · Central de Agentes  
+- **Cores:** preto `#0a0a0a` · superfície `#121212` · laranja `#F26522`  
+- **UI:** cards dark (borda sutil, texto branco)  
+- **Carrosséis realistas:** Antes → Depois fotorealista no estilo da marca  
+
+---
 
 ## Como rodar
 
 ```bash
 cp .env.example .env.local
-# cole sua XAI_API_KEY de https://console.x.ai
+# XAI_API_KEY=…   (obrigatório — https://console.x.ai)
 
 npm install
 npm run dev
 ```
 
-Abra [http://localhost:3000](http://localhost:3000) → **Abrir Central**.
+Abra [http://localhost:3000](http://localhost:3000) → **Dashboard** ou **Studio**.
 
-Opcional: `GITHUB_TOKEN`, `NOTION_TOKEN` + `NOTION_PARENT_PAGE_ID`, `BUFFER_ACCESS_TOKEN`.
+### Variáveis opcionais
 
-Para edição de vídeo: `cd kit-edicao-video/skill && uv sync` (ffmpeg no PATH).
+| Variável | Uso |
+| --- | --- |
+| `GITHUB_TOKEN` | Scout com mais rate limit |
+| `NOTION_TOKEN` + `NOTION_PARENT_PAGE_ID` | Guias Notion |
+| `BUFFER_ACCESS_TOKEN` | Stub de envio social |
 
-## Arquitetura
+### Vídeo / ffmpeg
 
+Para edição automática:
+
+```bash
+cd kit-edicao-video/skill && uv sync   # ffmpeg no PATH
 ```
-Usuário → /central (kanban + fila)
-        → /studio?mode=central|radar|video|grupo…
-             → /api/chat → orchestrator
-             → tools: central + radar + roteiro + arte + vídeo + notion…
-        → /api/content  (CRUD local em data/content/store.json)
-        → /api/publish  (fila de posts)
-```
 
-### Modo `central`
+Skills Ninja: coloque `.zip` em `ninja-kits/sources/` → `/kits` → **Instalar**.
 
-Agente operador da Central com tools:
+---
 
-- `list_content_pipeline` / `get_content_item`
-- `create_content_item` / `update_content_item` / `advance_content_stage`
-- `run_central_pipeline` — fecha pacote editorial
-- `schedule_content_publish` — enfileira Instagram/YouTube/TikTok/X/LinkedIn/Notion
+## APIs principais
 
-### Pipeline de estágios
+| Endpoint | Função |
+| --- | --- |
+| `POST /api/chat` | Stream do agente (mode, groupId, memberId, customAgentId…) |
+| `GET/POST /api/content` | Listar / criar itens do pipeline |
+| `PATCH /api/content/[id]` | Atualizar / avançar estágio |
+| `GET/POST /api/publish` | Fila de posts |
+| `GET/POST /api/agents` | Agentes custom |
+| `GET/POST /api/groups` | Grupos (builtin + custom) |
+| `PATCH /api/groups/[id]` | update / add_member / remove_member / set_orchestrator |
+| `GET/POST /api/kits` | Inventário e instalação de skills |
 
-`idea → approved → script → art → video → packaged → ready → scheduled → published`
+---
 
-Dados ficam em `data/content/store.json` (uso pessoal, sem multi-tenant).
+## Fluxo típico (exemplo)
 
-## Grupos de agentes
+1. **Dashboard** → abrir **Conteúdo Dev — Imagem**
+2. Etapa 1: **Radar de Pesquisa** gera briefing e pede aprovação  
+3. Etapa 2: **Roteirista** fecha o copy  
+4. Etapas 3–4: **Arte Twitter** + **Arte Realista**  
+5. Item aparece no **kanban** (`/central`)  
+6. Avança até `ready` → **fila de posts**  
 
-### Conteúdo Dev
-Radar → Roteirista → Arte Twitter/Realista → Bit
+Para vídeo: mesmo radar/roteiro, depois editores; no **Reels Pessoal**, faça upload do MP4 no Studio.
 
-### Conteúdo Dev Vídeo
-Roteiro pessoal → Editor Reels → Editor vídeo (skills) → Bit → Radar GitHub
+---
 
-### Contenidos España
-Editor → Carrusel → YouTube → Guionista → Capas → Bit
+## Deploy
 
-## Motor multi-agente (Grok)
+- **Web (Studio/CRM):** Vercel com `XAI_API_KEY`  
+- **Vídeo/ffmpeg:** precisa de máquina com binários (VPS) — o FS da Vercel é efêmero; para produção use Blob/DB no lugar de `data/*.json`
 
-| Modo | Modelo | Uso |
-| --- | --- | --- |
-| `central` | `grok-4.7` | SaaS ops — kanban + pacote + fila |
-| `chat` / agentes | `grok-4.7` | tools server-side |
-| `research` | `grok-4.20-multi-agent` | pesquisa profunda |
-| `auto` | roteador | escolhe o modo |
-
-## Hub Ninja Kits
-
-1. Cole `.zip` em `ninja-kits/sources/`  
-2. Em `/kits` → **Instalar todos os ZIPs**  
-3. Use no Studio (`mode=kits`) ou via Editor de Vídeo  
-
-## Editor de vídeo
-
-- Skills: `auto_edit_with_system_skills`, EDVD, HyperFrames  
-- UI visual: `/editor`  
-- Chat: `/studio?mode=video` + upload MP4  
-
-## Publicação
-
-1. Avance o item até `ready` / `packaged` na Central  
-2. **Fila IG / YouTube / X** ou tool `schedule_content_publish`  
-3. **Marcar postado** na fila (ou configure `BUFFER_ACCESS_TOKEN` para stub de envio)  
-
-APIs nativas Meta/YouTube/TikTok podem plugar no mesmo formato de job em `/api/publish`.
-
-## Estrutura
-
-```
-src/
-  app/
-    page.tsx                 # landing Central de Agentes
-    central/                 # kanban + detalhe
-    studio/                  # chat / agentes
-    api/content/             # CRUD pipeline
-    api/publish/             # fila de posts
-    api/chat/                # streaming agentes
-  components/
-    landing-page.tsx
-    central-board.tsx
-    app-shell.tsx
-    chat-app.tsx
-  lib/
-    content/                 # store + types
-    agents/                  # orchestrator + tools
-```
+---
 
 ## Próximos passos (opcional)
 
-- Buffer API real / Meta Graph / YouTube Data API  
+- APIs reais Meta / YouTube / TikTok / Buffer  
 - Cron diário do Radar  
-- TTS/avatar (HyperFrames) roteiro → MP4 sem gravação  
-- Gate PIN local para a Central  
-- Deploy Vercel com `XAI_API_KEY`
+- Persistência em Postgres/Blob  
+- TTS/avatar (HyperFrames) roteiro → MP4  
+- Gate PIN local
