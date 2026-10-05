@@ -1,14 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { ContentItem, PublishJob } from "@/lib/content/types";
 import { STAGE_LABELS } from "@/lib/content/types";
-import {
-  OPERATION_BLURBS,
-  OPERATION_LABELS,
-  type OperationId,
-} from "@/lib/agents/group-types";
+import { AGENT_GROUPS, type AgentGroup, type AgentMember } from "@/lib/agents/groups";
 import { GroupsManager } from "@/components/crm/groups-manager";
 
 type Stats = {
@@ -19,130 +15,105 @@ type Stats = {
   published: number;
 };
 
-type OpFeature = {
-  href: string;
-  title: string;
-  blurb: string;
-  glow: string;
-  tag: string;
-};
+/** Pipeline steps shown on dashboard (excludes orchestrator from the numbered flow). */
+function pipelineMembers(group: AgentGroup): AgentMember[] {
+  return group.members.filter((m) => m.mode !== "bit" && m.id !== "bit");
+}
 
-const OPS: Record<OperationId, OpFeature[]> = {
-  ideacao: [
-    {
-      href: "/radar",
-      title: "Radar",
-      blurb: "Briefing diário de IA, automação e marketing",
-      glow: "rgba(94, 234, 212, 0.35)",
-      tag: "Ideação",
-    },
-    {
-      href: "/studio?mode=github&q=Busca%20os%20melhores%20reposit%C3%B3rios%20do%20GitHub%20em%20diferentes%20nichos%20com%20mais%20stars%20e%20gera%20roteiro%20Reels%2060s%20de%20cada%20vencedor",
-      title: "GitHub Scout",
-      blurb: "Melhores repos por nicho + roteiro 60s",
-      glow: "rgba(94, 234, 212, 0.35)",
-      tag: "GitHub",
-    },
-  ],
-  script: [
-    {
-      href: "/studio?mode=roteiro",
-      title: "Roteirista",
-      blurb: "Reels 60s, guiones e tom pessoal",
-      glow: "rgba(200, 245, 66, 0.35)",
-      tag: "Script",
-    },
-    {
-      href: "/studio?mode=roteiro-pessoal",
-      title: "Roteirista Pessoal",
-      blurb: "1ª pessoa, autoridade e gancho",
-      glow: "rgba(167, 139, 250, 0.3)",
-      tag: "Script",
-    },
-  ],
-  visual: [
-    {
-      href: "/studio?mode=arte-realista&q=Planeja%20um%20carrossel%20realista%20Douglas%20Dev%20(Antes%2FDepois)%20sobre%205%20automa%C3%A7%C3%B5es%20com%20IA%20usando%20plan_carrossel_realista_douglas",
-      title: "Carrossel realista",
-      blurb: "Antes/Depois fotorealista · preto + laranja",
-      glow: "rgba(242, 101, 34, 0.4)",
-      tag: "Visual",
-    },
-    {
-      href: "/studio?mode=arte-twitter",
-      title: "Arte Twitter",
-      blurb: "Peças para X no brand kit",
-      glow: "rgba(242, 101, 34, 0.28)",
-      tag: "Visual",
-    },
-  ],
-  video: [
-    {
-      href: "/editor",
-      title: "Editor de vídeo",
-      blurb: "Skills Ninja + EDVD + HyperFrames",
-      glow: "rgba(94, 234, 212, 0.3)",
-      tag: "Produção",
-    },
-    {
-      href: "/studio?mode=editor-reels",
-      title: "Editor Reels",
-      blurb: "Corte 9:16, ritmo e legendas",
-      glow: "rgba(248, 113, 113, 0.28)",
-      tag: "Reels",
-    },
-  ],
-  publicacao: [
-    {
-      href: "/central",
-      title: "Pipeline CRM",
-      blurb: "Kanban ideia → postado + fila social",
-      glow: "rgba(200, 245, 66, 0.32)",
-      tag: "Ops",
-    },
-    {
-      href: "/pipeline",
-      title: "Pack Scout",
-      blurb: "GitHub → Reels → Notion numa tacada",
-      glow: "rgba(94, 234, 212, 0.25)",
-      tag: "Pack",
-    },
-  ],
-  times: [],
-  sistema: [
-    {
-      href: "/agentes",
-      title: "Criar agente",
-      blurb: "Persona + toolkit + instruções",
-      glow: "rgba(200, 245, 66, 0.4)",
-      tag: "Custom",
-    },
-    {
-      href: "/kits",
-      title: "Ninja Kits",
-      blurb: "Inventário de skills e runners",
-      glow: "rgba(255, 122, 89, 0.22)",
-      tag: "Skills",
-    },
-    {
-      href: "/studio?mode=orquestrador&q=Orquestra%20todos%20os%20grupos%20e%20defina%20o%20fluxo%20correto",
-      title: "Orquestrador Principal",
-      blurb: "Coordena todos os times e operações",
-      glow: "rgba(242, 101, 34, 0.45)",
-      tag: "Core",
-    },
-  ],
-};
+const PIPELINE_GROUPS = AGENT_GROUPS.filter(
+  (g) => g.id === "conteudo-dev" || g.id === "conteudo-dev-video",
+);
 
-const OP_ORDER: OperationId[] = [
-  "sistema",
-  "times",
-  "ideacao",
-  "script",
-  "visual",
-  "video",
-  "publicacao",
-];
+function PipelineGroupCard({
+  group,
+  accent,
+}: {
+  group: AgentGroup;
+  accent: string;
+}) {
+  const steps = pipelineMembers(group);
+
+  return (
+    <section className="crm-panel !p-0 overflow-hidden animate-fase-rise">
+      <div
+        className="border-b border-white/10 px-5 py-4 sm:px-6"
+        style={{
+          background: `linear-gradient(135deg, ${accent}22 0%, transparent 55%)`,
+        }}
+      >
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[color:var(--dd-orange)]">
+              Pipeline · {steps.length} etapas
+            </p>
+            <h3 className="font-display mt-1 text-2xl font-bold text-white">
+              {group.name}
+            </h3>
+            <p className="mt-1 max-w-xl text-sm text-white/50">{group.blurb}</p>
+          </div>
+          <Link
+            href={`/studio?mode=grupo&group=${group.id}`}
+            className="crm-btn crm-btn-primary"
+          >
+            Abrir sala
+          </Link>
+        </div>
+      </div>
+
+      <ol className="relative space-y-0 px-5 py-5 sm:px-6">
+        {steps.map((member, index) => {
+          const step = index + 1;
+          const isLast = index === steps.length - 1;
+          return (
+            <li key={member.id} className="relative flex gap-4 pb-5 last:pb-0">
+              {!isLast ? (
+                <span
+                  className="absolute left-[18px] top-10 bottom-0 w-px bg-white/10"
+                  aria-hidden
+                />
+              ) : null}
+              <div className="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/15 bg-[#0a0a0a] font-display text-sm font-bold text-[color:var(--dd-orange)]">
+                {step}
+              </div>
+              <Link
+                href={`/studio?mode=${member.mode}&group=${group.id}&member=${member.id}`}
+                className="crm-card-sm group flex min-w-0 flex-1 items-center gap-3 !py-3 transition hover:border-[color:var(--dd-orange)]/45"
+              >
+                <span
+                  className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-xs font-bold text-[#0b0f14]"
+                  style={{ background: member.color }}
+                >
+                  {member.name
+                    .split(" ")
+                    .slice(0, 2)
+                    .map((w) => w[0])
+                    .join("")}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-sm font-semibold text-white group-hover:text-[color:var(--dd-orange)]">
+                    {member.name}
+                  </span>
+                  <span className="mt-0.5 block text-[12px] leading-snug text-white/50">
+                    {member.role}
+                  </span>
+                </span>
+                <span className="hidden shrink-0 text-[10px] font-bold uppercase tracking-[0.14em] text-white/30 sm:block">
+                  Etapa {step}
+                </span>
+              </Link>
+            </li>
+          );
+        })}
+      </ol>
+
+      <div className="border-t border-white/10 px-5 py-3 sm:px-6">
+        <p className="text-[11px] text-white/40">
+          Fluxo: {steps.map((m) => m.name).join(" → ")}
+        </p>
+      </div>
+    </section>
+  );
+}
 
 export function CrmDashboard() {
   const [items, setItems] = useState<ContentItem[]>([]);
@@ -185,25 +156,25 @@ export function CrmDashboard() {
         <div className="relative z-10 flex flex-wrap items-end justify-between gap-6">
           <div className="max-w-xl">
             <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[color:var(--dd-orange)]">
-              Operações · @o.douglas.dev
+              Fluxos por grupo · @o.douglas.dev
             </p>
             <h2 className="font-display mt-3 text-4xl tracking-tight text-white sm:text-5xl">
               <span className="fase-shimmer-text">Central de Agentes</span>
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-white/55 sm:text-base">
-              Dashboard por operação. O Orquestrador Principal coordena os
-              grupos; cada time conversa e fecha o fluxo.
+              Agentes em sequência de pipeline — Imagem e Vídeo — cada um com
+              sua função no fluxo.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
             <Link
-              href="/studio?mode=orquestrador&q=Orquestra%20todos%20os%20grupos%20e%20monte%20o%20fluxo%20correto"
+              href="/studio?mode=orquestrador&q=Orquestra%20os%20grupos%20Imagem%20e%20V%C3%ADdeo%20no%20fluxo%20correto"
               className="crm-btn crm-btn-primary"
             >
               Orquestrador Principal
             </Link>
             <Link href="/grupos" className="crm-btn crm-btn-ghost">
-              Criar grupo
+              Gerenciar grupos
             </Link>
           </div>
         </div>
@@ -229,94 +200,61 @@ export function CrmDashboard() {
         </div>
       </section>
 
-      {OP_ORDER.map((op, sectionIndex) => {
-        if (op === "times") {
-          return (
-            <section
-              key={op}
-              className="animate-fase-rise"
-              style={{ animationDelay: `${80 + sectionIndex * 40}ms` }}
-            >
-              <div className="mb-3">
-                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[color:var(--dd-orange)]">
-                  Operação
-                </p>
-                <h3 className="font-display text-2xl font-bold text-white">
-                  {OPERATION_LABELS[op]}
-                </h3>
-                <p className="mt-1 text-sm text-[color:var(--fase-muted)]">
-                  {OPERATION_BLURBS[op]}
-                </p>
-              </div>
-              <GroupsManager compact />
-            </section>
-          );
-        }
+      <section className="space-y-6">
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[color:var(--dd-orange)]">
+            Distribuição
+          </p>
+          <h3 className="font-display text-2xl font-bold text-white">
+            Pipelines por grupo
+          </h3>
+          <p className="mt-1 text-sm text-white/50">
+            Ordem do fluxo — clique no agente para abrir a etapa no Studio.
+          </p>
+        </div>
 
-        const features = OPS[op];
-        return (
-          <section
-            key={op}
-            className="animate-fase-rise"
-            style={{ animationDelay: `${80 + sectionIndex * 40}ms` }}
-          >
-            <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
-              <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[color:var(--dd-orange)]">
-                  Operação
-                </p>
-                <h3 className="font-display text-2xl font-bold text-white">
-                  {OPERATION_LABELS[op]}
-                </h3>
-                <p className="mt-1 text-sm text-[color:var(--fase-muted)]">
-                  {OPERATION_BLURBS[op]}
-                </p>
-              </div>
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-              {features.map((f, i) => (
-                <Link
-                  key={f.href}
-                  href={f.href}
-                  className="crm-tile animate-fase-rise"
-                  style={
-                    {
-                      "--tile-glow": f.glow,
-                      animationDelay: `${100 + i * 40}ms`,
-                    } as CSSProperties
-                  }
-                >
-                  <span className="crm-pill">{f.tag}</span>
-                  <p className="font-display relative z-10 text-xl font-bold text-white">
-                    {f.title}
-                  </p>
-                  <p className="relative z-10 text-xs leading-relaxed text-[color:var(--fase-muted)]">
-                    {f.blurb}
-                  </p>
-                </Link>
-              ))}
-            </div>
-          </section>
-        );
-      })}
+        <div className="grid gap-6 xl:grid-cols-2">
+          {PIPELINE_GROUPS.map((group) => (
+            <PipelineGroupCard
+              key={group.id}
+              group={group}
+              accent={
+                group.id === "conteudo-dev-video" ? "#34D399" : "#F26522"
+              }
+            />
+          ))}
+        </div>
+      </section>
+
+      <section className="animate-fase-rise" style={{ animationDelay: "120ms" }}>
+        <div className="mb-3">
+          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[color:var(--dd-orange)]">
+            Operação
+          </p>
+          <h3 className="font-display text-2xl font-bold text-white">
+            Seus grupos custom
+          </h3>
+          <p className="mt-1 text-sm text-white/50">
+            Crie times extras, adicione ou remova agentes.
+          </p>
+        </div>
+        <GroupsManager compact />
+      </section>
 
       <div className="grid gap-4 lg:grid-cols-5">
-        <section
-          className="crm-panel lg:col-span-3 animate-fase-rise"
-          style={{ animationDelay: "160ms" }}
-        >
+        <section className="crm-panel lg:col-span-3 animate-fase-rise">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="font-display text-lg font-bold">Pipeline recente</h3>
             <Link
               href="/central"
-              className="text-xs font-semibold text-[color:var(--fase-muted)] hover:text-white"
+              className="text-xs font-semibold text-white/45 hover:text-white"
             >
               Abrir kanban →
             </Link>
           </div>
           <ul className="space-y-2">
             {recent.length === 0 ? (
-              <li className="text-sm text-[color:var(--fase-muted)]">
+              <li className="text-sm text-white/45">
                 Nenhum item ainda. Rode o Radar ou adicione na Central.
               </li>
             ) : (
@@ -330,7 +268,7 @@ export function CrmDashboard() {
                       <p className="text-sm font-semibold text-white">
                         {item.title}
                       </p>
-                      <p className="mt-0.5 text-[11px] text-[color:var(--fase-muted)]">
+                      <p className="mt-0.5 text-[11px] text-white/45">
                         {STAGE_LABELS[item.stage]} · {item.source} ·{" "}
                         {item.market.toUpperCase()}
                       </p>
@@ -346,13 +284,24 @@ export function CrmDashboard() {
         </section>
 
         <section className="space-y-4 lg:col-span-2">
-          <div
-            className="crm-panel animate-fase-rise"
-            style={{ animationDelay: "240ms" }}
-          >
+          <div className="crm-panel animate-fase-rise">
+            <h3 className="font-display text-lg font-bold">Atalhos</h3>
+            <div className="mt-3 flex flex-col gap-2">
+              <Link href="/central" className="crm-btn crm-btn-ghost w-full">
+                Pipeline CRM
+              </Link>
+              <Link href="/agentes" className="crm-btn crm-btn-ghost w-full">
+                Criar agente
+              </Link>
+              <Link href="/kits" className="crm-btn crm-btn-ghost w-full">
+                Ninja Kits
+              </Link>
+            </div>
+          </div>
+          <div className="crm-panel animate-fase-rise">
             <h3 className="font-display text-lg font-bold">Fila de posts</h3>
             {queue.length === 0 ? (
-              <p className="mt-2 text-sm text-[color:var(--fase-muted)]">
+              <p className="mt-2 text-sm text-white/45">
                 Vazia — avance itens até ready e enfileire.
               </p>
             ) : (
@@ -363,9 +312,7 @@ export function CrmDashboard() {
                     className="crm-card-sm flex items-center justify-between text-xs"
                   >
                     <span className="font-semibold uppercase">{j.network}</span>
-                    <span className="text-[color:var(--fase-muted)]">
-                      {j.status}
-                    </span>
+                    <span className="text-white/45">{j.status}</span>
                   </li>
                 ))}
               </ul>

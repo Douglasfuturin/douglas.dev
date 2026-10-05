@@ -35,14 +35,14 @@ const MODE_LABELS: Record<AgentMode, string> = {
   chat: "Chat + ferramentas",
   research: "Pesquisa multiagente",
   grupo: "Grupo (sala)",
-  radar: "Radar de Tendências",
+  radar: "Radar de Pesquisa",
   github: "GitHub Scout + Reels 60s",
   roteiro: "Roteirista / Guionista",
   "roteiro-pessoal": "Roteirista Pessoal",
   "arte-twitter": "Diretor de Arte Twitter",
   "arte-realista": "Diretor de Arte Realista",
-  bit: "Bit",
-  "editor-reels": "Editor Reels Realista",
+  bit: "Orquestrador",
+  "editor-reels": "Editor Reels Animação/Realismo",
   youtube: "YouTube (España)",
   carrossel: "Carrusel",
   capas: "Capas y Thumbnails",
@@ -51,7 +51,7 @@ const MODE_LABELS: Record<AgentMode, string> = {
   custom: "Agente custom",
   notion: "Notion Guide",
   pipeline: "Pack Scout→Reels→Notion",
-  video: "Editor de Vídeo (skills)",
+  video: "Editor Reels Pessoal",
   kits: "Skills Ninja",
 };
 
@@ -387,7 +387,7 @@ export function ChatApp() {
               }}
               className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
             >
-              Conteúdo Dev
+              Conteúdo Dev — Imagem
             </button>
             <button
               type="button"
@@ -398,7 +398,7 @@ export function ChatApp() {
               }}
               className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
             >
-              Dev Vídeo
+              Conteúdo Dev — Vídeo
             </button>
             <button
               type="button"

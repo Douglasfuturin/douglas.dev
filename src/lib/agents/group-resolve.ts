@@ -14,7 +14,9 @@ function builtinToResolved(id: string): ResolvedAgentGroup | null {
       ? "video"
       : g.id === "conteudos-espanha"
         ? "visual"
-        : "ideacao";
+        : g.id === "conteudo-dev"
+          ? "visual"
+          : "ideacao";
   const members: ResolvedGroupMember[] = g.members.map((m) => ({
     id: m.id,
     name: m.name,
@@ -22,7 +24,7 @@ function builtinToResolved(id: string): ResolvedAgentGroup | null {
     role: m.role,
     color: m.color,
     icon: m.icon,
-    isOrchestrator: m.id === "bit" || m.mode === "bit",
+    isOrchestrator: m.id === "bit" || m.mode === "bit" || m.name === "Orquestrador",
     kind: "builtin" as const,
     sourceId: m.id,
   }));

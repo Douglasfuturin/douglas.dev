@@ -5,7 +5,7 @@ export default function DashboardPage() {
   return (
     <CrmShell
       title="Dashboard"
-      subtitle="Visão por operação — Orquestrador, grupos, pipeline e módulos."
+      subtitle="Pipelines por grupo — Imagem e Vídeo em sequência de fluxo."
       actions={
         <>
           <a href="/studio?mode=central" className="crm-btn crm-btn-primary">
