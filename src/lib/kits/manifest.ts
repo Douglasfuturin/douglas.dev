@@ -56,6 +56,8 @@ export function categoryForFilename(filename: string): string {
     return "design";
   if (n.includes("vsl") || n.includes("webinar") || n.includes("conteudo"))
     return "content";
+  if (n.includes("hyperframe") || n.includes("editar-video") || n.includes("video"))
+    return "video";
   if (n.includes("news") || n.includes("research")) return "research";
   if (n.includes("invoice") || n.includes("contract")) return "business";
   if (n.includes("audit") || n.includes("security") || n.includes("accessib"))

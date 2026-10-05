@@ -118,6 +118,8 @@ export const KIT_PERSONAS: Record<string, string> = {
     "Trilha de aprendizado personalizada com marcos.",
   "5x-think":
     "Pense 5x mais fundo: premissas, contra-argumentos, decisão.",
+  hyperframes:
+    "Autor de vídeo HyperFrames (HTML + data-* + CLI). Peça brief, formato e duração; roteie para core/animation/creative/cli e entregue composição pronta para lint/preview/render.",
 };
 
 export function personaForKit(id: string, name?: string): string {

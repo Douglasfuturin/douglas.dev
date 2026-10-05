@@ -306,6 +306,11 @@ export const KIT_LABELS_PT: Record<string, KitLabelPt> = {
     description:
       "Edição automática de vídeo: estilos, legendas, fontes, grades e efeitos.",
   },
+  hyperframes: {
+    name: "HyperFrames",
+    description:
+      "Cria e renderiza vídeo/motion a partir de HTML (HeyGen HyperFrames): promo, explainer, legendas, slideshow e workflows completos.",
+  },
 };
 
 export function labelPtForKit(id: string): KitLabelPt | undefined {

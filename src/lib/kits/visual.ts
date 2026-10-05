@@ -249,6 +249,12 @@ export const VISUAL_KITS: Record<string, VisualConfig> = {
     showVariations: false,
     showSlides: false,
   }),
+  hyperframes: cfg("video", {
+    defaultAspect: "16:9",
+    aspects: [ASPECTS.landscape, ASPECTS.story, ASPECTS.square],
+    showVariations: false,
+    showSlides: false,
+  }),
 };
 
 export const VISUAL_KIND_LABEL: Record<VisualKind, string> = {
@@ -305,15 +311,26 @@ export function buildVisualPrompt(
   const aspect =
     cfg.aspects.find((a) => a.id === draft.aspectId) ?? cfg.aspects[0];
 
-  const lines = [
-    `Use a skill "${kitName}" (${kitId}) para produção visual.`,
-    "",
-    "Especificação do painel visual:",
-    `- Tipo: ${VISUAL_KIND_LABEL[cfg.kind]}`,
-    `- Formato: ${aspect.label} (${aspect.hint})`,
-    `- Estilo: ${style.label} — ${style.mood}`,
-    `- Paleta: fundo com caráter ${style.id}, texto ${style.fg}, destaque ${style.accent}`,
-  ];
+  const lines =
+    kitId === "hyperframes"
+      ? [
+          `Use a skill HyperFrames (${kitId}) para criar/editar um vídeo HTML.`,
+          "",
+          "Especificação do painel visual:",
+          `- Framework: HyperFrames (HeyGen)`,
+          `- Formato: ${aspect.label} (${aspect.hint})`,
+          `- Estilo visual: ${style.label} — ${style.mood}`,
+          `- Paleta: ${style.id}, texto ${style.fg}, destaque ${style.accent}`,
+        ]
+      : [
+          `Use a skill "${kitName}" (${kitId}) para produção visual.`,
+          "",
+          "Especificação do painel visual:",
+          `- Tipo: ${VISUAL_KIND_LABEL[cfg.kind]}`,
+          `- Formato: ${aspect.label} (${aspect.hint})`,
+          `- Estilo: ${style.label} — ${style.mood}`,
+          `- Paleta: fundo com caráter ${style.id}, texto ${style.fg}, destaque ${style.accent}`,
+        ];
 
   if (draft.topic.trim()) lines.push(`- Tema/assunto: ${draft.topic.trim()}`);
   if (draft.headline.trim())
@@ -324,11 +341,20 @@ export function buildVisualPrompt(
   if (cfg.showVariations)
     lines.push(`- Variações a entregar: ${draft.variations}`);
 
-  lines.push(
-    "",
-    "Entregue o resultado pronto para usar (copy por peça + direção de arte + prompts de imagem quando couber).",
-    "Responda em português.",
-  );
+  if (kitId === "hyperframes") {
+    lines.push(
+      "",
+      "Siga skills/hyperframes/SKILL.md e roteie para core/animation/creative/cli conforme o pedido.",
+      "Entregue composição HyperFrames + comandos de lint/preview/render.",
+      "Responda em português.",
+    );
+  } else {
+    lines.push(
+      "",
+      "Entregue o resultado pronto para usar (copy por peça + direção de arte + prompts de imagem quando couber).",
+      "Responda em português.",
+    );
+  }
 
   if (extraBrief?.trim()) {
     lines.push("", "Pedido adicional do usuário:", extraBrief.trim());

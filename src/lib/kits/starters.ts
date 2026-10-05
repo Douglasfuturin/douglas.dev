@@ -442,6 +442,23 @@ export const KIT_STARTERS: Record<string, KitStarter[]> = {
         "Liste estilos disponíveis e edite o vídeo em [caminho] com legendas e estilo reel-mono.",
     },
   ],
+  hyperframes: [
+    {
+      label: "Novo vídeo",
+      prompt:
+        "Use HyperFrames para criar um vídeo de [duração]s em [16:9|9:16] sobre [tema]. Peça só o mínimo e entregue composição HTML + passos de preview/render.",
+    },
+    {
+      label: "Promo produto",
+      prompt:
+        "Workflow product-launch HyperFrames para [produto/oferta]. Brief → storyboard → composição → lint/preview.",
+    },
+    {
+      label: "Explainer",
+      prompt:
+        "Crie um explainer faceless em HyperFrames sobre [tema], com legendas e CTA final.",
+    },
+  ],
 };
 
 export function startersForKit(id: string, name?: string): KitStarter[] {
