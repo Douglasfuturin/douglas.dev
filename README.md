@@ -8,6 +8,7 @@ Starter em Next.js + Vercel AI SDK + xAI Grok para um sistema multi-agente com a
 - Roteirista — roteiro de Reels ~60s sobre um repositório
 - Notion Guide — página/arquivo com link + instalação + uso
 - Pipeline — Scout → Roteiro → Notion numa tacada
+- Radar de Tendências — briefing diário (IA, automação, marketing) com aprovação → Roteirista
 - web search, X search, code execution, image generation
 
 ## Arquitetura (duas camadas)
@@ -30,18 +31,17 @@ Um roteador escolhe o modo:
 | `roteiro` | `grok-4.7` | roteiro de Reels ~60s sobre um repo |
 | `notion` | `grok-4.7` | guia no Notion (link + instalar + usar) |
 | `pipeline` | `grok-4.7` | pack completo Scout → Reels → Notion |
+| `radar` | `grok-4.7` | briefing diário IA / automação / marketing |
 | `kits` | `grok-4.7` | skills Ninja / ZIPs instalados |
 | `video` | `grok-4.7` | edição automática de vídeo |
 | `auto` | roteador + um dos acima | decide pelo conteúdo da mensagem |
 
 ```
-Usuário → /api/chat → orchestrator (auto|chat|research|github|roteiro|notion|pipeline|kits|video)
-                         ├─ chat: grok-4.7 + web/X/code/image (+ github/roteiro/notion/pipeline tools)
-                         ├─ github: GitHub Scout (search/rank/compare repos)
-                         ├─ roteiro: Roteirista Reels 60s
-                         ├─ notion: Notion Guide (página + .md)
-                         ├─ pipeline: Scout → Roteiro → Notion (run_repo_content_pack)
-                         ├─ kits / video: skills Ninja + editor
+Usuário → /api/chat → orchestrator (...|pipeline|radar|kits|video)
+                         ├─ radar: briefing diário → aprovar → Roteirista
+                         ├─ pipeline: Scout → Roteiro → Notion
+                         ├─ github / roteiro / notion
+                         ├─ kits / video
                          └─ research: grok-4.20-multi-agent + web/X
 ```
 
@@ -84,6 +84,16 @@ Atalho `/pipeline` ou `/?mode=pipeline`:
 - Salva o pack em `outputs/packs/`
 
 Exemplo: “Pacote completo sobre agentes de IA em TypeScript”.
+
+## Radar de Tendências
+
+Atalho `/radar` ou `/?mode=radar`:
+
+1. O agente pesquisa (web + X) notícias de **automação**, **IA** e **marketing**
+2. Entrega briefing ranqueado via `deliver_daily_radar_briefing` (salva em `outputs/radar/`)
+3. Você **aprova** um card → handoff automático para o **Roteirista** (`prepare_trend_for_reels`)
+
+Exemplo: “Monta o briefing diário de automação, IA e marketing”.
 
 ## Como rodar
 

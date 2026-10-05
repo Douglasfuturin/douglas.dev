@@ -19,6 +19,7 @@ export type AgentMode =
   | "roteiro"
   | "notion"
   | "pipeline"
+  | "radar"
   | "auto";
 
 export type ResearchDepth = "low" | "medium" | "high";

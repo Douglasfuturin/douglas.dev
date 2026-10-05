@@ -28,6 +28,7 @@ export function reelsScriptTools() {
           const repo = await fetchRepoBundle(fullName);
           return {
             ok: true,
+            kind: "repo" as const,
             repo: {
               fullName: repo.fullName,
               url: repo.url,
@@ -75,11 +76,87 @@ export function reelsScriptTools() {
       },
     }),
 
+    prepare_trend_for_reels: tool({
+      description:
+        "Prepara uma tendência/notícia aprovada do Radar para roteiro de Reels 60s (manchete, ângulo, fontes).",
+      inputSchema: z.object({
+        headline: z.string(),
+        summary: z.string(),
+        angle: z.string(),
+        category: z
+          .enum(["automacao", "ia", "marketing", "cruzado"])
+          .optional(),
+        whyNow: z.string().optional(),
+        sources: z
+          .array(
+            z.object({
+              title: z.string(),
+              url: z.string().optional(),
+            }),
+          )
+          .optional(),
+      }),
+      execute: async ({
+        headline,
+        summary,
+        angle,
+        category = "cruzado",
+        whyNow,
+        sources = [],
+      }) => {
+        return {
+          ok: true,
+          kind: "trend" as const,
+          trend: {
+            headline,
+            summary,
+            angle,
+            category,
+            whyNow: whyNow || null,
+            sources,
+          },
+          timingGuide: {
+            totalSec: 60,
+            beats: [
+              { name: "hook", range: "0–3s", goal: "Gancho da notícia" },
+              {
+                name: "problema",
+                range: "3–12s",
+                goal: "Contexto / dor do mercado",
+              },
+              {
+                name: "solucao",
+                range: "12–28s",
+                goal: "O que mudou + insight",
+              },
+              {
+                name: "demo",
+                range: "28–48s",
+                goal: "Como aplicar / o que fazer com isso",
+              },
+              {
+                name: "cta",
+                range: "48–60s",
+                goal: "Salvar + opinião / próximo passo",
+              },
+            ],
+          },
+        };
+      },
+    }),
+
     deliver_reels_script: tool({
       description:
-        "Entrega o roteiro final de Reels (~60s) em formato estruturado. Use depois de prepare_repo_for_reels. A soma dos blocos deve cobrir ~60 segundos.",
+        "Entrega o roteiro final de Reels (~60s) em formato estruturado. Use depois de prepare_repo_for_reels ou prepare_trend_for_reels. A soma dos blocos deve cobrir ~60 segundos.",
       inputSchema: z.object({
-        fullName: z.string(),
+        fullName: z
+          .string()
+          .optional()
+          .describe("owner/repo quando for sobre GitHub"),
+        topic: z
+          .string()
+          .optional()
+          .describe("Tema/manchete quando for tendência do Radar"),
         title: z.string().describe("Título interno do roteiro"),
         style: z
           .enum(["explicativo", "hype", "tutorial", "opiniao"])
@@ -92,7 +169,15 @@ export function reelsScriptTools() {
           .optional()
           .describe("Legenda do post (Instagram/TikTok)"),
       }),
-      execute: async ({ fullName, title, style = "explicativo", beats, hashtags, caption }) => {
+      execute: async ({
+        fullName,
+        topic,
+        title,
+        style = "explicativo",
+        beats,
+        hashtags,
+        caption,
+      }) => {
         const sorted = [...beats].sort((a, b) => a.startSec - b.startSec);
         const totalSec = Math.max(...sorted.map((b) => b.endSec), 0);
         const gaps: string[] = [];
@@ -114,7 +199,6 @@ export function reelsScriptTools() {
         const wordCount = sorted
           .map((b) => b.spoken.trim().split(/\s+/).filter(Boolean).length)
           .reduce((a, b) => a + b, 0);
-        // ~2.5 palavras/s falado natural em PT → ~150 palavras / 60s
         const paceOk = wordCount >= 90 && wordCount <= 180;
 
         const scriptText = sorted
@@ -129,7 +213,8 @@ export function reelsScriptTools() {
 
         return {
           ok: true,
-          fullName,
+          fullName: fullName || null,
+          topic: topic || null,
           title,
           style,
           durationTargetSec: 60,

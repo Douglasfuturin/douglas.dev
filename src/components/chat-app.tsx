@@ -6,6 +6,11 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { AgentMode, ResearchDepth } from "@/lib/agents/models";
 import {
+  extractRadarBriefing,
+  RadarApprovalCards,
+  type RadarCardItem,
+} from "@/components/radar-approval-cards";
+import {
   DEFAULT_VIDEO_OPTIONS,
   FONT_LABELS,
   SOUND_LABELS,
@@ -28,6 +33,7 @@ const MODE_LABELS: Record<AgentMode, string> = {
   auto: "Automático",
   chat: "Chat + ferramentas",
   research: "Pesquisa multiagente",
+  radar: "Radar de Tendências",
   github: "GitHub Scout",
   roteiro: "Roteirista Reels",
   notion: "Notion Guide",
@@ -49,6 +55,7 @@ function readQueryMode(): AgentMode {
     m === "roteiro" ||
     m === "notion" ||
     m === "pipeline" ||
+    m === "radar" ||
     m === "auto"
   ) {
     return m;
@@ -169,6 +176,32 @@ export function ChatApp() {
   const busy = status === "submitted" || status === "streaming";
   const showVideoPanel = mode === "video" || mode === "auto";
 
+  function approveTrendForRoteirista(item: RadarCardItem) {
+    const prompt =
+      item.approvePrompt ||
+      [
+        "Crie um roteiro de Reels de ~60 segundos sobre esta tendência APROVADA do Radar:",
+        "",
+        `Manchete: ${item.headline}`,
+        `Ângulo: ${item.angle}`,
+        `Resumo: ${item.summary}`,
+        `Por que agora: ${item.whyNow}`,
+        "",
+        "Use prepare_trend_for_reels e deliver_reels_script.",
+      ].join("\n");
+    setMode("roteiro");
+    void sendMessage(
+      { text: prompt },
+      {
+        body: {
+          mode: "roteiro",
+          researchDepth,
+          videoOptions,
+        },
+      },
+    );
+  }
+
   // Dashboard → agent handoff: autosend once (sessionStorage or ?q=)
   useEffect(() => {
     if (!autosendRef.current) return;
@@ -237,7 +270,7 @@ export function ChatApp() {
             Grokish
           </p>
           <p className="mt-2 max-w-md text-sm leading-relaxed text-[var(--muted)]">
-            Multi-agente + kits Ninja + Scout + roteiros + Notion.
+            Multi-agente + radar + roteiros + Scout + Notion.
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             <Link
@@ -246,6 +279,13 @@ export function ChatApp() {
             >
               Painel de Skills →
             </Link>
+            <button
+              type="button"
+              onClick={() => setMode("radar")}
+              className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
+            >
+              Radar
+            </button>
             <button
               type="button"
               onClick={() => setMode("pipeline")}
@@ -630,13 +670,21 @@ export function ChatApp() {
 
                   if (part.type.startsWith("tool-")) {
                     const toolName = part.type.replace(/^tool-/, "");
+                    const briefing = extractRadarBriefing(part);
                     return (
-                      <p
-                        key={`${message.id}-${index}`}
-                        className="rounded-md bg-[var(--chip)] px-2 py-1 font-mono text-xs text-[var(--accent-ink)]"
-                      >
-                        tool · {toolName}
-                      </p>
+                      <div key={`${message.id}-${index}`} className="space-y-2">
+                        <p className="rounded-md bg-[var(--chip)] px-2 py-1 font-mono text-xs text-[var(--accent-ink)]">
+                          tool · {toolName}
+                        </p>
+                        {briefing ? (
+                          <RadarApprovalCards
+                            date={briefing.date}
+                            items={briefing.items}
+                            busy={busy}
+                            onApprove={approveTrendForRoteirista}
+                          />
+                        ) : null}
+                      </div>
                     );
                   }
 
@@ -690,7 +738,9 @@ export function ChatApp() {
             placeholder={
               mode === "video"
                 ? "Ex: edita automaticamente o vídeo enviado em reel-mono com legendas"
-                : "Pergunte algo… ou peça para editar um vídeo"
+                : mode === "radar"
+                  ? "Ex: Monta o briefing diário de IA, automação e marketing"
+                  : "Pergunte algo… ou peça o radar / um roteiro"
             }
             className="min-h-[56px] flex-1 resize-none rounded-xl border border-[var(--line)] bg-white/70 px-3 py-3 text-sm text-[var(--ink)] outline-none ring-[var(--accent)] placeholder:text-[var(--muted)] focus:ring-2"
             onKeyDown={(e) => {
@@ -784,11 +834,17 @@ function EmptyState({
                     "Gera o pack Scout→Reels→Notion sobre edição de vídeo open-source",
                     "Roda o pipeline no repo vercel/ai (roteiro + Notion)",
                   ]
-                : [
-                    "O que é o modelo grok-4.20-multi-agent e quando usar?",
-                    "Pesquise nas últimas notícias o que está rolando sobre agentes de IA",
-                    "Lista os kits Ninja disponíveis e o que cada um faz",
-                  ];
+                : mode === "radar"
+                  ? [
+                      "Monta o briefing diário de automação, IA e marketing",
+                      "Quais as melhores notícias de IA de hoje para eu aprovar um Reels?",
+                      "Radar de tendências: top histórias + ângulos para conteúdo",
+                    ]
+                  : [
+                      "O que é o modelo grok-4.20-multi-agent e quando usar?",
+                      "Pesquise nas últimas notícias o que está rolando sobre agentes de IA",
+                      "Lista os kits Ninja disponíveis e o que cada um faz",
+                    ];
 
   return (
     <section className="animate-rise mt-2 space-y-4">
@@ -800,12 +856,14 @@ function EmptyState({
             : mode === "github"
               ? "Descreva o tema/stack — o scout busca e ranqueia os melhores repos no GitHub."
               : mode === "roteiro"
-                ? "Passe o owner/repo — o roteirista entrega um Reels de ~60s (fala + tela + visual)."
+                ? "Passe o owner/repo ou uma tendência aprovada — Reels de ~60s."
                 : mode === "notion"
                   ? "Passe o repo — o agente gera arquivo/página Notion com link, instalação e uso."
                   : mode === "pipeline"
                     ? "Uma tacada: escolhe o melhor repo → roteiro Reels 60s → guia Notion."
-                    : "Chat, research, Scout, pack, roteiros, Notion, kits ou editor."}
+                    : mode === "radar"
+                      ? "Briefing diário de IA, automação e marketing — aprove um card para o Roteirista."
+                      : "Chat, radar, Scout, pack, roteiros, Notion, kits ou editor."}
       </p>
       <ul className="space-y-2">
         {prompts.map((prompt) => (

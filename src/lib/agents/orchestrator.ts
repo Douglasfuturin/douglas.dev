@@ -11,6 +11,7 @@ import {
   KITS_PERSONA,
   NOTION_AGENT_PERSONA,
   PIPELINE_PERSONA,
+  RADAR_PERSONA,
   RESEARCH_PERSONA,
   ROTEIRISTA_PERSONA,
   ROUTER_PROMPT,
@@ -21,6 +22,7 @@ import { githubScoutTools } from "./github-tools";
 import { reelsScriptTools } from "./reels-tools";
 import { notionRepoTools } from "./notion-tools";
 import { pipelineTools } from "./pipeline-tools";
+import { radarTools } from "./radar-tools";
 import { videoEditorTools } from "./video-tools";
 import { kitPersona, ninjaKitTools } from "./kit-tools";
 import { getKitById } from "@/lib/kits/discover";
@@ -195,6 +197,19 @@ Installed ZIP/SKILL: ${installed ? "yes" : "no — still deliver the kit's job w
     };
   }
 
+  if (mode === "radar") {
+    return {
+      mode,
+      model: chatModel,
+      instructions: RADAR_PERSONA,
+      tools: {
+        ...radarTools(),
+        ...researchTools(),
+        ...grokBotTools(),
+      },
+    };
+  }
+
   return {
     mode: "chat",
     model: chatModel,
@@ -202,9 +217,10 @@ Installed ZIP/SKILL: ${installed ? "yes" : "no — still deliver the kit's job w
 
 You can also inventory Ninja kits with list_ninja_kits when the user mentions kits/ZIPs/cursos.
 For GitHub repo discovery, prefer mode github / search_best_github_repos.
-For Reels scripts about a repo, prefer mode roteiro.
+For Reels scripts about a repo or approved trend, prefer mode roteiro.
 For Notion repo guides, prefer mode notion.
-For the full Scout → Roteiro → Notion pack, prefer mode pipeline / run_repo_content_pack.`,
+For the full Scout → Roteiro → Notion pack, prefer mode pipeline / run_repo_content_pack.
+For daily AI/automation/marketing briefing, prefer mode radar / deliver_daily_radar_briefing.`,
     tools: {
       ...grokBotTools(),
       ...ninjaKitTools(),
@@ -212,6 +228,7 @@ For the full Scout → Roteiro → Notion pack, prefer mode pipeline / run_repo_
       ...reelsScriptTools(),
       ...notionRepoTools(),
       ...pipelineTools(),
+      ...radarTools(),
     },
   };
 }
@@ -219,6 +236,7 @@ For the full Scout → Roteiro → Notion pack, prefer mode pipeline / run_repo_
 async function routeMode(latestUserText: string): Promise<ConcreteMode> {
   if (!latestUserText) return "chat";
   if (heuristicKits(latestUserText)) return "kits";
+  if (heuristicRadar(latestUserText)) return "radar";
   if (heuristicPipeline(latestUserText)) return "pipeline";
   if (heuristicRoteiro(latestUserText)) return "roteiro";
   if (heuristicNotion(latestUserText)) return "notion";
@@ -243,6 +261,7 @@ async function routeMode(latestUserText: string): Promise<ConcreteMode> {
     if (parsed.mode === "roteiro") return "roteiro";
     if (parsed.mode === "notion") return "notion";
     if (parsed.mode === "pipeline") return "pipeline";
+    if (parsed.mode === "radar") return "radar";
     return "chat";
   } catch {
     return heuristicRoute(latestUserText);
@@ -251,6 +270,12 @@ async function routeMode(latestUserText: string): Promise<ConcreteMode> {
 
 function heuristicKits(text: string): boolean {
   return /\b(ninja\s*kits?|ninja\s*cursos|instala(r)?\s*kit|list(a|ar)\s*kits?|skill\.md|f:\\\\ninja|\.zip\b.*kit|kits?\s*ninja)\b/i.test(
+    text,
+  );
+}
+
+function heuristicRadar(text: string): boolean {
+  return /\b(radar(\s+de)?\s+tend[eê]ncias?|briefing\s+di[aá]rio|not[ií]cias?\s+(de\s+)?(ia|automa[cç][aã]o|marketing)|tend[eê]ncias?\s+(de\s+)?(ia|automa[cç][aã]o|marketing)|o\s+que\s+est[aá]\s+bombando|aprovar?\s+(para\s+o\s+)?roteirista)\b/i.test(
     text,
   );
 }
@@ -274,7 +299,7 @@ function heuristicNotion(text: string): boolean {
 }
 
 function heuristicGithub(text: string): boolean {
-  return /\b(github|reposit[oó]rios?|repos?\b|open[\s-]?source|melhor(es)?\s+(libs?|bibliotecas?|projetos?)|trending|stars?\b)\b/i.test(
+  return /\b(github|reposit[oó]rios?|repos?\b|open[\s-]?source|melhor(es)?\s+(libs?|bibliotecas?|projetos?)|stars?\b)\b/i.test(
     text,
   );
 }
@@ -287,12 +312,13 @@ function heuristicVideo(text: string): boolean {
 
 function heuristicRoute(text: string): ConcreteMode {
   if (heuristicKits(text)) return "kits";
+  if (heuristicRadar(text)) return "radar";
   if (heuristicPipeline(text)) return "pipeline";
   if (heuristicRoteiro(text)) return "roteiro";
   if (heuristicNotion(text)) return "notion";
   if (heuristicGithub(text)) return "github";
   if (heuristicVideo(text)) return "video";
   const researchSignals =
-    /\b(pesquisa|pesquise|research|compare|comparar|fontes|cita|deep dive|investiga|o que est[aã]o dizendo|latest|mais recentes|tend[eê]ncias)\b/i;
+    /\b(pesquisa|pesquise|research|compare|comparar|fontes|cita|deep dive|investiga|o que est[aã]o dizendo|latest|mais recentes)\b/i;
   return researchSignals.test(text) ? "research" : "chat";
 }

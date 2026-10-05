@@ -51,7 +51,10 @@ export async function POST(req: Request) {
     tools: agent.tools as Parameters<typeof streamText>[0]["tools"],
     providerOptions: agent.providerOptions,
     stopWhen:
-      agent.mode === "video" || agent.mode === "kits"
+      agent.mode === "video" ||
+      agent.mode === "kits" ||
+      agent.mode === "radar" ||
+      agent.mode === "pipeline"
         ? stepCountIs(12)
         : stepCountIs(8),
   });
