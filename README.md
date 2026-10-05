@@ -29,15 +29,16 @@ Há um **Orquestrador Principal** que coordena todos os grupos e um **Orquestrad
 
 ```
 Você
+ ├─ /app           → chat estilo Grok com Orquestrador Principal (delega/cria agentes)
  ├─ /dashboard     → pipelines por grupo + stats
  ├─ /grupos        → criar/editar times, add/remove agentes
- ├─ /studio        → conversa com agentes (modos)
+ ├─ /app/studio    → Studio avançado (todos os modos; /studio redireciona)
  ├─ /central       → kanban ideia → postado
  ├─ /agentes       → criar agentes custom
  ├─ /kits          → instalar skills Ninja
  └─ /editor        → edição visual de vídeo
 
-Studio / Chat
+Hub /app (Orquestrador) ou Studio
  └─ POST /api/chat
       └─ orchestrator.resolveAgent(mode, group, member…)
            ├─ persona (prompts)
@@ -45,8 +46,8 @@ Studio / Chat
            └─ tools (radar, arte, vídeo, central, github…)
 ```
 
-1. Você escolhe um **grupo** ou **modo** no Studio (ou deixa `auto` rotear).
-2. O **orquestrador** resolve persona + tools.
+1. No **`/app`**, você conversa com o **Orquestrador Principal** (ele lista agentes, delega e pode criar custom). No Studio avançado, escolhe grupo/modo manualmente.
+2. O **orquestrador** resolve persona + tools (incl. `delegate_to_specialist`, `create_custom_agent`).
 3. O agente usa tools (pesquisa, pipeline CRM, edição, etc.).
 4. Itens persistem em `data/content/store.json` e avançam no kanban.
 5. Quando `ready`, entram na fila de publicação.
@@ -96,10 +97,12 @@ Em `/grupos` ou no dashboard você pode:
 | Rota | Função |
 | --- | --- |
 | `/` | Landing Douglas Dev / Central de Agentes |
+| `/app` | Hub de chat (Orquestrador Principal — interface principal) |
+| `/app/studio` | Studio completo (modos, grupos, vídeo, kits) |
 | `/dashboard` | CRM: pipelines Imagem/Vídeo + grupos custom + fila |
 | `/central` | Kanban do pipeline editorial |
 | `/central/[id]` | Detalhe do item (avançar estágio, publicar) |
-| `/studio` | Chat multi-agente (todos os modos) |
+| `/studio` | Redireciona para `/app/studio` |
 | `/grupos` | Gerenciar grupos e membros |
 | `/agentes` | Criar agentes custom (persona + toolkit) |
 | `/kits` | Hub Ninja Kits (ZIP → instalar → usar) |

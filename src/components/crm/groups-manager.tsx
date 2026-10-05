@@ -193,7 +193,7 @@ export function GroupsManager({ compact = false }: { compact?: boolean }) {
         <div className="flex flex-wrap gap-2">
           {!compact ? (
             <Link
-              href="/studio?mode=orquestrador&q=Orquestra%20todos%20os%20grupos%20e%20defina%20o%20fluxo%20certo"
+              href="/app?q=Orquestra%20todos%20os%20grupos%20e%20defina%20o%20fluxo%20certo&autosend=1"
               className="crm-btn crm-btn-primary"
             >
               Orquestrador Principal

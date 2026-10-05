@@ -168,7 +168,7 @@ export function CrmDashboard() {
           </div>
           <div className="flex flex-wrap gap-2">
             <Link
-              href="/studio?mode=orquestrador&q=Orquestra%20os%20grupos%20Imagem%20e%20V%C3%ADdeo%20no%20fluxo%20correto"
+              href="/app?q=Orquestra%20os%20grupos%20Imagem%20e%20V%C3%ADdeo%20no%20fluxo%20correto&autosend=1"
               className="crm-btn crm-btn-primary"
             >
               Orquestrador Principal

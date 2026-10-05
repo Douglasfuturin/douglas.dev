@@ -468,3 +468,102 @@ textarea.field {
 .dd-halo {
   background: radial-gradient(circle at center, rgba(242, 101, 34, 0.55), transparent 62%);
 }
+
+/* —— Grok-style hub (Orquestrador Principal) —— */
+.grok-app {
+  display: flex;
+  min-height: 100vh;
+  height: 100dvh;
+  background: #050505;
+  color: #fff;
+}
+
+.grok-sidebar {
+  width: 268px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, #070707 0%, #0a0a0a 100%);
+}
+
+.grok-main {
+  background:
+    radial-gradient(720px 400px at 50% -10%, rgba(242, 101, 34, 0.12), transparent 55%),
+    #050505;
+}
+
+.grok-topbar {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(5, 5, 5, 0.85);
+  backdrop-filter: blur(12px);
+}
+
+.grok-new-chat {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.65rem 1rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #fff;
+  transition: background 160ms ease, border-color 160ms ease;
+}
+
+.grok-new-chat:hover {
+  background: rgba(242, 101, 34, 0.15);
+  border-color: rgba(242, 101, 34, 0.45);
+}
+
+.grok-nav-link {
+  display: block;
+  border-radius: 0.65rem;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.55);
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.grok-nav-link:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+.grok-nav-link[data-active="true"] {
+  background: rgba(242, 101, 34, 0.14);
+  color: #fff;
+  box-shadow: inset 3px 0 0 var(--dd-orange);
+}
+
+.grok-hub-chat {
+  --ink: #ffffff;
+  --muted: rgba(255, 255, 255, 0.45);
+  --panel: #121212;
+  --line: rgba(255, 255, 255, 0.1);
+  --accent: var(--dd-orange);
+  --accent-ink: #140a04;
+  --chip: rgba(242, 101, 34, 0.2);
+  height: 100%;
+  min-height: 0;
+}
+
+.grok-hub-chat .grok-composer {
+  background: rgba(8, 8, 8, 0.92);
+}
+
+.grok-hub-chat .crm-card {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.88);
+  text-align: left;
+  width: 100%;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  padding: 0.75rem 1rem;
+}

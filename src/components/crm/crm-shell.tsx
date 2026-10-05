@@ -12,9 +12,10 @@ type NavItem = {
 };
 
 const PRIMARY: NavItem[] = [
+  { href: "/app", label: "Chat", ico: "CH", match: ["/app"] },
   { href: "/dashboard", label: "Dashboard", ico: "DB", match: ["/dashboard"] },
   { href: "/central", label: "Pipeline", ico: "PL", match: ["/central"] },
-  { href: "/studio", label: "Studio IA", ico: "AI", match: ["/studio"] },
+  { href: "/app/studio", label: "Studio IA", ico: "AI", match: ["/studio", "/app/studio"] },
   { href: "/agentes", label: "Criar agente", ico: "+", match: ["/agentes"] },
   { href: "/grupos", label: "Grupos", ico: "GR", match: ["/grupos"] },
 ];

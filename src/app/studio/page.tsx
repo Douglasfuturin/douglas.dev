@@ -1,15 +1,16 @@
-import { CrmShell } from "@/components/crm/crm-shell";
-import { ChatApp } from "@/components/chat-app";
+import { redirect } from "next/navigation";
 
-export default function StudioPage() {
-  return (
-    <CrmShell
-      title="Studio IA"
-      subtitle="Motor da Central de Agentes — Central, grupos, radar, roteiro, artes e edição."
-    >
-      <div className="crm-panel !p-0 overflow-hidden min-h-[70vh]">
-        <ChatApp />
-      </div>
-    </CrmShell>
-  );
+type PageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default async function StudioPage({ searchParams }: PageProps) {
+  const sp = await searchParams;
+  const qs = new URLSearchParams();
+  for (const [key, value] of Object.entries(sp)) {
+    if (typeof value === "string") qs.set(key, value);
+    else if (Array.isArray(value) && value[0]) qs.set(key, value[0]);
+  }
+  const tail = qs.toString();
+  redirect(tail ? `/app/studio?${tail}` : "/app/studio");
 }

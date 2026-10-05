@@ -99,6 +99,15 @@ function readQueryAutosend(): boolean {
   return new URLSearchParams(window.location.search).get("autosend") === "1";
 }
 
+function resolveInitialMode(variant: "studio" | "hub"): AgentMode {
+  const fromQuery = readQueryMode();
+  if (variant === "hub") {
+    if (fromQuery !== "auto") return fromQuery;
+    return "orquestrador";
+  }
+  return fromQuery;
+}
+
 function readHandoff(): {
   kitId?: string;
   prompt?: string;
@@ -121,13 +130,17 @@ function readHandoff(): {
   }
 }
 
-export function ChatApp() {
+export function ChatApp({
+  variant = "studio",
+}: {
+  variant?: "studio" | "hub";
+}) {
   const [handoff] = useState(readHandoff);
   const [input, setInput] = useState(
     () => handoff?.prompt || readQueryPrompt(),
   );
   const [mode, setMode] = useState<AgentMode>(() =>
-    handoff?.kitId ? "kits" : readQueryMode(),
+    handoff?.kitId ? "kits" : resolveInitialMode(variant),
   );
   const [researchDepth, setResearchDepth] = useState<ResearchDepth>("medium");
   const [kitId, setKitId] = useState<string>(
@@ -234,8 +247,34 @@ export function ChatApp() {
 
   const busy = status === "submitted" || status === "streaming";
   const showVideoPanel =
-    mode === "video" || mode === "editor-reels" || mode === "auto";
+    variant === "hub"
+      ? mode === "video" || mode === "editor-reels"
+      : mode === "video" || mode === "editor-reels" || mode === "auto";
   const activeGroup = groups.find((g) => g.id === groupId) || null;
+
+  function sendBody(overrides?: Partial<{
+    mode: AgentMode;
+    researchDepth: ResearchDepth;
+    videoOptions: VideoEditOptions;
+    kitId: string | undefined;
+    groupId: string | undefined;
+    memberId: string | undefined;
+    customAgentId: string | undefined;
+  }>) {
+    const effectiveMode =
+      overrides?.mode ??
+      (variant === "hub" && mode === "auto" ? "orquestrador" : mode);
+    return {
+      mode: effectiveMode,
+      researchDepth,
+      videoOptions,
+      kitId: kitId || undefined,
+      groupId: groupId || undefined,
+      memberId: memberId || undefined,
+      customAgentId: customAgentId || undefined,
+      ...overrides,
+    };
+  }
 
   function approveTrendForRoteirista(item: RadarCardItem) {
     void fetch("/api/content", {
@@ -300,13 +339,12 @@ export function ChatApp() {
     void sendMessage(
       { text: prompt },
       {
-        body: {
-          mode: "kits",
-          kitId: kitId || undefined,
-        },
+        body: handoff?.kitId || kitId
+          ? { mode: "kits", kitId: kitId || undefined }
+          : sendBody({ mode: variant === "hub" ? "orquestrador" : mode }),
       },
     );
-  }, [handoff, kitId, sendMessage]);
+  }, [handoff, kitId, sendMessage, variant, mode]);
 
   async function onUpload(file: File | null) {
     if (!file) return;
@@ -340,11 +378,26 @@ export function ChatApp() {
     setVideoOptions((prev) => ({ ...prev, [key]: value }));
   }
 
-  return (
-    <div className="relative flex min-h-full flex-1 flex-col overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 atmosphere" aria-hidden />
-      <div className="pointer-events-none absolute inset-0 grid-fade" aria-hidden />
+  const assistantLabel =
+    variant === "hub" || mode === "orquestrador"
+      ? "Orquestrador"
+      : "Grokish";
+  const maxWidth = variant === "hub" ? "max-w-2xl" : "max-w-3xl";
 
+  return (
+    <div
+      className={`relative flex min-h-0 flex-1 flex-col overflow-hidden ${
+        variant === "hub" ? "grok-hub-chat" : ""
+      }`}
+    >
+      {variant === "studio" ? (
+        <div className="pointer-events-none absolute inset-0 atmosphere" aria-hidden />
+      ) : null}
+      {variant === "studio" ? (
+        <div className="pointer-events-none absolute inset-0 grid-fade" aria-hidden />
+      ) : null}
+
+      {variant === "studio" ? (
       <header className="relative z-10 mx-auto flex w-full max-w-3xl items-end justify-between gap-4 px-5 pt-8 pb-4">
         <div>
           <p className="font-display text-3xl tracking-tight text-[var(--ink)] md:text-4xl">
@@ -355,10 +408,16 @@ export function ChatApp() {
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             <Link
-              href="/dashboard"
+              href="/app"
               className="inline-flex rounded-lg bg-[var(--ink)] px-3 py-1.5 text-xs font-semibold text-[var(--panel)]"
             >
-              Dashboard →
+              Chat Orquestrador →
+            </Link>
+            <Link
+              href="/dashboard"
+              className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
+            >
+              Dashboard
             </Link>
             <Link
               href="/central"
@@ -555,8 +614,11 @@ export function ChatApp() {
           ) : null}
         </div>
       </header>
+      ) : null}
 
-      <main className="relative z-10 mx-auto flex w-full max-w-3xl flex-1 flex-col px-5 pb-36">
+      <main
+        className={`relative z-10 mx-auto flex w-full ${maxWidth} flex-1 flex-col px-5 pb-36`}
+      >
         {showVideoPanel ? (
           <section className="mb-4 animate-rise rounded-2xl border border-[var(--line)] bg-[var(--panel)]/85 p-4 backdrop-blur">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
@@ -824,6 +886,7 @@ export function ChatApp() {
           {messages.length === 0 ? (
             <EmptyState
               mode={mode}
+              variant={variant}
               onPick={(prompt) => {
                 setInput(prompt);
               }}
@@ -840,7 +903,7 @@ export function ChatApp() {
               }`}
             >
               <p className="mb-1 text-[10px] uppercase tracking-[0.16em] opacity-60">
-                {message.role === "user" ? "Você" : "Grokish"}
+                {message.role === "user" ? "Você" : assistantLabel}
               </p>
               <div className="space-y-3 whitespace-pre-wrap">
                 {message.parts.map((part, index) => {
@@ -878,7 +941,9 @@ export function ChatApp() {
             <p className="animate-pulse text-sm text-[var(--muted)]">
               {mode === "video"
                 ? "Editor trabalhando no pipeline…"
-                : "Agentes trabalhando…"}
+                : variant === "hub" || mode === "orquestrador"
+                  ? "Orquestrador delegando tarefas…"
+                  : "Agentes trabalhando…"}
             </p>
           ) : null}
 
@@ -891,38 +956,30 @@ export function ChatApp() {
       </main>
 
       <form
-        className="fixed inset-x-0 bottom-0 z-20 border-t border-[var(--line)] bg-[var(--panel)]/85 px-5 py-4 backdrop-blur-xl"
+        className={`grok-composer fixed inset-x-0 bottom-0 z-20 border-t border-[var(--line)] bg-[var(--panel)]/85 px-5 py-4 backdrop-blur-xl ${
+          variant === "hub" ? "md:left-[268px]" : ""
+        }`}
         onSubmit={(e) => {
           e.preventDefault();
           const text = input.trim();
           if (!text || busy) return;
-          sendMessage(
-            { text },
-            {
-              body: {
-                mode,
-                researchDepth,
-                videoOptions,
-                kitId: kitId || undefined,
-                groupId: groupId || undefined,
-                memberId: memberId || undefined,
-              },
-            },
-          );
+          sendMessage({ text }, { body: sendBody() });
           setInput("");
         }}
       >
-        <div className="mx-auto flex w-full max-w-3xl items-end gap-2">
+        <div className={`mx-auto flex w-full ${maxWidth} items-end gap-2`}>
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            rows={2}
+            rows={variant === "hub" ? 1 : 2}
             placeholder={
-              mode === "video"
-                ? "Ex: edita automaticamente o vídeo enviado em reel-mono com legendas"
-                : mode === "radar"
-                  ? "Ex: Monta o briefing diário de IA, automação e marketing"
-                  : "Pergunte algo… ou peça o radar / um roteiro"
+              variant === "hub" || mode === "orquestrador"
+                ? "Peça qualquer coisa — delego para Radar, Roteiro, Arte, Vídeo ou crio um agente novo…"
+                : mode === "video"
+                  ? "Ex: edita automaticamente o vídeo enviado em reel-mono com legendas"
+                  : mode === "radar"
+                    ? "Ex: Monta o briefing diário de IA, automação e marketing"
+                    : "Pergunte algo… ou peça o radar / um roteiro"
             }
             className="min-h-[56px] flex-1 resize-none rounded-xl border border-[var(--line)] bg-[var(--panel)] px-3 py-3 text-sm text-[var(--ink)] outline-none ring-[var(--accent)] placeholder:text-[var(--muted)] focus:ring-2"
             onKeyDown={(e) => {
@@ -974,13 +1031,23 @@ function Field({
 
 function EmptyState({
   mode,
+  variant = "studio",
   onPick,
 }: {
   mode: AgentMode;
+  variant?: "studio" | "hub";
   onPick: (prompt: string) => void;
 }) {
   const prompts =
-    mode === "video"
+    variant === "hub" || mode === "orquestrador"
+      ? [
+          "Lista agentes e grupos disponíveis e sugere o próximo passo no pipeline",
+          "Roda Conteúdo Dev — Imagem: radar → roteiro → direção de arte",
+          "Delega ao roteirista um Reels de 60s sobre automação com IA",
+          "Coordena Conteúdo Espanha: carrossel + capas para esta semana",
+          "Cria um agente custom para threads no Twitter e me mostra como usar",
+        ]
+      : mode === "video"
       ? [
           "Lista os estilos de edição disponíveis no kit",
           "Edita automaticamente o vídeo em workspace/videos — estilo reel-mono com legendas",
@@ -1037,7 +1104,9 @@ function EmptyState({
   return (
     <section className="animate-rise mt-2 space-y-4">
       <p className="text-sm text-[var(--muted)]">
-        {mode === "video"
+        {variant === "hub" || mode === "orquestrador"
+          ? "Converse com o Orquestrador Principal — ele delega para especialistas ou cria novos agentes."
+          : mode === "video"
           ? "Upload um MP4, escolha estilo/opções e peça a edição automática."
           : mode === "kits"
             ? "Skill ativa via dashboard /kits — descreva o pedido ou use um atalho."

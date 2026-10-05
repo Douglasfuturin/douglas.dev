@@ -12,7 +12,7 @@ export default function GruposPage() {
       actions={
         <div className="flex flex-wrap gap-2">
           <Link
-            href="/studio?mode=orquestrador&q=Orquestra%20todos%20os%20grupos"
+            href="/app?q=Orquestra%20todos%20os%20grupos&autosend=1"
             className="crm-btn crm-btn-primary"
           >
             Orquestrador Principal

@@ -26,7 +26,7 @@ export function LandingPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Link href="/dashboard" className="crm-btn crm-btn-ghost !py-2">
+          <Link href="/app" className="crm-btn crm-btn-ghost !py-2">
             Entrar
           </Link>
           <Link href="/dashboard" className="crm-btn crm-btn-primary !py-2">
@@ -63,11 +63,14 @@ export function LandingPage() {
           className="mt-8 flex flex-wrap items-center gap-3 animate-fase-rise"
           style={{ animationDelay: "340ms" }}
         >
-          <Link href="/dashboard" className="crm-btn crm-btn-primary">
-            Abrir Dashboard
+          <Link href="/app" className="crm-btn crm-btn-primary">
+            Conversar com Orquestrador
+          </Link>
+          <Link href="/dashboard" className="crm-btn crm-btn-ghost">
+            Dashboard
           </Link>
           <Link
-            href="/studio?mode=arte-realista&q=Planeja%20um%20carrossel%20realista%20Douglas%20Dev%20sobre%205%20automa%C3%A7%C3%B5es%20com%20IA"
+            href="/app?q=Planeja%20um%20carrossel%20realista%20Douglas%20Dev%20sobre%205%20automa%C3%A7%C3%B5es%20com%20IA"
             className="crm-btn crm-btn-ghost"
           >
             Carrossel realista

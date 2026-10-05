@@ -39,6 +39,7 @@ import { spainContentTools } from "./spain-tools";
 import { videoEditorTools } from "./video-tools";
 import { centralContentTools } from "./central-tools";
 import { nicheScoutTools } from "./niche-scout-tools";
+import { orchestratorTools } from "./orchestrator-tools";
 import { kitPersona, ninjaKitTools } from "./kit-tools";
 import { getCustomAgent } from "./custom-store";
 import {
@@ -372,6 +373,7 @@ Nenhum agente custom selecionado. Peça para criar um em /agentes ou escolha um 
       model: multiAgentModel,
       instructions: ORQUESTRADOR_PRINCIPAL_PERSONA,
       tools: {
+        ...orchestratorTools(),
         ...bitCoordinatorTools(),
         ...centralContentTools(),
         ...radarTools(),
