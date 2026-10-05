@@ -43,8 +43,8 @@ export function VideoPreview({
   }, [playing, onPlayingChange]);
 
   return (
-    <div className="relative mx-auto flex h-full max-h-[58vh] w-full max-w-[360px] items-center justify-center">
-      <div className="relative aspect-[9/16] w-full overflow-hidden rounded-2xl bg-black shadow-[0_0_80px_color-mix(in_oklab,var(--primary)_14%,transparent)] ring-1 ring-[color:var(--border)]">
+    <div className="nexus-editor-preview flex w-full flex-col gap-3">
+      <div className="relative mx-auto aspect-[9/16] w-full max-w-[220px] overflow-hidden rounded-xl bg-black ring-1 ring-[color:var(--border)] lg:max-w-[240px]">
         {src ? (
           <video
             ref={ref}
@@ -59,23 +59,23 @@ export function VideoPreview({
             onEnded={() => onPlayingChange(false)}
           />
         ) : (
-          <div className="flex h-full items-center justify-center px-6 text-center text-sm text-[color:var(--muted-foreground)]">
-            Envie um vídeo para pré-visualizar em tempo real
+          <div className="flex h-full items-center justify-center px-4 text-center text-xs leading-relaxed text-[color:var(--muted-foreground)]">
+            Envie um vídeo para pré-visualizar
           </div>
         )}
 
         {caption ? (
-          <div className="pointer-events-none absolute inset-x-0 bottom-[14%] px-4 text-center">
-            <p className="font-display text-3xl font-extrabold uppercase leading-none tracking-tight text-[color:var(--foreground)] drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)]">
+          <div className="pointer-events-none absolute inset-x-0 bottom-[12%] px-3 text-center">
+            <p className="text-lg font-extrabold uppercase leading-none tracking-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)]">
               {caption}
             </p>
           </div>
         ) : null}
       </div>
 
-      <div className="pointer-events-none absolute -bottom-8 left-1/2 -translate-x-1/2 font-mono text-xs text-[color:var(--muted-foreground)]">
+      <p className="text-center font-mono text-xs text-[color:var(--muted-foreground)]">
         {formatClock(currentTime)}
-      </div>
+      </p>
     </div>
   );
 }

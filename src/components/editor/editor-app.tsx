@@ -419,8 +419,8 @@ export function EditorApp() {
 
       <main className="flex flex-1 flex-col gap-4 px-4 py-4">
         {view === "visual" ? (
-          <>
-            <div className="flex flex-1 flex-col items-center justify-center py-2">
+          <div className="nexus-editor-visual grid gap-4 lg:grid-cols-[minmax(200px,260px)_minmax(0,1fr)] lg:items-start">
+            <aside className="rounded-xl border border-[color:var(--border)] bg-[color:var(--background)]/60 p-4">
               <VideoPreview
                 src={src}
                 currentTime={currentTime}
@@ -432,35 +432,34 @@ export function EditorApp() {
                 }}
                 onPlayingChange={setPlaying}
               />
-            </div>
+              <div className="mt-3 flex items-center justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setCurrentTime((t) => Math.max(0, t - 1 / 30))}
+                  className="rounded-full border border-[color:var(--border)] px-3 py-1.5 text-sm"
+                >
+                  ‹
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPlaying((p) => !p)}
+                  className="rounded-full bg-[color:var(--foreground)] px-4 py-1.5 text-sm font-semibold text-[color:var(--background)]"
+                >
+                  {playing ? "Pause" : "Play"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCurrentTime((t) => Math.min(duration, t + 1 / 30))
+                  }
+                  className="rounded-full border border-[color:var(--border)] px-3 py-1.5 text-sm"
+                >
+                  ›
+                </button>
+              </div>
+            </aside>
 
-            <div className="mx-auto flex w-full max-w-5xl items-center justify-center gap-3">
-              <button
-                type="button"
-                onClick={() => setCurrentTime((t) => Math.max(0, t - 1 / 30))}
-                className="rounded-full border border-[color:var(--border)] px-3 py-2 text-sm"
-              >
-                ‹
-              </button>
-              <button
-                type="button"
-                onClick={() => setPlaying((p) => !p)}
-                className="rounded-full bg-[color:var(--foreground)] px-5 py-2 text-sm font-semibold text-[color:var(--background)]"
-              >
-                {playing ? "Pause" : "Play"}
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  setCurrentTime((t) => Math.min(duration, t + 1 / 30))
-                }
-                className="rounded-full border border-[color:var(--border)] px-3 py-2 text-sm"
-              >
-                ›
-              </button>
-            </div>
-
-            <div className="mx-auto w-full max-w-5xl">
+            <div className="min-w-0">
               <Timeline
                 duration={duration || analysis?.duration || 0}
                 currentTime={currentTime}
@@ -482,14 +481,14 @@ export function EditorApp() {
                 }}
               />
             </div>
-          </>
+          </div>
         ) : (
           <CodeWorkspace analysis={analysis} logs={logs} busy={busy} />
         )}
       </main>
 
       <footer className="border-t border-[color:var(--border)] px-4 py-3">
-        <div className="mx-auto flex w-full max-w-5xl flex-col gap-2">
+        <div className="flex w-full flex-col gap-2">
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
             <label className="flex flex-col gap-1 text-[10px] uppercase tracking-wider text-[color:var(--muted-foreground)]">
               Estilo

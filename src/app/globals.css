@@ -497,6 +497,14 @@ textarea.field {
   height: 0;
 }
 
+.nexus-editor-visual {
+  align-items: start;
+}
+
+.nexus-editor-preview {
+  max-width: 100%;
+}
+
 .nexus-editor select,
 .nexus-editor input[type="text"],
 .nexus-editor input:not([type]) {
