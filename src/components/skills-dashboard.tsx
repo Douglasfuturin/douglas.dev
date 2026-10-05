@@ -49,7 +49,7 @@ type Catalog = {
   };
 };
 
-export function SkillsDashboard() {
+export function SkillsDashboard({ embedded = false }: { embedded?: boolean }) {
   const router = useRouter();
   const [catalog, setCatalog] = useState<Catalog | null>(null);
   const [query, setQuery] = useState("");
@@ -154,7 +154,7 @@ export function SkillsDashboard() {
       /* ignore */
     }
     router.push(
-      `/studio?mode=kits&kit=${encodeURIComponent(selected.id)}&handoff=1`,
+      `/ferramentas/studio?mode=kits&kit=${encodeURIComponent(selected.id)}&handoff=1`,
     );
   }
 
@@ -219,47 +219,70 @@ export function SkillsDashboard() {
   }
 
   return (
-    <div className="relative min-h-full flex-1 overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 atmosphere" aria-hidden />
-      <div className="pointer-events-none absolute inset-0 grid-fade" aria-hidden />
+    <div
+      className={
+        embedded
+          ? "relative min-h-0 flex-1"
+          : "relative min-h-full flex-1 overflow-hidden"
+      }
+    >
+      {!embedded ? (
+        <>
+          <div className="pointer-events-none absolute inset-0 atmosphere" aria-hidden />
+          <div className="pointer-events-none absolute inset-0 grid-fade" aria-hidden />
+        </>
+      ) : null}
 
-      <div className="relative z-10 mx-auto flex h-[100dvh] w-full max-w-7xl flex-col px-4 py-5 md:px-6">
-        <header className="mb-4 flex flex-wrap items-end justify-between gap-3 animate-rise">
+      <div
+        className={
+          embedded
+            ? "relative z-10 flex w-full flex-col"
+            : "relative z-10 mx-auto flex h-[100dvh] w-full max-w-7xl flex-col px-4 py-5 md:px-6"
+        }
+      >
+        <header className="mb-4 flex flex-wrap items-end justify-between gap-3 animate-nexus-rise">
           <div>
-            <div className="flex flex-wrap items-center gap-3">
-              <Link
-                href="/"
-                className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]"
-              >
-                ← Grokish
-              </Link>
-              <span className="text-xs text-[var(--muted)]">/</span>
-              <p className="text-xs uppercase tracking-[0.18em] text-[var(--accent-ink)]">
-                Painel de Skills
+            {embedded ? (
+              <p className="text-sm text-[color:var(--muted-foreground)]">
+                {catalog?.manifestCount ?? "…"} skills · escolha, ajuste o brief e execute
               </p>
-            </div>
-            <h1 className="mt-2 font-display text-3xl tracking-tight text-[var(--ink)] md:text-4xl">
-              Skills Ninja
-            </h1>
-            <p className="mt-1 max-w-xl text-sm text-[var(--muted)]">
-              Escolha a skill, ajuste o brief (ou o painel visual) e execute —{" "}
-              {catalog?.manifestCount ?? "…"} skills disponíveis.
-            </p>
+            ) : (
+              <>
+                <div className="flex flex-wrap items-center gap-3">
+                  <Link
+                    href="/ferramentas"
+                    className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]"
+                  >
+                    ← Ferramentas
+                  </Link>
+                  <span className="text-xs text-[var(--muted)]">/</span>
+                  <p className="text-xs uppercase tracking-[0.18em] text-[var(--accent-ink)]">
+                    Painel de Skills
+                  </p>
+                </div>
+                <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[var(--ink)] md:text-4xl">
+                  Skills
+                </h1>
+                <p className="mt-1 max-w-xl text-sm text-[var(--muted)]">
+                  Escolha a skill, ajuste o brief e execute —{" "}
+                  {catalog?.manifestCount ?? "…"} skills disponíveis.
+                </p>
+              </>
+            )}
           </div>
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={() => setShowManage((v) => !v)}
-              className="rounded-lg border border-[var(--line)] bg-[var(--panel)]/80 px-3 py-2 text-sm text-[var(--ink)]"
+              className="nexus-btn-ghost !py-2 text-sm"
             >
               {showManage ? "Fechar gestão" : "Gestão de ZIPs"}
             </button>
-            <Link
-              href="/editor"
-              className="rounded-lg border border-[var(--line)] px-3 py-2 text-sm text-[var(--ink)]"
-            >
-              Editor EDVD
-            </Link>
+            {!embedded ? (
+              <Link href="/ferramentas/editor" className="nexus-btn-ghost !py-2 text-sm">
+                Editor
+              </Link>
+            ) : null}
           </div>
         </header>
 
@@ -487,7 +510,7 @@ export function SkillsDashboard() {
 
                   {selected.id.includes("video") || selected.kind === "video" ? (
                     <Link
-                      href="/editor"
+                      href="/ferramentas/editor"
                       className="mt-2 rounded-xl border border-[var(--line)] px-4 py-2.5 text-center text-sm text-[var(--ink)]"
                     >
                       Abrir Editor EDVD

@@ -224,8 +224,8 @@ export function CrmDashboard() {
               <Link href="/agentes" className="crm-btn crm-btn-ghost w-full">
                 Criar agente
               </Link>
-              <Link href="/kits" className="crm-btn crm-btn-ghost w-full">
-                Ninja Kits
+              <Link href="/ferramentas/skills" className="crm-btn crm-btn-ghost w-full">
+                Skills
               </Link>
             </div>
           </div>

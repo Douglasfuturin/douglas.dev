@@ -193,6 +193,11 @@ export function NexusShell({
   );
 
   const isChat = variant === "chat";
+  const wideContent =
+    pathname.startsWith("/ferramentas") ||
+    pathname.startsWith("/editor") ||
+    pathname.startsWith("/kits");
+  const contentMax = wideContent ? "max-w-7xl" : "max-w-6xl";
 
   return (
     <div className={`nexus-app ${isChat ? "nexus-app-chat" : ""}`}>
@@ -253,7 +258,7 @@ export function NexusShell({
 
           <div className="flex shrink-0 items-center gap-2">
             {isChat ? (
-              <Link href="/app/studio" className="nexus-btn-ghost hidden sm:inline-flex">
+              <Link href="/ferramentas/studio" className="nexus-btn-ghost hidden sm:inline-flex">
                 Modo avançado
               </Link>
             ) : (
@@ -267,7 +272,7 @@ export function NexusShell({
         {xaiError ? (
           <div className="nexus-banner-warn px-4 py-2 text-xs md:px-6">
             Chat IA: {xaiError}{" "}
-            <Link href="/editor" className="underline">
+            <Link href="/ferramentas/editor" className="underline">
               Editor local
             </Link>{" "}
             funciona sem chave.
@@ -278,7 +283,7 @@ export function NexusShell({
           className={`relative min-h-0 flex-1 ${isChat ? "flex flex-col" : "overflow-y-auto"}`}
         >
           {!isChat && !hideHeader && (title || actions) ? (
-            <div className="mx-auto w-full max-w-6xl px-4 pb-2 pt-6 md:px-6">
+            <div className={`mx-auto w-full ${contentMax} px-4 pb-2 pt-6 md:px-6`}>
               <header className="flex flex-wrap items-end justify-between gap-4">
                 <div>
                   {title ? (
@@ -301,7 +306,7 @@ export function NexusShell({
             className={
               isChat
                 ? "flex min-h-0 flex-1 flex-col"
-                : "mx-auto w-full max-w-6xl px-4 pb-10 pt-2 md:px-6 md:pb-12"
+                : `mx-auto w-full ${contentMax} px-4 pb-10 pt-2 md:px-6 md:pb-12`
             }
           >
             {children}

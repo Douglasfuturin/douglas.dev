@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { NEXUS_TOOLS } from "./nexus-tools";
 
 export type NexusNavItem = {
   href: string;
@@ -17,7 +18,8 @@ export type NexusIconName =
   | "editor"
   | "kits"
   | "pipeline"
-  | "plus";
+  | "plus"
+  | "tools";
 
 export const NEXUS_MAIN_NAV: NexusNavItem[] = [
   { href: "/dashboard", label: "Visão geral", icon: "overview", match: ["/dashboard"] },
@@ -26,12 +28,21 @@ export const NEXUS_MAIN_NAV: NexusNavItem[] = [
   { href: "/central", label: "Atividade", icon: "activity", match: ["/central"] },
 ];
 
+/** Ferramentas: hub + 4 módulos + orquestrador. */
 export const NEXUS_TOOLS_NAV: NexusNavItem[] = [
+  {
+    href: "/ferramentas",
+    label: "Todas",
+    icon: "tools",
+    match: ["/ferramentas"],
+  },
+  ...NEXUS_TOOLS.map((t) => ({
+    href: t.href,
+    label: t.label,
+    icon: t.icon,
+    match: t.match,
+  })),
   { href: "/app", label: "Orquestrador", icon: "plus", match: ["/app"] },
-  { href: "/app/studio", label: "Studio", icon: "studio", match: ["/studio", "/app/studio"] },
-  { href: "/editor", label: "Editor vídeo", icon: "editor", match: ["/editor"] },
-  { href: "/kits", label: "Ninja Kits", icon: "kits", match: ["/kits"] },
-  { href: "/pipeline", label: "Pack Scout", icon: "pipeline", match: ["/pipeline"] },
 ];
 
 export const NEXUS_RECENT_CHATS = [
@@ -48,7 +59,7 @@ export const NEXUS_RECENT_CHATS = [
     when: "18 min",
   },
   {
-    href: "/app?mode=roteiro",
+    href: "/ferramentas/studio?mode=roteiro",
     title: "Roteiro Reels 60s",
     agent: "Roteirista",
     when: "2 h",
@@ -56,6 +67,10 @@ export const NEXUS_RECENT_CHATS = [
 ] as const;
 
 export function isNexusActive(pathname: string, item: NexusNavItem) {
+  // Hub /ferramentas: active only on exact path (not child modules)
+  if (item.href === "/ferramentas") {
+    return pathname === "/ferramentas";
+  }
   if (item.match) {
     return item.match.some(
       (m) => pathname === m || pathname.startsWith(`${m}/`),
@@ -71,6 +86,5 @@ export type NexusShellProps = {
   title?: string;
   subtitle?: string;
   actions?: ReactNode;
-  /** Hide default page header (overview pages bring their own hero). */
   hideHeader?: boolean;
 };

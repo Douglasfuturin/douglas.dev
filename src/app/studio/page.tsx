@@ -12,5 +12,5 @@ export default async function StudioPage({ searchParams }: PageProps) {
     else if (Array.isArray(value) && value[0]) qs.set(key, value[0]);
   }
   const tail = qs.toString();
-  redirect(tail ? `/app/studio?${tail}` : "/app/studio");
+  redirect(tail ? `/ferramentas/studio?${tail}` : "/ferramentas/studio");
 }
