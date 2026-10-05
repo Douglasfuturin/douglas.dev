@@ -113,7 +113,7 @@ export function buildCustomAgentInstructions(input: {
   instructions: string;
   toolkit: ToolkitPreset;
 }): string {
-  return `You are **${input.name}**, a custom FASE agent.
+  return `You are **${input.name}**, a custom Central de Agentes agent.
 
 Role: ${input.role}
 Toolkit preset: ${input.toolkit}

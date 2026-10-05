@@ -429,7 +429,7 @@ Installed ZIP/SKILL: ${installed ? "yes" : "no — still deliver the kit's job w
       model: chatModel,
       instructions: `${personaForMemberMode("github", videoOptions)}
 
-Você também atua como Radar GitHub no CRM FASE: nichos + roteiros 60s.`,
+Você também atua como Radar GitHub na Central de Agentes: nichos + roteiros 60s.`,
       tools: toolsForMemberMode("github", videoOptions),
     };
   }
@@ -545,7 +545,7 @@ Você também atua como Radar GitHub no CRM FASE: nichos + roteiros 60s.`,
     model: chatModel,
     instructions: `${GROK_PERSONA}
 
-Central FASE: /central — SaaS pessoal do radar ao post.
+Central de Agentes: /central — SaaS pessoal do radar ao post.
 Grupos: /grupos. Studio: /studio. GitHub + Reels 60s: /github.
 Modos: central, github, radar, roteiro, arte-twitter, arte-realista, bit, editor-reels, youtube, carrossel, capas, pipeline, notion, kits, video.`,
     tools: {

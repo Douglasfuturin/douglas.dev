@@ -167,7 +167,7 @@ export function CrmDashboard() {
               Content operations · @o.douglas.dev
             </p>
             <h2 className="font-display mt-3 text-4xl tracking-tight text-white sm:text-5xl">
-              <span className="fase-shimmer-text">FASE</span>
+              <span className="fase-shimmer-text">Central de Agentes</span>
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-white/55 sm:text-base">
               Identidade Douglas Dev — preto, laranja e carrosséis realistas.

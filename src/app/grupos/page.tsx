@@ -26,7 +26,7 @@ export default function GruposPage() {
   return (
     <CrmShell
       title="Agentes"
-      subtitle="Salas FASE — Conteúdo Dev, Dev Vídeo e Contenidos España."
+      subtitle="Salas — Conteúdo Dev, Dev Vídeo e Contenidos España."
       actions={
         <Link href="/dashboard" className="crm-btn crm-btn-ghost">
           Dashboard

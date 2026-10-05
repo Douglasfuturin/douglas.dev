@@ -1,4 +1,4 @@
-/** Pipeline stages for personal content ops (FASE). */
+/** Pipeline stages for personal content ops (Central de Agentes). */
 export const CONTENT_STAGES = [
   "idea",
   "approved",

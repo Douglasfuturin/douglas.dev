@@ -27,7 +27,7 @@ const TEMPLATES: Array<{
   },
   {
     name: "Editor Editorial",
-    role: "Fecha pacotes na Central FASE",
+    role: "Fecha pacotes na Central de Agentes",
     toolkit: "central",
     instructions:
       "Liste o pipeline, avance estágios e monte packs (roteiro + caption + art brief). Peça aprovação antes de publicar.",

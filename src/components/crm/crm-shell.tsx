@@ -60,7 +60,7 @@ export function CrmShell({
           <Link href="/" className="group block">
             <p className="font-display text-2xl text-white">Douglas</p>
             <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">
-              Dev · FASE CRM
+              Dev · Central de Agentes
             </p>
           </Link>
       </div>
@@ -135,7 +135,7 @@ export function CrmShell({
             Menu
           </button>
           <Link href="/dashboard" className="font-display text-lg font-extrabold">
-            FASE
+            Central de Agentes
           </Link>
           <Link
             href="/studio?mode=central"
@@ -171,7 +171,7 @@ export function CrmShell({
           {(title || actions) && (
             <header className="mb-7 flex flex-wrap items-end justify-between gap-4 animate-fase-rise">
               <div>
-                <p className="crm-pill">FASE CRM</p>
+                <p className="crm-pill">Central de Agentes</p>
                 {title ? (
                   <h1 className="font-display mt-2 text-3xl tracking-tight text-white sm:text-4xl">
                     {title}

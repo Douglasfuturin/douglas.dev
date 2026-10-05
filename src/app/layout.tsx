@@ -19,7 +19,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Douglas Dev — FASE Content CRM",
+  title: "Douglas Dev — Central de Agentes",
   description:
     "CRM de conteúdo com identidade Douglas Dev: agentes, pipeline e carrosséis realistas.",
 };

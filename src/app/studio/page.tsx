@@ -5,7 +5,7 @@ export default function StudioPage() {
   return (
     <CrmShell
       title="Studio IA"
-      subtitle="Motor de agentes FASE — Central, grupos, radar, roteiro, artes e edição."
+      subtitle="Motor da Central de Agentes — Central, grupos, radar, roteiro, artes e edição."
     >
       <div className="crm-panel !p-0 overflow-hidden min-h-[70vh]">
         <ChatApp />

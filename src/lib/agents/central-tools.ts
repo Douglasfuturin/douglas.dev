@@ -15,7 +15,7 @@ export function centralContentTools() {
   return {
     list_content_pipeline: tool({
       description:
-        "Lista itens da Central FASE (kanban pessoal: ideia → postado). Filtra por stage ou market.",
+        "Lista itens da Central de Agentes (kanban pessoal: ideia → postado). Filtra por stage ou market.",
       inputSchema: z.object({
         stage: z.enum(CONTENT_STAGES).optional(),
         market: z.enum(["br", "es", "en"]).optional(),
@@ -43,7 +43,7 @@ export function centralContentTools() {
 
     create_content_item: tool({
       description:
-        "Cria um item na Central FASE (ideia, tendência aprovada, tema de vídeo, etc.).",
+        "Cria um item na Central de Agentes (ideia, tendência aprovada, tema de vídeo, etc.).",
       inputSchema: z.object({
         title: z.string().min(3),
         summary: z.string().optional(),

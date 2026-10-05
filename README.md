@@ -1,10 +1,10 @@
-# FASE — Central de Conteúdo Pessoal
+# Central de Agentes — Central de Conteúdo Pessoal
 
 SaaS pessoal (single-user) do **radar ao post**, em cima de Next.js + Vercel AI SDK + xAI Grok.
 
 ## O que é
 
-**FASE** une todas as etapas de operações de conteúdo numa única app:
+**Central de Agentes** une todas as etapas de operações de conteúdo numa única app:
 
 1. **Ideia / Radar** — briefing diário (IA, automação, marketing) + GitHub Scout  
 2. **Aprovação** — cards → Roteirista  
@@ -18,7 +18,7 @@ SaaS pessoal (single-user) do **radar ao post**, em cima de Next.js + Vercel AI 
 
 | Rota | Função |
 | --- | --- |
-| `/` | Landing cinematográfica FASE |
+| `/` | Landing cinematográfica Central de Agentes |
 | `/dashboard` | **CRM Dashboard** — visão geral + todos os módulos |
 | `/central` | Kanban do pipeline (ideia → postado) |
 | `/central/[id]` | Detalhe do conteúdo |
@@ -117,7 +117,7 @@ APIs nativas Meta/YouTube/TikTok podem plugar no mesmo formato de job em `/api/p
 ```
 src/
   app/
-    page.tsx                 # landing FASE
+    page.tsx                 # landing Central de Agentes
     central/                 # kanban + detalhe
     studio/                  # chat / agentes
     api/content/             # CRUD pipeline

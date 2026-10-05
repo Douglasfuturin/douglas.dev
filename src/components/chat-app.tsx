@@ -49,7 +49,7 @@ const MODE_LABELS: Record<AgentMode, string> = {
   youtube: "YouTube (España)",
   carrossel: "Carrusel",
   capas: "Capas y Thumbnails",
-  central: "Central FASE",
+  central: "Central de Agentes",
   custom: "Agente custom",
   notion: "Notion Guide",
   pipeline: "Pack Scout→Reels→Notion",
@@ -261,7 +261,7 @@ export function ChatApp() {
         `Por que agora: ${item.whyNow}`,
         "",
         "Use prepare_trend_for_reels e deliver_reels_script.",
-        "Depois use run_central_pipeline (ou create_content_item) para salvar o roteiro na Central FASE com stage=script.",
+        "Depois use run_central_pipeline (ou create_content_item) para salvar o roteiro na Central de Agentes com stage=script.",
       ].join("\n");
     setMode("roteiro");
     void sendMessage(
@@ -346,7 +346,7 @@ export function ChatApp() {
             Studio
           </p>
           <p className="mt-2 max-w-md text-sm leading-relaxed text-[var(--muted)]">
-            Agentes FASE — grupos, radar, roteiro, artes e edição.
+            Agentes — grupos, radar, roteiro, artes e edição.
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             <Link

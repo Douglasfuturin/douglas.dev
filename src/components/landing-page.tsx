@@ -22,7 +22,7 @@ export function LandingPage() {
         <div>
           <p className="font-display text-2xl text-white">Douglas Dev</p>
           <p className="text-[11px] font-semibold tracking-[0.14em] text-white/45">
-            @o.douglas.dev · FASE
+            @o.douglas.dev · Central de Agentes
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -37,19 +37,19 @@ export function LandingPage() {
 
       <section className="relative z-10 mx-auto flex min-h-[78vh] max-w-6xl flex-col justify-center px-5 pb-16 pt-4 sm:px-8">
         <p
-          className="font-display text-[clamp(3.2rem,12vw,7.5rem)] leading-[0.88] text-white animate-fase-rise"
+          className="font-display text-[clamp(2.6rem,10vw,6.5rem)] leading-[0.88] text-white animate-fase-rise"
           style={{ animationDelay: "40ms" }}
         >
-          Tarefas
+          Central
           <br />
-          no automático
+          de Agentes
         </p>
         <h1
           className="mt-6 max-w-lg text-lg font-medium leading-snug text-white/75 sm:text-xl animate-fase-rise"
           style={{ animationDelay: "140ms" }}
         >
-          CRM de conteúdo com a identidade Douglas Dev — carrosséis realistas,
-          agentes e pipeline até o post.
+          CRM de conteúdo Douglas Dev — carrosséis realistas, agentes e
+          pipeline até o post.
         </h1>
         <p
           className="mt-4 max-w-md text-sm leading-relaxed text-white/45 animate-fase-rise"
@@ -101,7 +101,7 @@ export function LandingPage() {
               body: "Carrosséis realistas com problema, seta laranja e solução — no estilo dos seus posts.",
             },
             {
-              title: "Agentes FASE",
+              title: "Agentes",
               body: "Radar, GitHub + Reels 60s, arte realista e criar agente custom.",
             },
             {
