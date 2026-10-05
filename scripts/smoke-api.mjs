@@ -129,7 +129,7 @@ async function main() {
     fail("POST /api/upload", JSON.stringify(uploadJson));
   }
 
-  // Chat (expects 500 without key or 200 stream with key)
+  // Chat (expects 500 with clear message for placeholder key, or stream with real key)
   const chatRes = await fetch(`${BASE}/api/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -140,8 +140,12 @@ async function main() {
   });
   if (chatRes.status === 500) {
     const err = await chatRes.json();
-    if (err.error?.includes("XAI_API_KEY")) {
-      pass("POST /api/chat", "missing XAI_API_KEY (expected in CI)");
+    if (
+      err.error?.includes("XAI_API_KEY") ||
+      err.error?.includes("placeholder") ||
+      err.error?.includes("inválida")
+    ) {
+      pass("POST /api/chat", err.error.slice(0, 80));
     } else {
       fail("POST /api/chat", JSON.stringify(err));
     }
@@ -149,6 +153,29 @@ async function main() {
     pass("POST /api/chat", `status ${chatRes.status} (stream)`);
   } else {
     fail("POST /api/chat", `status ${chatRes.status}`);
+  }
+
+  // Local editor render (dry-run only — full encode is heavy)
+  const { status: renderStatus, json: renderJson } = await getJson(
+    "/api/editor/render",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        path: demoPath,
+        takes: [{ start: 0, end: 2 }],
+        dryRunOnly: true,
+        videoOptions: { estilo: "reel-mono", formato: "9:16", captions: false },
+      }),
+    },
+  );
+  if (renderStatus === 200 && renderJson.ok) {
+    pass("POST /api/editor/render dry-run", renderJson.step);
+  } else {
+    fail(
+      "POST /api/editor/render dry-run",
+      `status ${renderStatus} ${JSON.stringify(renderJson).slice(0, 160)}`,
+    );
   }
 
   const failed = results.filter((r) => !r.ok);

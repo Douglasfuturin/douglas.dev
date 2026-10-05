@@ -230,7 +230,17 @@ npm install
 npm run dev
 ```
 
-Abra [http://localhost:3000](http://localhost:3000) → **Dashboard** ou **Studio**.
+Abra [http://localhost:3000/app](http://localhost:3000/app) (Orquestrador) ou **Dashboard** / **Editor** (`/editor`).
+
+### Smoke tests (sem UI)
+
+Com o dev server rodando (`npm run dev`):
+
+```bash
+npm run test:smoke
+```
+
+Valida rotas principais, APIs CRM, upload + análise do editor (`/api/editor/analyze`), streaming do chat (se `XAI_API_KEY` estiver definida) e dry-run do kit de vídeo (`fabrica.py --seco`).
 
 ### Variáveis opcionais
 
@@ -242,13 +252,19 @@ Abra [http://localhost:3000](http://localhost:3000) → **Dashboard** ou **Studi
 
 ### Vídeo / ffmpeg
 
-Para edição automática:
+Para edição automática (local, **sem** XAI):
 
 ```bash
 cd kit-edicao-video/skill && uv sync   # ffmpeg no PATH
 ```
 
+No editor (`/editor`): Upload → Dry-run → **Renderizar corte**. A API `/api/editor/render` roda a fábrica localmente.
+
 Skills Ninja: coloque `.zip` em `ninja-kits/sources/` → `/kits` → **Instalar**.
+
+### Chat / Orquestrador
+
+Exige `XAI_API_KEY` **real** (não o placeholder). Sem ela, `/app` mostra um aviso e o editor continua utilizável.
 
 ---
 

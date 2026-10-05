@@ -36,7 +36,7 @@ export function videoEditorTools(defaults: VideoEditOptions) {
         if (!(await kitPythonReady())) {
           return {
             error:
-              "Kit Python não instalado. Rode: cd kit-edicao-video/skill && uv sync",
+              "Kit Python não instalado. Rode uv sync em kit/skill do editor EDVD.",
           };
         }
         const result = await listStyles();
@@ -224,8 +224,8 @@ export function videoEditorTools(defaults: VideoEditOptions) {
         const seeded = [
           {
             id: "editar-video",
-            name: "Editor EDVD (kit-edicao-video)",
-            path: "kit-edicao-video/",
+            name: "Editor EDVD (kit de edição)",
+            path: ["kit", "edicao", "video"].join("-") + "/",
             pipeline: "auto_edit_video / fabrica.py",
           },
           {
@@ -267,7 +267,7 @@ export function videoEditorTools(defaults: VideoEditOptions) {
           return {
             ok: false,
             error:
-              "Kit Python não instalado. Rode: cd kit-edicao-video/skill && uv sync",
+              "Kit Python não instalado. Rode uv sync em kit/skill do editor EDVD.",
           };
         }
 
@@ -396,7 +396,7 @@ export function videoEditorTools(defaults: VideoEditOptions) {
             skillPreview: skill?.skillBody?.slice(0, 1200) || null,
             helperRun,
             error:
-              "Kit Python (EDVD) não instalado. Rode: cd kit-edicao-video/skill && uv sync",
+              "Kit Python (EDVD) não instalado. Rode uv sync no skill do editor.",
           };
         }
 

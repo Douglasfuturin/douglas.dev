@@ -258,6 +258,9 @@ export async function writePlan(input: {
     plan.sfx = path.join(KIT_DIR, "assets", "sons", `${input.options.som}.wav`);
   }
 
+  // Entrega sob workspace/ (não dentro da pasta do kit)
+  plan.saida = UPLOADS_DIR;
+
   const planPath = path.join(EDITS_DIR, `${slug}.plan.json`);
   await writeFile(planPath, JSON.stringify(plan, null, 2), "utf8");
   return { planPath, plan };

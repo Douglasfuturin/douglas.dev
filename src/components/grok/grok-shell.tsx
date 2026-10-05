@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 const NAV = [
   { href: "/app", label: "Chat", match: ["/app"] },
@@ -24,6 +24,23 @@ function active(pathname: string, href: string, match?: string[]) {
 export function GrokShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [xaiError, setXaiError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    fetch("/api/health")
+      .then((r) => r.json())
+      .then((data: { xai?: { ok?: boolean; error?: string | null } }) => {
+        if (!alive) return;
+        if (data.xai && !data.xai.ok) {
+          setXaiError(data.xai.error || "XAI_API_KEY ausente");
+        } else setXaiError(null);
+      })
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   const sidebar = (
     <>
@@ -107,6 +124,15 @@ export function GrokShell({ children }: { children: ReactNode }) {
             Modo avançado
           </Link>
         </header>
+        {xaiError ? (
+          <div className="border-b border-amber-500/30 bg-amber-500/10 px-4 py-2 text-xs text-amber-100 md:px-5">
+            Chat IA precisa de chave real: {xaiError} — o{" "}
+            <Link href="/editor" className="underline">
+              Editor de vídeo
+            </Link>{" "}
+            já funciona localmente sem chave.
+          </div>
+        ) : null}
         <div className="relative min-h-0 flex-1">{children}</div>
       </div>
     </div>
