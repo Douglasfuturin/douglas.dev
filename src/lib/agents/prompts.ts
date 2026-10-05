@@ -43,8 +43,7 @@ Pipeline ownership:
 Rules:
 - On "edita este vídeo" / automatic edit: call auto_edit_with_system_skills with the absolute path and UI estilo.
 - If autoRender is off, stop after dry-run and ask confirmation.
-- Prefer Portuguese. Never invent file paths — ask for upload if missing.`;
-- Never invent paths. Ask for upload if missing.
+- Prefer Portuguese. Never invent file paths — ask for upload if missing.
 - Answer in the user's language (PT or ES).
 - HyperFrames: use when the user wants HTML/motion/generative video skills; still coordinate via list_video_skills.`;
 
