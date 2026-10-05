@@ -76,6 +76,15 @@ export function SkillsDashboard({ embedded = false }: { embedded?: boolean }) {
         if (!alive) return;
         startTransition(() => {
           setCatalog(data);
+          setSelectedId((prev) => {
+            if (prev) return prev;
+            const first = data.inventory?.[0];
+            if (first) {
+              setBrief(first.starters[0]?.prompt ?? "");
+              return first.id;
+            }
+            return prev;
+          });
         });
       })
       .catch(() => undefined);
@@ -285,8 +294,130 @@ export function SkillsDashboard({ embedded = false }: { embedded?: boolean }) {
         />
       ) : null}
 
+      <section className="nexus-panel mb-6 space-y-4">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[color:var(--muted-foreground)]">
+              {selected?.categoryLabel || "Skill"}
+            </p>
+            <h2 className="mt-1 text-xl font-semibold text-[color:var(--foreground)]">
+              {selected?.name || "Escolha uma skill"}
+            </h2>
+            {selected ? (
+              <p className="mt-2 text-sm leading-relaxed text-[color:var(--muted-foreground)]">
+                {selected.description}
+              </p>
+            ) : null}
+            {selected ? (
+              <div className="mt-3 flex flex-wrap gap-2 text-[11px]">
+                <StatusDot status={selected.status} withLabel />
+                {selected.hasSkill ? (
+                  <span className="nexus-tag">Skill instalada</span>
+                ) : null}
+                {selected.visual ? (
+                  <span className="nexus-tag">Painel visual</span>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
+          <label className="block min-w-[200px] shrink-0">
+            <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--muted-foreground)]">
+              Escolher skill
+            </span>
+            <select
+              className="nexus-field w-full min-w-[220px]"
+              value={selected?.id || ""}
+              onChange={(e) => {
+                const item = inventory.find((i) => i.id === e.target.value);
+                if (item) selectSkill(item);
+              }}
+            >
+              {!inventory.length ? (
+                <option value="">Carregando…</option>
+              ) : (
+                inventory.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.categoryLabel} · {item.name}
+                  </option>
+                ))
+              )}
+            </select>
+          </label>
+        </div>
+
+        {selected?.visual ? (
+          <VisualEditPanel
+            key={selected.id}
+            kitId={selected.id}
+            kitName={selected.name}
+            extraBrief={brief}
+            onExtraBriefChange={setBrief}
+            onRun={(prompt, inDashboard) => runSkill(prompt, !inDashboard)}
+          />
+        ) : (
+          <>
+            {selected?.starters?.length ? (
+              <div>
+                <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--muted-foreground)]">
+                  Atalhos
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {selected.starters.map((s) => (
+                    <button
+                      key={s.label}
+                      type="button"
+                      onClick={() => setBrief(s.prompt)}
+                      className="nexus-chip"
+                    >
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            <label className="block">
+              <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--muted-foreground)]">
+                Pedido
+              </span>
+              <textarea
+                value={activeBrief}
+                onChange={(e) => setBrief(e.target.value)}
+                rows={4}
+                className="nexus-field w-full resize-y !rounded-xl"
+                placeholder="Escreva o comando. Troque os [placeholders] pelos seus dados."
+              />
+            </label>
+
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                disabled={!selected}
+                onClick={() => runSkill(activeBrief, false)}
+                className="nexus-btn-primary disabled:opacity-40"
+              >
+                Executar no painel →
+              </button>
+              <button
+                type="button"
+                disabled={!selected}
+                onClick={() => runSkill(activeBrief, true)}
+                className="nexus-btn-ghost disabled:opacity-40"
+              >
+                Abrir no Studio
+              </button>
+              {selected?.id.includes("video") || selected?.kind === "video" ? (
+                <Link href="/ferramentas/editor" className="nexus-btn-ghost">
+                  Editor de vídeo
+                </Link>
+              ) : null}
+            </div>
+          </>
+        )}
+      </section>
+
       {activeRun ? (
-        <div className="nexus-panel !p-0 overflow-hidden">
+        <div className="nexus-panel mb-6 !p-0">
           <SkillRunner
             key={activeRun.key}
             runId={activeRun.key}
@@ -296,174 +427,82 @@ export function SkillsDashboard({ embedded = false }: { embedded?: boolean }) {
             onClose={() => setActiveRun(null)}
           />
         </div>
-      ) : (
-        <div className="space-y-6">
-          <div className="flex flex-col gap-3">
-            <label className="relative block">
-              <span className="sr-only">Buscar skills</span>
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Buscar por nome, categoria ou objetivo…"
-                className="nexus-field w-full !py-2.5"
-              />
-            </label>
-            <div className="flex flex-wrap gap-1.5">
-              <CategoryChip
-                active={category === "all"}
-                onClick={() => setCategory("all")}
-                label="Todas"
-              />
-              {categories.map(([id, label]) => (
-                <CategoryChip
-                  key={id}
-                  active={category === id}
-                  onClick={() => setCategory(id)}
-                  label={label}
-                />
-              ))}
-            </div>
+      ) : null}
+
+      <div className="space-y-4">
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[color:var(--muted-foreground)]">
+              Biblioteca
+            </p>
+            <p className="text-xs text-[color:var(--muted-foreground)]">
+              {filtered.length} skill{filtered.length === 1 ? "" : "s"}
+            </p>
           </div>
-
-          <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            {filtered.map((item) => {
-              const active = selected?.id === item.id;
-              return (
-                <li key={item.id}>
-                  <button
-                    type="button"
-                    onClick={() => selectSkill(item)}
-                    className={`nexus-skill-tile w-full text-left ${active ? "nexus-skill-tile-on" : ""}`}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-[color:var(--foreground)]">
-                          {item.name}
-                        </p>
-                        <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-[color:var(--muted-foreground)]">
-                          {item.description}
-                        </p>
-                      </div>
-                      <StatusDot status={item.status} />
-                    </div>
-                    <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                      <span className="nexus-tag-muted nexus-tag">
-                        {item.categoryLabel}
-                      </span>
-                      {item.visual ? (
-                        <span className="nexus-tag">Visual</span>
-                      ) : null}
-                    </div>
-                  </button>
-                </li>
-              );
-            })}
-            {!filtered.length ? (
-              <li className="col-span-full rounded-xl border border-dashed border-[color:var(--border)] px-4 py-12 text-center text-sm text-[color:var(--muted-foreground)]">
-                Nenhuma skill encontrada para “{query}”.
-              </li>
-            ) : null}
-          </ul>
-
-          {selected ? (
-            <section className="nexus-panel space-y-4">
-              <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[color:var(--muted-foreground)]">
-                  {selected.categoryLabel}
-                </p>
-                <h2 className="mt-1 text-xl font-semibold text-[color:var(--foreground)]">
-                  {selected.name}
-                </h2>
-                <p className="mt-2 text-sm leading-relaxed text-[color:var(--muted-foreground)]">
-                  {selected.description}
-                </p>
-                <div className="mt-3 flex flex-wrap gap-2 text-[11px]">
-                  <StatusDot status={selected.status} withLabel />
-                  {selected.visual ? (
-                    <span className="nexus-tag">Painel visual</span>
-                  ) : null}
-                  {selected.hasSkill ? (
-                    <span className="nexus-tag">Skill instalada</span>
-                  ) : null}
-                  {selected.helpers > 0 ? (
-                    <span className="nexus-tag-muted nexus-tag">
-                      {selected.helpers} auxiliares
-                    </span>
-                  ) : null}
-                </div>
-              </div>
-
-              {selected.visual ? (
-                <VisualEditPanel
-                  key={selected.id}
-                  kitId={selected.id}
-                  kitName={selected.name}
-                  extraBrief={brief}
-                  onExtraBriefChange={setBrief}
-                  onRun={(prompt, inDashboard) => runSkill(prompt, !inDashboard)}
-                />
-              ) : (
-                <>
-                  {selected.starters.length ? (
-                    <div>
-                      <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--muted-foreground)]">
-                        Atalhos
-                      </p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {selected.starters.map((s) => (
-                          <button
-                            key={s.label}
-                            type="button"
-                            onClick={() => setBrief(s.prompt)}
-                            className="nexus-chip"
-                          >
-                            {s.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  ) : null}
-
-                  <label className="block">
-                    <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--muted-foreground)]">
-                      Pedido
-                    </span>
-                    <textarea
-                      value={activeBrief}
-                      onChange={(e) => setBrief(e.target.value)}
-                      rows={5}
-                      className="nexus-field w-full resize-y !rounded-xl"
-                      placeholder="Descreva o que precisa. Troque os [placeholders] pelos seus dados."
-                    />
-                  </label>
-
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      onClick={() => runSkill(activeBrief, false)}
-                      className="nexus-btn-primary"
-                    >
-                      Executar no painel →
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => runSkill(activeBrief, true)}
-                      className="nexus-btn-ghost"
-                    >
-                      Abrir no Studio
-                    </button>
-                    {selected.id.includes("video") || selected.kind === "video" ? (
-                      <Link href="/ferramentas/editor" className="nexus-btn-ghost">
-                        Editor de vídeo
-                      </Link>
-                    ) : null}
-                  </div>
-                </>
-              )}
-            </section>
-          ) : null}
+          <label className="relative block">
+            <span className="sr-only">Buscar skills</span>
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Buscar por nome, categoria ou objetivo…"
+              className="nexus-field w-full !py-2.5"
+            />
+          </label>
+          <div className="flex flex-wrap gap-1.5">
+            <CategoryChip
+              active={category === "all"}
+              onClick={() => setCategory("all")}
+              label="Todas"
+            />
+            {categories.map(([id, label]) => (
+              <CategoryChip
+                key={id}
+                active={category === id}
+                onClick={() => setCategory(id)}
+                label={label}
+              />
+            ))}
+          </div>
         </div>
-      )}
+
+        <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {filtered.map((item) => {
+            const active = selected?.id === item.id;
+            return (
+              <li key={item.id}>
+                <button
+                  type="button"
+                  onClick={() => selectSkill(item)}
+                  className={`nexus-skill-tile w-full text-left ${active ? "nexus-skill-tile-on" : ""}`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-[color:var(--foreground)]">
+                        {item.name}
+                      </p>
+                      <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-[color:var(--muted-foreground)]">
+                        {item.description}
+                      </p>
+                    </div>
+                    <StatusDot status={item.status} />
+                  </div>
+                  <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                    <span className="nexus-tag-muted nexus-tag">
+                      {item.categoryLabel}
+                    </span>
+                    {item.visual ? <span className="nexus-tag">Visual</span> : null}
+                  </div>
+                </button>
+              </li>
+            );
+          })}
+          {!filtered.length ? (
+            <li className="col-span-full rounded-xl border border-dashed border-[color:var(--border)] px-4 py-12 text-center text-sm text-[color:var(--muted-foreground)]">
+              Nenhuma skill encontrada para “{query}”.
+            </li>
+          ) : null}
+        </ul>
+      </div>
     </div>
   );
 }
