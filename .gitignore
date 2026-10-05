@@ -48,6 +48,7 @@ kit-edicao-video/skill/**/*.egg-info/
 workspace/videos/
 workspace/edits/
 public/outputs/
+/outputs/
 *.mp4
 *.mov
 *.mkv

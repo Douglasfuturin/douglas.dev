@@ -9,12 +9,16 @@ import {
   GROK_PERSONA,
   GITHUB_SCOUT_PERSONA,
   KITS_PERSONA,
+  NOTION_AGENT_PERSONA,
   RESEARCH_PERSONA,
+  ROTEIRISTA_PERSONA,
   ROUTER_PROMPT,
   VIDEO_EDITOR_PERSONA,
 } from "./prompts";
 import { grokBotTools, researchTools } from "./tools";
 import { githubScoutTools } from "./github-tools";
+import { reelsScriptTools } from "./reels-tools";
+import { notionRepoTools } from "./notion-tools";
 import { videoEditorTools } from "./video-tools";
 import { kitPersona, ninjaKitTools } from "./kit-tools";
 import { getKitById } from "@/lib/kits/discover";
@@ -40,6 +44,8 @@ export type ResolvedAgent = {
     xai: { reasoningEffort: ResearchDepth };
   };
 };
+
+type ConcreteMode = Exclude<AgentMode, "auto">;
 
 function extractLatestUserText(messages: UIMessage[]): string {
   for (let i = messages.length - 1; i >= 0; i--) {
@@ -146,26 +152,56 @@ Installed ZIP/SKILL: ${installed ? "yes" : "no — still deliver the kit's job w
     };
   }
 
+  if (mode === "roteiro") {
+    return {
+      mode,
+      model: chatModel,
+      instructions: ROTEIRISTA_PERSONA,
+      tools: {
+        ...reelsScriptTools(),
+        ...githubScoutTools(),
+        ...grokBotTools(),
+      },
+    };
+  }
+
+  if (mode === "notion") {
+    return {
+      mode,
+      model: chatModel,
+      instructions: NOTION_AGENT_PERSONA,
+      tools: {
+        ...notionRepoTools(),
+        ...githubScoutTools(),
+        ...grokBotTools(),
+      },
+    };
+  }
+
   return {
     mode: "chat",
     model: chatModel,
     instructions: `${GROK_PERSONA}
 
 You can also inventory Ninja kits with list_ninja_kits when the user mentions kits/ZIPs/cursos.
-For GitHub repo discovery, prefer mode github / search_best_github_repos.`,
+For GitHub repo discovery, prefer mode github / search_best_github_repos.
+For Reels scripts about a repo, prefer mode roteiro.
+For Notion repo guides, prefer mode notion.`,
     tools: {
       ...grokBotTools(),
       ...ninjaKitTools(),
       ...githubScoutTools(),
+      ...reelsScriptTools(),
+      ...notionRepoTools(),
     },
   };
 }
 
-async function routeMode(
-  latestUserText: string,
-): Promise<"chat" | "research" | "video" | "kits" | "github"> {
+async function routeMode(latestUserText: string): Promise<ConcreteMode> {
   if (!latestUserText) return "chat";
   if (heuristicKits(latestUserText)) return "kits";
+  if (heuristicRoteiro(latestUserText)) return "roteiro";
+  if (heuristicNotion(latestUserText)) return "notion";
   if (heuristicGithub(latestUserText)) return "github";
   if (heuristicVideo(latestUserText)) return "video";
 
@@ -184,6 +220,8 @@ async function routeMode(
     if (parsed.mode === "video") return "video";
     if (parsed.mode === "kits") return "kits";
     if (parsed.mode === "github") return "github";
+    if (parsed.mode === "roteiro") return "roteiro";
+    if (parsed.mode === "notion") return "notion";
     return "chat";
   } catch {
     return heuristicRoute(latestUserText);
@@ -196,6 +234,18 @@ function heuristicKits(text: string): boolean {
   );
 }
 
+function heuristicRoteiro(text: string): boolean {
+  return /\b(roteirista|roteiro|script\s+(de\s+)?(reels?|shorts?)|reels?\s+de\s+60|60\s*segundos?\s+(sobre|falando)|gancho\s+do\s+reels?)\b/i.test(
+    text,
+  );
+}
+
+function heuristicNotion(text: string): boolean {
+  return /\b(notion|publique?\s+no\s+notion|guia\s+no\s+notion|p[aá]gina\s+no\s+notion|disponibiliz(a|ar)\s+(no\s+)?notion)\b/i.test(
+    text,
+  );
+}
+
 function heuristicGithub(text: string): boolean {
   return /\b(github|reposit[oó]rios?|repos?\b|open[\s-]?source|melhor(es)?\s+(libs?|bibliotecas?|projetos?)|trending|stars?\b)\b/i.test(
     text,
@@ -203,15 +253,15 @@ function heuristicGithub(text: string): boolean {
 }
 
 function heuristicVideo(text: string): boolean {
-  return /\b(edita|editar|edi[cç][aã]o|v[ií]deo|reel|legenda|legendas|fabrica|transcreve|transcrever|aula-ccnp|sil[eê]ncio|mp4|b-?roll|vsl)\b/i.test(
+  return /\b(edita|editar|edi[cç][aã]o|v[ií]deo|legenda|legendas|fabrica|transcreve|transcrever|aula-ccnp|sil[eê]ncio|mp4|b-?roll|vsl|render(izar)?\s+(o\s+)?(v[ií]deo|mp4))\b/i.test(
     text,
   );
 }
 
-function heuristicRoute(
-  text: string,
-): "chat" | "research" | "video" | "kits" | "github" {
+function heuristicRoute(text: string): ConcreteMode {
   if (heuristicKits(text)) return "kits";
+  if (heuristicRoteiro(text)) return "roteiro";
+  if (heuristicNotion(text)) return "notion";
   if (heuristicGithub(text)) return "github";
   if (heuristicVideo(text)) return "video";
   const researchSignals =

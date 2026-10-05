@@ -4,7 +4,7 @@ import { xai } from "@ai-sdk/xai";
 export const chatModel = xai.responses("grok-4.7");
 
 /**
- * Multi-agent nativo da xAI: vários agentes em paralelo para deep research.
+ * Multi-agente nativo da xAI: vários agentes em paralelo para deep research.
  * Em grok-4.20-multi-agent, reasoningEffort controla a *quantidade* de agentes
  * (low/medium/high), não só a profundidade de thinking.
  */
@@ -16,6 +16,8 @@ export type AgentMode =
   | "video"
   | "kits"
   | "github"
+  | "roteiro"
+  | "notion"
   | "auto";
 
 export type ResearchDepth = "low" | "medium" | "high";

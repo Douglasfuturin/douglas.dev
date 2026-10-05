@@ -1,153 +1,14 @@
 import { tool } from "ai";
 import { z } from "zod";
-
-const GH_API = "https://api.github.com";
-const UA = "Grokish-GitHub-Scout";
-
-type GhRepo = {
-  id: number;
-  full_name: string;
-  html_url: string;
-  description: string | null;
-  language: string | null;
-  stargazers_count: number;
-  forks_count: number;
-  watchers_count: number;
-  open_issues_count: number;
-  topics?: string[];
-  license?: { spdx_id?: string | null } | null;
-  archived: boolean;
-  fork: boolean;
-  created_at: string;
-  updated_at: string;
-  pushed_at: string;
-  homepage?: string | null;
-  owner?: { login: string; html_url: string };
-};
-
-type RankedRepo = {
-  rank: number;
-  score: number;
-  fullName: string;
-  url: string;
-  description: string;
-  language: string | null;
-  stars: number;
-  forks: number;
-  openIssues: number;
-  topics: string[];
-  license: string | null;
-  archived: boolean;
-  pushedAt: string;
-  why: string[];
-};
-
-function authHeaders(): HeadersInit {
-  const headers: Record<string, string> = {
-    Accept: "application/vnd.github+json",
-    "User-Agent": UA,
-    "X-GitHub-Api-Version": "2022-11-28",
-  };
-  const token =
-    process.env.GITHUB_TOKEN ||
-    process.env.GH_TOKEN ||
-    process.env.GITHUB_PAT ||
-    "";
-  if (token) headers.Authorization = `Bearer ${token}`;
-  return headers;
-}
-
-async function ghGet<T>(path: string, query?: Record<string, string>): Promise<T> {
-  const url = new URL(path.startsWith("http") ? path : `${GH_API}${path}`);
-  if (query) {
-    for (const [k, v] of Object.entries(query)) {
-      if (v) url.searchParams.set(k, v);
-    }
-  }
-  const res = await fetch(url, {
-    headers: authHeaders(),
-    cache: "no-store",
-  });
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new Error(
-      `GitHub API ${res.status}: ${body.slice(0, 300) || res.statusText}`,
-    );
-  }
-  return (await res.json()) as T;
-}
-
-function daysSince(iso: string): number {
-  const t = Date.parse(iso);
-  if (Number.isNaN(t)) return 9999;
-  return Math.max(0, (Date.now() - t) / (1000 * 60 * 60 * 24));
-}
-
-/** Score simples: popularidade + atividade recente + saúde básica. */
-function scoreRepo(repo: GhRepo): { score: number; why: string[] } {
-  const why: string[] = [];
-  const stars = repo.stargazers_count || 0;
-  const forks = repo.forks_count || 0;
-  const ageDays = daysSince(repo.pushed_at || repo.updated_at);
-  const starScore = Math.log10(stars + 1) * 28;
-  const forkScore = Math.log10(forks + 1) * 10;
-  let activity = 18;
-  if (ageDays <= 30) {
-    activity = 22;
-    why.push("atualizado no último mês");
-  } else if (ageDays <= 90) {
-    activity = 18;
-    why.push("atividade recente (≤90 dias)");
-  } else if (ageDays <= 365) {
-    activity = 10;
-    why.push("push no último ano");
-  } else {
-    activity = 2;
-    why.push("pouca atividade recente");
-  }
-
-  let health = 8;
-  if (repo.archived) {
-    health -= 20;
-    why.push("arquivado");
-  }
-  if (repo.fork) {
-    health -= 8;
-    why.push("é um fork");
-  }
-  if ((repo.open_issues_count || 0) > stars * 0.2 && stars > 200) {
-    health -= 4;
-    why.push("muitas issues abertas vs. stars");
-  } else if (stars > 500) {
-    why.push("comunidade forte (stars)");
-  }
-  if (repo.license?.spdx_id) {
-    health += 3;
-    why.push(`licença ${repo.license.spdx_id}`);
-  }
-  if (repo.language) why.push(`linguagem ${repo.language}`);
-
-  const score = Math.round(starScore + forkScore + activity + health);
-  return { score: Math.max(0, score), why: why.slice(0, 5) };
-}
-
-function buildQuery(input: {
-  query: string;
-  language?: string;
-  minStars?: number;
-  topic?: string;
-  includeForks?: boolean;
-}): string {
-  const parts = [input.query.trim()];
-  if (input.language) parts.push(`language:${input.language}`);
-  if (input.topic) parts.push(`topic:${input.topic}`);
-  if (typeof input.minStars === "number" && input.minStars > 0) {
-    parts.push(`stars:>=${input.minStars}`);
-  }
-  if (!input.includeForks) parts.push("fork:false");
-  parts.push("archived:false");
-  return parts.filter(Boolean).join(" ");
-}
+import {
+  buildSearchQuery,
+  cleanRepoFullName,
+  fetchRepoBundle,
+  ghGet,
+  scoreRepo,
+  type GhRepo,
+  type RankedRepo,
+} from "./github-client";
 
 export function githubScoutTools() {
   return {
@@ -194,7 +55,7 @@ export function githubScoutTools() {
         limit = 10,
         includeForks = false,
       }) => {
-        const q = buildQuery({
+        const q = buildSearchQuery({
           query,
           language,
           topic,
@@ -265,43 +126,9 @@ export function githubScoutTools() {
           .describe("Nome completo owner/repo, ex.: vercel/ai"),
       }),
       execute: async ({ fullName }) => {
-        const clean = fullName.replace(/^https?:\/\/github\.com\//, "").replace(/\/$/, "");
         try {
-          const repo = await ghGet<GhRepo>(`/repos/${clean}`);
-          const { score, why } = scoreRepo(repo);
-          let readmePreview: string | null = null;
-          try {
-            const readme = await ghGet<{ content?: string; encoding?: string }>(
-              `/repos/${clean}/readme`,
-            );
-            if (readme.content && readme.encoding === "base64") {
-              readmePreview = Buffer.from(readme.content, "base64")
-                .toString("utf8")
-                .slice(0, 2500);
-            }
-          } catch {
-            readmePreview = null;
-          }
-          return {
-            ok: true,
-            repo: {
-              fullName: repo.full_name,
-              url: repo.html_url,
-              description: repo.description,
-              language: repo.language,
-              stars: repo.stargazers_count,
-              forks: repo.forks_count,
-              openIssues: repo.open_issues_count,
-              topics: repo.topics || [],
-              license: repo.license?.spdx_id || null,
-              homepage: repo.homepage || null,
-              pushedAt: repo.pushed_at,
-              createdAt: repo.created_at,
-              score,
-              why,
-              readmePreview,
-            },
-          };
+          const repo = await fetchRepoBundle(fullName);
+          return { ok: true, repo };
         } catch (err) {
           return {
             ok: false,
@@ -328,9 +155,7 @@ export function githubScoutTools() {
       execute: async ({ repos, useCase }) => {
         const details = [];
         for (const name of repos) {
-          const clean = name
-            .replace(/^https?:\/\/github\.com\//, "")
-            .replace(/\/$/, "");
+          const clean = cleanRepoFullName(name);
           try {
             const repo = await ghGet<GhRepo>(`/repos/${clean}`);
             const { score, why } = scoreRepo(repo);

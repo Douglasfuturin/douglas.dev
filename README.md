@@ -5,6 +5,8 @@ Starter em Next.js + Vercel AI SDK + xAI Grok para um sistema multi-agente com a
 - chat agentic com tools server-side
 - research multi-agente paralelo (`grok-4.20-multi-agent`)
 - GitHub Scout — busca e ranqueia os melhores repositórios open-source
+- Roteirista — roteiro de Reels ~60s sobre um repositório
+- Notion Guide — página/arquivo com link + instalação + uso
 - web search, X search, code execution, image generation
 
 ## Arquitetura (duas camadas)
@@ -24,14 +26,18 @@ Um roteador escolhe o modo:
 | `chat` | `grok-4.7` | conversa, código, imagens, fatos rápidos |
 | `research` | `grok-4.20-multi-agent` | investigação profunda com fontes |
 | `github` | `grok-4.7` | melhores repos GitHub, libs open-source, comparação |
+| `roteiro` | `grok-4.7` | roteiro de Reels ~60s sobre um repo |
+| `notion` | `grok-4.7` | guia no Notion (link + instalar + usar) |
 | `kits` | `grok-4.7` | skills Ninja / ZIPs instalados |
 | `video` | `grok-4.7` | edição automática de vídeo |
 | `auto` | roteador + um dos acima | decide pelo conteúdo da mensagem |
 
 ```
-Usuário → /api/chat → orchestrator (auto|chat|research|github|kits|video)
-                         ├─ chat: grok-4.7 + web/X/code/image (+ github tools)
+Usuário → /api/chat → orchestrator (auto|chat|research|github|roteiro|notion|kits|video)
+                         ├─ chat: grok-4.7 + web/X/code/image (+ github/roteiro/notion tools)
                          ├─ github: GitHub Scout (search/rank/compare repos)
+                         ├─ roteiro: Roteirista Reels 60s
+                         ├─ notion: Notion Guide (página + .md)
                          ├─ kits / video: skills Ninja + editor
                          └─ research: grok-4.20-multi-agent + web/X
 ```
@@ -45,6 +51,27 @@ Modo dedicado (UI: **GitHub Scout**, atalho `/github` ou `/?mode=github`) que us
 - `compare_github_repos` — comparativo lado a lado
 
 Opcional: defina `GITHUB_TOKEN` (ou `GH_TOKEN` / `GITHUB_PAT`) em `.env.local` para limites de rate maiores.
+
+## Roteirista (Reels 60s)
+
+Atalho `/roteiro` ou `/?mode=roteiro`:
+
+- `prepare_repo_for_reels` — fatos do repo + guia de timing
+- `deliver_reels_script` — roteiro estruturado (hook → CTA) com fala, texto de tela e visual
+
+## Notion Guide
+
+Atalho `/notion` ou `/?mode=notion`:
+
+- `publish_repo_guide_to_notion` — cria página Notion + arquivo `.md` local (e tenta anexar o arquivo)
+- `export_repo_guide_markdown` — só gera/salva o markdown em `outputs/repo-guides/`
+
+Configure no `.env.local`:
+
+```bash
+NOTION_TOKEN=ntn_...
+NOTION_PARENT_PAGE_ID=...   # página pai compartilhada com a integração
+```
 
 ## Como rodar
 

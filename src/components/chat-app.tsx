@@ -29,6 +29,8 @@ const MODE_LABELS: Record<AgentMode, string> = {
   chat: "Chat + ferramentas",
   research: "Pesquisa multiagente",
   github: "GitHub Scout",
+  roteiro: "Roteirista Reels",
+  notion: "Notion Guide",
   video: "Editor de vídeo",
   kits: "Skills Ninja",
 };
@@ -43,6 +45,8 @@ function readQueryMode(): AgentMode {
     m === "chat" ||
     m === "research" ||
     m === "github" ||
+    m === "roteiro" ||
+    m === "notion" ||
     m === "auto"
   ) {
     return m;
@@ -231,7 +235,7 @@ export function ChatApp() {
             Grokish
           </p>
           <p className="mt-2 max-w-md text-sm leading-relaxed text-[var(--muted)]">
-            Multi-agente + kits Ninja + editor de vídeo automático.
+            Multi-agente + kits Ninja + Scout + roteiros + Notion.
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             <Link
@@ -246,6 +250,20 @@ export function ChatApp() {
               className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
             >
               GitHub Scout
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode("roteiro")}
+              className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
+            >
+              Roteirista
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode("notion")}
+              className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
+            >
+              Notion
             </button>
             <Link
               href="/editor"
@@ -739,11 +757,23 @@ function EmptyState({
               "Ache libs open-source de edição de vídeo no GitHub e ranqueie",
               "Compare vercel/ai com langchainjs e diga qual usar para um chatbot",
             ]
-          : [
-              "O que é o modelo grok-4.20-multi-agent e quando usar?",
-              "Pesquise nas últimas notícias o que está rolando sobre agentes de IA",
-              "Lista os kits Ninja disponíveis e o que cada um faz",
-            ];
+          : mode === "roteiro"
+            ? [
+                "Roteiro de Reels 60s sobre vercel/ai",
+                "Escreva um roteiro hype de 60 segundos sobre shadcn-ui/ui",
+                "Monte o script falado + texto de tela para um Reels do supabase/supabase",
+              ]
+            : mode === "notion"
+              ? [
+                  "Publique no Notion o guia de instalação do vercel/ai",
+                  "Crie um arquivo/página Notion com link + como usar o repo supabase/supabase",
+                  "Exporte o markdown de guia do repositório facebook/react",
+                ]
+              : [
+                  "O que é o modelo grok-4.20-multi-agent e quando usar?",
+                  "Pesquise nas últimas notícias o que está rolando sobre agentes de IA",
+                  "Lista os kits Ninja disponíveis e o que cada um faz",
+                ];
 
   return (
     <section className="animate-rise mt-2 space-y-4">
@@ -754,7 +784,11 @@ function EmptyState({
             ? "Skill ativa via dashboard /kits — descreva o pedido ou use um atalho."
             : mode === "github"
               ? "Descreva o tema/stack — o scout busca e ranqueia os melhores repos no GitHub."
-              : "Chat, research, GitHub Scout, kits Ninja ou editor de vídeo."}
+              : mode === "roteiro"
+                ? "Passe o owner/repo — o roteirista entrega um Reels de ~60s (fala + tela + visual)."
+                : mode === "notion"
+                  ? "Passe o repo — o agente gera arquivo/página Notion com link, instalação e uso."
+                  : "Chat, research, Scout, roteiros, Notion, kits Ninja ou editor de vídeo."}
       </p>
       <ul className="space-y-2">
         {prompts.map((prompt) => (
