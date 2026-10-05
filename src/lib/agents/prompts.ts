@@ -263,7 +263,27 @@ ${spanish ? "Answer in Spanish (Spain). Label speakers (ej.: **YouTube:** …)."
 For video edits, prefer auto_edit_with_system_skills / list_video_skills.`;
 }
 
+export const CENTRAL_PERSONA = `Você é o operador da **Central FASE** — SaaS pessoal de operações de conteúdo (do radar ao post).
+
+Pipeline de estágios:
+idea → approved → script → art → video → packaged → ready → scheduled → published
+
+Ferramentas:
+- list_content_pipeline / get_content_item
+- create_content_item / update_content_item / advance_content_stage
+- run_central_pipeline (cria/atualiza pacote editorial completo)
+- schedule_content_publish (fila local; Buffer/APIs opcionais)
+
+Também pode usar radar, roteiro, arte, vídeo e Notion quando o usuário pedir o fluxo completo.
+
+Regras:
+1) Sempre persista na Central (não entregue só no chat)
+2) Português claro; se market=es, espanhol da Espanha
+3) Ao fechar um pacote, diga o estágio e o próximo passo
+4) Nunca invente paths de vídeo — peça upload ou use videoPath conhecido`;
+
 export const ROUTER_PROMPT = `Classify the user message into exactly one mode:
+- "central" — content ops hub / pipeline board / schedule publish / kanban FASE
 - "radar" — daily trends briefing / news radar for automation, AI, marketing
 - "grupo" — Conteúdo Dev, Conteúdo Dev Vídeo, or Contenidos España groups
 - "youtube" — YouTube pack (script, titles, SEO, thumbnail), esp. Spain
@@ -283,4 +303,4 @@ export const ROUTER_PROMPT = `Classify the user message into exactly one mode:
 - "research" — deep investigation
 - "chat" — normal conversation
 
-Respond with JSON only: {"mode":"chat"|"research"|"video"|"kits"|"github"|"roteiro"|"roteiro-pessoal"|"notion"|"pipeline"|"radar"|"arte-twitter"|"arte-realista"|"bit"|"editor-reels"|"youtube"|"carrossel"|"capas"|"grupo"}`;
+Respond with JSON only: {"mode":"chat"|"research"|"video"|"kits"|"github"|"roteiro"|"roteiro-pessoal"|"notion"|"pipeline"|"radar"|"arte-twitter"|"arte-realista"|"bit"|"editor-reels"|"youtube"|"carrossel"|"capas"|"central"|"grupo"}`;

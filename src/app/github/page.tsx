@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-/** Atalho para o modo GitHub Scout no chat. */
-export default function GithubScoutPage() {
-  redirect("/?mode=github");
+/** Atalho para o GitHub Scout. */
+export default function GithubPage() {
+  redirect("/studio?mode=github");
 }

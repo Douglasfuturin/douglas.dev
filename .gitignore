@@ -61,3 +61,6 @@ ninja-kits/**/.staging-*
 ninja-kits/installed/**/__MACOSX/
 ninja-kits/installed/**/.DS_Store
 ninja-kits/installed/editar-video/
+
+# FASE personal content store (local SaaS data)
+/data/

@@ -1,135 +1,31 @@
-# Grokish — multi-agente com funcionalidades do Grok Bot
+# FASE — Central de Conteúdo Pessoal
 
-Starter em Next.js + Vercel AI SDK + xAI Grok para um sistema multi-agente com as mesmas capabilities do Grok Bot:
+SaaS pessoal (single-user) do **radar ao post**, em cima de Next.js + Vercel AI SDK + xAI Grok.
 
-- chat agentic com tools server-side
-- research multi-agente paralelo (`grok-4.20-multi-agent`)
-- GitHub Scout — busca e ranqueia os melhores repositórios open-source
-- Roteirista — roteiro de Reels ~60s sobre um repositório
-- Notion Guide — página/arquivo com link + instalação + uso
-- Pipeline — Scout → Roteiro → Notion numa tacada
-- Radar de Tendências — briefing diário (IA, automação, marketing) com aprovação → Roteirista
-- web search, X search, code execution, image generation
+## O que é
 
-## Arquitetura (duas camadas)
+**FASE** une todas as etapas de operações de conteúdo numa única app:
 
-### 1) Multi-agente nativo da xAI (recomendado para research)
+1. **Ideia / Radar** — briefing diário (IA, automação, marketing) + GitHub Scout  
+2. **Aprovação** — cards → Roteirista  
+3. **Roteiro** — Reels 60s, guion España, roteiro pessoal  
+4. **Artes** — Twitter, realista, capas, carrossel  
+5. **Vídeo** — edição automática com skills Ninja + kit EDVD / HyperFrames  
+6. **Pacote** — Notion + `outputs/`  
+7. **Publicação** — fila local (`/api/publish`) + hook opcional Buffer  
 
-Use o modelo `grok-4.20-multi-agent` via Responses API. A xAI sobe vários agentes em paralelo. Em `providerOptions.xai.reasoningEffort`, `low` / `medium` / `high` controlam a **quantidade de agentes**.
+## Rotas do produto
 
-Tools típicas: `web_search`, `x_search`.
-
-### 2) Orquestrador próprio + Grok agentic (`grok-4.7`)
-
-Um roteador escolhe o modo:
-
-| Modo | Modelo | Quando usar |
-| --- | --- | --- |
-| `chat` | `grok-4.7` | conversa, código, imagens, fatos rápidos |
-| `research` | `grok-4.20-multi-agent` | investigação profunda com fontes |
-| `github` | `grok-4.7` | melhores repos GitHub, libs open-source, comparação |
-| `roteiro` | `grok-4.7` | roteiro de Reels ~60s sobre um repo |
-| `notion` | `grok-4.7` | guia no Notion (link + instalar + usar) |
-| `pipeline` | `grok-4.7` | pack completo Scout → Reels → Notion |
-| `radar` | `grok-4.7` | briefing diário IA / automação / marketing |
-| `kits` | `grok-4.7` | skills Ninja / ZIPs instalados |
-| `video` | `grok-4.7` | edição automática de vídeo |
-| `auto` | roteador + um dos acima | decide pelo conteúdo da mensagem |
-
-```
-Usuário → /api/chat → orchestrator (...|pipeline|radar|kits|video)
-                         ├─ radar: briefing diário → aprovar → Roteirista
-                         ├─ pipeline: Scout → Roteiro → Notion
-                         ├─ github / roteiro / notion
-                         ├─ kits / video
-                         └─ research: grok-4.20-multi-agent + web/X
-```
-
-## GitHub Scout
-
-Modo dedicado (UI: **GitHub Scout**, atalho `/github` ou `/?mode=github`) que usa a Search API do GitHub:
-
-- `search_best_github_repos` — busca + score (stars, forks, atividade, licença)
-- `get_github_repo` — detalhe + preview do README
-- `compare_github_repos` — comparativo lado a lado
-
-Opcional: defina `GITHUB_TOKEN` (ou `GH_TOKEN` / `GITHUB_PAT`) em `.env.local` para limites de rate maiores.
-
-## Roteirista (Reels 60s)
-
-Atalho `/roteiro` ou `/?mode=roteiro`:
-
-- `prepare_repo_for_reels` — fatos do repo + guia de timing
-- `deliver_reels_script` — roteiro estruturado (hook → CTA) com fala, texto de tela e visual
-
-## Notion Guide
-
-Atalho `/notion` ou `/?mode=notion`:
-
-- `publish_repo_guide_to_notion` — cria página Notion + arquivo `.md` local (e tenta anexar o arquivo)
-- `export_repo_guide_markdown` — só gera/salva o markdown em `outputs/repo-guides/`
-
-Configure no `.env.local`:
-
-```bash
-NOTION_TOKEN=ntn_...
-NOTION_PARENT_PAGE_ID=...   # página pai compartilhada com a integração
-```
-
-## Pipeline (Scout → Reels → Notion)
-
-Atalho `/pipeline` ou `/?mode=pipeline`:
-
-- `run_repo_content_pack` — escolhe o melhor repo, gera roteiro 60s e publica/exporta o guia
-- Salva o pack em `outputs/packs/`
-
-Exemplo: “Pacote completo sobre agentes de IA em TypeScript”.
-
-## Radar de Tendências
-
-Atalho `/radar` ou `/?mode=radar`:
-
-1. O agente pesquisa (web + X) notícias de **automação**, **IA** e **marketing**
-2. Entrega briefing ranqueado via `deliver_daily_radar_briefing` (salva em `outputs/radar/`)
-3. Você **aprova** um card → handoff automático para o **Roteirista** (`prepare_trend_for_reels`)
-
-Exemplo: “Monta o briefing diário de automação, IA e marketing”.
-
-## Grupos de agentes
-
-Atalho [`/grupos`](/grupos) — duas salas no estilo Grok (até 6 membros):
-
-### Conteúdo Dev
-1. Radar de Tendências  
-2. Roteirista  
-3. Diretor de Arte Twitter  
-4. Diretor de Arte Realista  
-5. Bit  
-6. Roteirista Pessoal  
-
-Fluxo: briefing → aprovação → roteiro → artes Twitter/realista → Bit fecha.
-
-### Conteúdo Dev Vídeo
-1. Roteirista Pessoal  
-2. Editor Reels Realista  
-3. Editor Vídeo Pessoal  
-4. Bit  
-5. Radar GitHub  
-
-Fluxo: repo/tema → roteiro pessoal → edição Reels → render EDVD → Bit.
-
-Abra a sala (`/?mode=grupo&group=conteudo-dev`) ou um membro específico (`&member=radar`).
-
-### Contenidos España
-1. Editor de Vídeo (skills do sistema)  
-2. Carrusel  
-3. YouTube  
-4. Guionista  
-5. Capas y Thumbnails  
-6. Bit  
-
-Fluxo: guion → YouTube/carrusel → capas → edición automática → Bit.  
-Atalho: `/?mode=grupo&group=conteudos-espanha`
+| Rota | Função |
+| --- | --- |
+| `/` | Landing FASE |
+| `/central` | Kanban do pipeline (ideia → postado) |
+| `/central/[id]` | Detalhe do conteúdo |
+| `/studio` | Studio de agentes (chat + modos) |
+| `/grupos` | Salas Conteúdo Dev / Vídeo / España |
+| `/kits` | Hub de skills Ninja |
+| `/editor` | Editor visual EDVD |
+| `/radar` `/roteiro` `/pipeline` … | Atalhos → Studio |
 
 ## Como rodar
 
@@ -141,97 +37,103 @@ npm install
 npm run dev
 ```
 
-Abra [http://localhost:3000](http://localhost:3000).
+Abra [http://localhost:3000](http://localhost:3000) → **Abrir Central**.
+
+Opcional: `GITHUB_TOKEN`, `NOTION_TOKEN` + `NOTION_PARENT_PAGE_ID`, `BUFFER_ACCESS_TOKEN`.
+
+Para edição de vídeo: `cd kit-edicao-video/skill && uv sync` (ffmpeg no PATH).
+
+## Arquitetura
+
+```
+Usuário → /central (kanban + fila)
+        → /studio?mode=central|radar|video|grupo…
+             → /api/chat → orchestrator
+             → tools: central + radar + roteiro + arte + vídeo + notion…
+        → /api/content  (CRUD local em data/content/store.json)
+        → /api/publish  (fila de posts)
+```
+
+### Modo `central`
+
+Agente operador da Central com tools:
+
+- `list_content_pipeline` / `get_content_item`
+- `create_content_item` / `update_content_item` / `advance_content_stage`
+- `run_central_pipeline` — fecha pacote editorial
+- `schedule_content_publish` — enfileira Instagram/YouTube/TikTok/X/LinkedIn/Notion
+
+### Pipeline de estágios
+
+`idea → approved → script → art → video → packaged → ready → scheduled → published`
+
+Dados ficam em `data/content/store.json` (uso pessoal, sem multi-tenant).
+
+## Grupos de agentes
+
+### Conteúdo Dev
+Radar → Roteirista → Arte Twitter/Realista → Bit
+
+### Conteúdo Dev Vídeo
+Roteiro pessoal → Editor Reels → Editor vídeo (skills) → Bit → Radar GitHub
+
+### Contenidos España
+Editor → Carrusel → YouTube → Guionista → Capas → Bit
+
+## Motor multi-agente (Grok)
+
+| Modo | Modelo | Uso |
+| --- | --- | --- |
+| `central` | `grok-4.7` | SaaS ops — kanban + pacote + fila |
+| `chat` / agentes | `grok-4.7` | tools server-side |
+| `research` | `grok-4.20-multi-agent` | pesquisa profunda |
+| `auto` | roteador | escolhe o modo |
+
+## Hub Ninja Kits
+
+1. Cole `.zip` em `ninja-kits/sources/`  
+2. Em `/kits` → **Instalar todos os ZIPs**  
+3. Use no Studio (`mode=kits`) ou via Editor de Vídeo  
+
+## Editor de vídeo
+
+- Skills: `auto_edit_with_system_skills`, EDVD, HyperFrames  
+- UI visual: `/editor`  
+- Chat: `/studio?mode=video` + upload MP4  
+
+## Publicação
+
+1. Avance o item até `ready` / `packaged` na Central  
+2. **Fila IG / YouTube / X** ou tool `schedule_content_publish`  
+3. **Marcar postado** na fila (ou configure `BUFFER_ACCESS_TOKEN` para stub de envio)  
+
+APIs nativas Meta/YouTube/TikTok podem plugar no mesmo formato de job em `/api/publish`.
 
 ## Estrutura
 
 ```
 src/
-  app/api/chat/route.ts     # endpoint streaming
-  components/chat-app.tsx   # UI
-  lib/agents/
-    models.ts               # chat + multi-agent models
-    tools.ts                # tools do Grok Bot
-    prompts.ts              # persona + router
-    orchestrator.ts         # roteamento de modos
+  app/
+    page.tsx                 # landing FASE
+    central/                 # kanban + detalhe
+    studio/                  # chat / agentes
+    api/content/             # CRUD pipeline
+    api/publish/             # fila de posts
+    api/chat/                # streaming agentes
+  components/
+    landing-page.tsx
+    central-board.tsx
+    app-shell.tsx
+    chat-app.tsx
+  lib/
+    content/                 # store + types
+    agents/                  # orchestrator + tools
 ```
 
-## Exemplo mínimo (só API)
+## Próximos passos (opcional)
 
-```ts
-import { xai } from '@ai-sdk/xai';
-import { generateText } from 'ai';
-
-const { text, sources } = await generateText({
-  model: xai.responses('grok-4.20-multi-agent'),
-  prompt: 'Pesquise o estado atual de MCP em agentes de IA',
-  tools: {
-    web_search: xai.tools.webSearch(),
-    x_search: xai.tools.xSearch(),
-  },
-  providerOptions: {
-    xai: { reasoningEffort: 'medium' }, // nº de agentes
-  },
-});
-```
-
-## Hub Ninja Kits
-
-Abra [http://localhost:3000/kits](http://localhost:3000/kits) para importar cada ZIP de `F:\NINJA CURSOS`:
-
-1. Cole os `.zip` em `ninja-kits/sources/` (ou upload na UI / anexe na conversa do Cloud Agent)
-2. Clique em **Instalar todos os ZIPs**
-3. Cada kit vira agente + helpers (`list_ninja_kits`, `describe_ninja_kit`, `run_ninja_kit_helper`)
-4. Modo **Ninja Kits** no chat, com kit ativo selecionável
-
-O Cloud Agent **não acessa** o disco `F:\` do Windows — os ZIPs precisam ser enviados/copiados.
-
-## Editor de vídeo (skills do sistema)
-
-O modo **Editor de Vídeo** usa:
-
-- `list_video_skills` — inventário (editar-video, hyperframes, …)
-- `auto_edit_with_system_skills` — edição automática via skills + EDVD
-- Helpers Ninja (`list_ninja_kits` / `run_ninja_kit_helper`)
-- Pipeline clássico: transcribe → plan → dry-run → render
-
-O modo **Editor de vídeo** usa o kit em `kit-edicao-video/`:
-
-1. Uma vez: `cd kit-edicao-video/skill && uv sync`
-2. Na UI: escolha o modo **Editor de vídeo**, faça upload do MP4 e ajuste opções
-3. Peça: `Edita automaticamente este vídeo…`
-
-### Editor visual em tempo real (EDVD)
-
-Abra [http://localhost:3000/editor](http://localhost:3000/editor):
-
-- Abas **Code** / **Visual** (como na referência)
-- Preview 9:16 com legendas ao vivo
-- Timeline com filmstrip, waveform e playhead
-- Takes arrastáveis + atalhos (espaço, setas)
-- Painel do agente: material analisado, transcript, gordura
-- Comandos + automação no rodapé
-
-### Opções na UI do chat e do editor EDVD
-
-- **30 estilos**: aula, reel, quadro, VSL, podcast, shorts, teaser, story, webinar, entrevista, doc, feed, pitch, cold-open, tutorial, unboxing, hook-15s, live-highlight, carrossel, etc.
-- **16 fontes OFL** no kit (Montserrat, Bebas, Anton, Rajdhani, Teko, …)
-- **5 formatos**: 16:9, 9:16, 1:1, 4:5, 21:9
-- **11 grades** de cor + **10 SFX** sintéticos + emendas `glitch` / `flash` / `whip`
-- Resolução, idioma, Whisper, legendas, intro/outro, crop, `pause_keep`, `sil_cut`
-- Auto-confirmar plano + render automático
-
-### Tools do agente
-
-`list_video_styles`, `list_edit_catalog`, `describe_video_style`, `transcribe_video`, `create_edit_plan`, `dry_run_edit`, `render_edit`, `burn_captions`, `measure_breathing`, `auto_edit_video`
-
-Pipeline automático: **transcreve → plano → dry-run → render**.
-
-## Próximos passos
-
-- Persistência de sessão (DB / Redis)
-- Memória de longo prazo por usuário
-- Canal Slack / Discord
-- Evals para qualidade das respostas research
-- Deploy na Vercel com `XAI_API_KEY` nas env vars
-- Fila de jobs para renders longos
+- Buffer API real / Meta Graph / YouTube Data API  
+- Cron diário do Radar  
+- TTS/avatar (HyperFrames) roteiro → MP4 sem gravação  
+- Gate PIN local para a Central  
+- Deploy Vercel com `XAI_API_KEY`

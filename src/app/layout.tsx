@@ -19,9 +19,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Grokish — multi-agente com tools do Grok",
+  title: "FASE — Central de Conteúdo Pessoal",
   description:
-    "Starter de sistema multi-agente usando xAI Grok: chat agentic, research paralelo, web/X search, código e imagem.",
+    "SaaS pessoal do radar ao post: tendências, roteiros, artes, edição com skills e fila de publicação.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

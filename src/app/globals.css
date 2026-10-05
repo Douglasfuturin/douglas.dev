@@ -1,15 +1,26 @@
 @import "tailwindcss";
 
 :root {
-  --ink: #102033;
-  --muted: #5b6b7c;
-  --panel: #f4f7fb;
-  --line: #c9d4e1;
-  --accent: #14b8a6;
-  --accent-ink: #06251f;
-  --chip: #d7f6f0;
-  --background: #e7eef6;
+  --ink: #0f1a24;
+  --muted: #5a6b7a;
+  --panel: #f2f5f8;
+  --line: #cfd8e2;
+  --accent: #c9842a;
+  --accent-ink: #1a1206;
+  --chip: #f0e2c8;
+  --background: #e6ebf1;
   --foreground: var(--ink);
+
+  --fase-ink: #0f1a24;
+  --fase-muted: #5a6b7a;
+  --fase-panel: #f2f5f8;
+  --fase-line: #cfd8e2;
+  --fase-accent: #c9842a;
+  --fase-accent-ink: #1a1206;
+  --fase-chip: #f0e2c8;
+  --fase-cream: #e8eef4;
+  --fase-ember: #c9842a;
+  --fase-night: #0b1218;
 }
 
 @theme inline {
@@ -30,17 +41,81 @@ body {
   font-family: var(--font-syne), ui-sans-serif, sans-serif;
 }
 
+.fase-shell {
+  background:
+    radial-gradient(900px 420px at 8% -8%, rgba(201, 132, 42, 0.16), transparent 55%),
+    radial-gradient(700px 380px at 92% 0%, rgba(40, 90, 140, 0.14), transparent 50%),
+    linear-gradient(180deg, #e9eef4 0%, #e2e8ef 50%, #dde4ec 100%);
+  min-height: 100vh;
+}
+
+.fase-landing {
+  background: linear-gradient(165deg, #0b1218 0%, #15202c 42%, #0f1822 100%);
+  color: var(--fase-cream);
+}
+
+.fase-landing-glow {
+  pointer-events: none;
+  position: absolute;
+  inset: -20% -10% auto;
+  height: 70vh;
+  background:
+    radial-gradient(ellipse at 30% 40%, rgba(201, 132, 42, 0.32), transparent 55%),
+    radial-gradient(ellipse at 78% 20%, rgba(50, 110, 160, 0.22), transparent 50%);
+}
+
+.fase-landing-grain {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0.08;
+  background-image:
+    linear-gradient(rgba(232, 238, 244, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(232, 238, 244, 0.1) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: linear-gradient(180deg, black, transparent 90%);
+}
+
+@keyframes fase-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fase-rise {
+  animation: fase-rise 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.field {
+  width: 100%;
+  border-radius: 0.65rem;
+  border: 1px solid var(--fase-line);
+  background: white;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.875rem;
+  outline: none;
+}
+
+.field:focus {
+  border-color: var(--fase-accent);
+}
+
 .atmosphere {
   background:
-    radial-gradient(900px 480px at 12% -10%, rgba(20, 184, 166, 0.28), transparent 60%),
-    radial-gradient(700px 420px at 90% 0%, rgba(37, 99, 235, 0.16), transparent 55%),
-    linear-gradient(180deg, #edf3f9 0%, #e3ebf4 45%, #dfe8f2 100%);
+    radial-gradient(900px 480px at 12% -10%, rgba(201, 132, 42, 0.18), transparent 60%),
+    radial-gradient(700px 420px at 90% 0%, rgba(40, 90, 140, 0.14), transparent 55%),
+    linear-gradient(180deg, #e9eef4 0%, #e2e8ef 45%, #dde4ec 100%);
 }
 
 .grid-fade {
   background-image:
-    linear-gradient(rgba(16, 32, 51, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(16, 32, 51, 0.04) 1px, transparent 1px);
+    linear-gradient(rgba(15, 26, 36, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 26, 36, 0.04) 1px, transparent 1px);
   background-size: 28px 28px;
   mask-image: linear-gradient(180deg, black, transparent 85%);
 }

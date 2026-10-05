@@ -11,6 +11,7 @@ import {
   BIT_PERSONA,
   CAPAS_ES_PERSONA,
   CARROSSEL_ES_PERSONA,
+  CENTRAL_PERSONA,
   EDITOR_REELS_PERSONA,
   GROK_PERSONA,
   GITHUB_SCOUT_PERSONA,
@@ -35,6 +36,7 @@ import { radarTools } from "./radar-tools";
 import { artDirectorTools, bitCoordinatorTools } from "./art-tools";
 import { spainContentTools } from "./spain-tools";
 import { videoEditorTools } from "./video-tools";
+import { centralContentTools } from "./central-tools";
 import { kitPersona, ninjaKitTools } from "./kit-tools";
 import { getKitById } from "@/lib/kits/discover";
 import {
@@ -98,7 +100,12 @@ function toolsForMemberMode(
       return { ...radarTools(), ...researchTools(), ...grokBotTools() };
     case "roteiro":
     case "roteiro-pessoal":
-      return { ...reelsScriptTools(), ...githubScoutTools(), ...grokBotTools() };
+      return {
+        ...reelsScriptTools(),
+        ...centralContentTools(),
+        ...githubScoutTools(),
+        ...grokBotTools(),
+      };
     case "arte-twitter":
       return {
         ...artDirectorTools("twitter"),
@@ -458,15 +465,40 @@ Installed ZIP/SKILL: ${installed ? "yes" : "no — still deliver the kit's job w
     };
   }
 
+  if (mode === "central") {
+    return {
+      mode,
+      model: chatModel,
+      instructions: CENTRAL_PERSONA,
+      tools: {
+        ...centralContentTools(),
+        ...radarTools(),
+        ...reelsScriptTools(),
+        ...artDirectorTools("twitter"),
+        ...artDirectorTools("realista"),
+        ...pipelineTools(),
+        ...notionRepoTools(),
+        ...githubScoutTools(),
+        ...spainContentTools(),
+        ...videoEditorTools(videoOptions),
+        ...ninjaKitTools(),
+        ...bitCoordinatorTools(),
+        ...grokBotTools(),
+      },
+    };
+  }
+
   return {
     mode: "chat",
     model: chatModel,
     instructions: `${GROK_PERSONA}
 
-Grupos disponíveis: Conteúdo Dev e Conteúdo Dev Vídeo (veja /grupos).
-Modos: radar, roteiro, arte-twitter, arte-realista, bit, editor-reels, github, pipeline, notion, kits, video.`,
+Central FASE: /central — SaaS pessoal do radar ao post.
+Grupos: /grupos. Studio: /studio.
+Modos: central, radar, roteiro, arte-twitter, arte-realista, bit, editor-reels, youtube, carrossel, capas, github, pipeline, notion, kits, video.`,
     tools: {
       ...grokBotTools(),
+      ...centralContentTools(),
       ...ninjaKitTools(),
       ...githubScoutTools(),
       ...reelsScriptTools(),
@@ -481,6 +513,7 @@ Modos: radar, roteiro, arte-twitter, arte-realista, bit, editor-reels, github, p
 
 async function routeMode(latestUserText: string): Promise<ConcreteMode> {
   if (!latestUserText) return "chat";
+  if (heuristicCentral(latestUserText)) return "central";
   if (heuristicKits(latestUserText)) return "kits";
   if (heuristicGrupo(latestUserText)) return "grupo";
   if (heuristicRadar(latestUserText)) return "radar";
@@ -525,6 +558,7 @@ async function routeMode(latestUserText: string): Promise<ConcreteMode> {
       "youtube",
       "carrossel",
       "capas",
+      "central",
       "grupo",
       "chat",
     ];
@@ -535,6 +569,12 @@ async function routeMode(latestUserText: string): Promise<ConcreteMode> {
   } catch {
     return heuristicRoute(latestUserText);
   }
+}
+
+function heuristicCentral(text: string): boolean {
+  return /\b(central(\s+de)?\s+conte[uú]do|fase\b|kanban|pipeline\s+(editorial|de\s+conte[uú]do)|agenda(r)?\s+(o\s+)?post|fila\s+de\s+publica[cç][aã]o|schedule\s+post|do\s+zero\s+ao\s+post|opera[cç][oõ]es\s+de\s+conte[uú]do)\b/i.test(
+    text,
+  );
 }
 
 function heuristicKits(text: string): boolean {
@@ -604,6 +644,7 @@ function heuristicVideo(text: string): boolean {
 }
 
 function heuristicRoute(text: string): ConcreteMode {
+  if (heuristicCentral(text)) return "central";
   if (heuristicKits(text)) return "kits";
   if (heuristicGrupo(text)) return "grupo";
   if (heuristicRadar(text)) return "radar";

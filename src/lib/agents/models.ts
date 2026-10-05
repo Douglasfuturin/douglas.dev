@@ -28,6 +28,7 @@ export type AgentMode =
   | "youtube"
   | "carrossel"
   | "capas"
+  | "central"
   | "grupo"
   | "auto";
 

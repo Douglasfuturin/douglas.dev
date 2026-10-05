@@ -49,6 +49,7 @@ const MODE_LABELS: Record<AgentMode, string> = {
   youtube: "YouTube (España)",
   carrossel: "Carrusel",
   capas: "Capas y Thumbnails",
+  central: "Central FASE",
   notion: "Notion Guide",
   pipeline: "Pack Scout→Reels→Notion",
   video: "Editor de Vídeo (skills)",
@@ -198,6 +199,23 @@ export function ChatApp() {
   const groups = listAgentGroups();
 
   function approveTrendForRoteirista(item: RadarCardItem) {
+    void fetch("/api/content", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: item.headline,
+        summary: item.summary,
+        stage: "approved",
+        source: "radar",
+        score: item.score,
+        tags: [item.category],
+        topic: item.category,
+        notes: `Ângulo: ${item.angle}\nPor que agora: ${item.whyNow}`,
+        groupId: groupId || "conteudo-dev",
+        networks: ["instagram", "youtube"],
+      }),
+    }).catch(() => undefined);
+
     const prompt =
       item.approvePrompt ||
       [
@@ -209,6 +227,7 @@ export function ChatApp() {
         `Por que agora: ${item.whyNow}`,
         "",
         "Use prepare_trend_for_reels e deliver_reels_script.",
+        "Depois use run_central_pipeline (ou create_content_item) para salvar o roteiro na Central FASE com stage=script.",
       ].join("\n");
     setMode("roteiro");
     void sendMessage(
@@ -290,17 +309,23 @@ export function ChatApp() {
       <header className="relative z-10 mx-auto flex w-full max-w-3xl items-end justify-between gap-4 px-5 pt-8 pb-4">
         <div>
           <p className="font-display text-4xl tracking-tight text-[var(--ink)] md:text-5xl">
-            Grokish
+            Studio
           </p>
           <p className="mt-2 max-w-md text-sm leading-relaxed text-[var(--muted)]">
-            Grupos Conteúdo Dev + Vídeo · radar · roteiro · arte · edição.
+            Motor FASE — Central, grupos, radar, roteiro, artes e edição.
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             <Link
-              href="/grupos"
+              href="/central"
               className="inline-flex rounded-lg bg-[var(--ink)] px-3 py-1.5 text-xs font-semibold text-[var(--panel)]"
             >
-              Grupos de agentes →
+              Central →
+            </Link>
+            <Link
+              href="/grupos"
+              className="inline-flex rounded-lg border border-[var(--line)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)]"
+            >
+              Grupos
             </Link>
             <Link
               href="/kits"

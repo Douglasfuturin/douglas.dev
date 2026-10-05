@@ -61,6 +61,7 @@ export async function POST(req: Request) {
       agent.mode === "kits" ||
       agent.mode === "radar" ||
       agent.mode === "pipeline" ||
+      agent.mode === "central" ||
       agent.mode === "grupo" ||
       agent.mode === "editor-reels"
         ? stepCountIs(12)

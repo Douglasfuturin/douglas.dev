@@ -154,7 +154,7 @@ export function SkillsDashboard() {
       /* ignore */
     }
     router.push(
-      `/?mode=kits&kit=${encodeURIComponent(selected.id)}&handoff=1`,
+      `/studio?mode=kits&kit=${encodeURIComponent(selected.id)}&handoff=1`,
     );
   }
 

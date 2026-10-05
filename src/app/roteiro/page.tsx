@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-/** Atalho para o modo Roteirista (Reels 60s). */
+/** Atalho para o Roteirista. */
 export default function RoteiroPage() {
-  redirect("/?mode=roteiro");
+  redirect("/studio?mode=roteiro");
 }
