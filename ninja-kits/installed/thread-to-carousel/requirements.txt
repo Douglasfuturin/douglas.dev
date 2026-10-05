@@ -1,0 +1,6 @@
+Pillow
+pilmoji
+google-genai
+requests
+steel-sdk
+playwright

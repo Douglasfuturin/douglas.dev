@@ -1,118 +1,312 @@
-# Grokish — multi-agente com funcionalidades do Grok Bot
+# Central de Agentes
 
-Starter em Next.js + Vercel AI SDK + xAI Grok para um sistema multi-agente com as mesmas capabilities do Grok Bot:
+SaaS pessoal de **operações de conteúdo** — do radar ao post — com identidade **Douglas Dev** (preto + laranja `#F26522`).
 
-- chat agentic com tools server-side
-- research multi-agente paralelo (`grok-4.20-multi-agent`)
-- web search, X search, code execution, image generation
+Stack: **Next.js 16** · **Vercel AI SDK** · **xAI Grok** (`grok-4.7` / `grok-4.20-multi-agent`).
 
-## Arquitetura (duas camadas)
+Uso single-user: dados em JSON local (`data/`), sem multi-tenant.
 
-### 1) Multi-agente nativo da xAI (recomendado para research)
+---
 
-Use o modelo `grok-4.20-multi-agent` via Responses API. A xAI sobe vários agentes em paralelo. Em `providerOptions.xai.reasoningEffort`, `low` / `medium` / `high` controlam a **quantidade de agentes**.
+## O que o sistema faz
 
-Tools típicas: `web_search`, `x_search`.
+A Central de Agentes transforma ideias em conteúdo pronto para publicar, com **agentes especializados** que trabalham em **pipeline** (sequência) dentro de **grupos**.
 
-### 2) Orquestrador próprio + Grok agentic (`grok-4.7`)
+| Etapa | O que acontece |
+| --- | --- |
+| **1. Ideação** | Radar de Pesquisa e GitHub Scout encontram temas/repos |
+| **2. Roteiro** | Roteirista escreve Reels ~60s / copy de carrossel |
+| **3. Visual** | Diretores de arte (Twitter + realista Antes/Depois) |
+| **4. Vídeo** | Editores de Reels (animação/realismo) e Reels pessoal (você envia → recebe editado) |
+| **5. Pacote** | Notion + artefatos em `outputs/` |
+| **6. Publicação** | Kanban CRM + fila local (`/api/publish`) |
 
-Um roteador escolhe o modo:
+Há um **Orquestrador Principal** que coordena todos os grupos e um **Orquestrador por grupo** que conduz o fluxo entre os membros.
 
-| Modo | Modelo | Quando usar |
+---
+
+## Como funciona (visão geral)
+
+```
+Você
+ ├─ /app           → chat estilo Grok com Orquestrador Principal (delega/cria agentes)
+ ├─ /dashboard     → pipelines por grupo + stats
+ ├─ /grupos        → criar/editar times, add/remove agentes
+ ├─ /app/studio    → Studio avançado (todos os modos; /studio redireciona)
+ ├─ /central       → kanban ideia → postado
+ ├─ /agentes       → criar agentes custom
+ ├─ /kits          → instalar skills Ninja
+ └─ /editor        → edição visual de vídeo
+
+Hub /app (Orquestrador) ou Studio
+ └─ POST /api/chat
+      └─ orchestrator.resolveAgent(mode, group, member…)
+           ├─ persona (prompts)
+           ├─ modelo (grok-4.7 ou multi-agent)
+           └─ tools (radar, arte, vídeo, central, github…)
+```
+
+1. No **`/app`**, você conversa com o **Orquestrador Principal** (ele lista agentes, delega e pode criar custom). No Studio avançado, escolhe grupo/modo manualmente.
+2. O **orquestrador** resolve persona + tools (incl. `delegate_to_specialist`, `create_custom_agent`).
+3. O agente usa tools (pesquisa, pipeline CRM, edição, etc.).
+4. Itens persistem em `data/content/store.json` e avançam no kanban.
+5. Quando `ready`, entram na fila de publicação.
+
+---
+
+## Pipelines de agentes (grupos padrão)
+
+### Conteúdo Dev — Imagem
+
+| # | Agente | Função |
 | --- | --- | --- |
-| `chat` | `grok-4.7` | conversa, código, imagens, fatos rápidos |
-| `research` | `grok-4.20-multi-agent` | investigação profunda com fontes |
-| `auto` | roteador + um dos acima | decide pelo conteúdo da mensagem |
+| 1 | Radar de Pesquisa | Briefing de IA, automação e marketing |
+| 2 | Roteirista | Roteiro / copy do carrossel |
+| 3 | Diretor de Arte Twitter | Peças estilo X/Twitter |
+| 4 | Diretor de Arte Realista | Carrossel Antes/Depois fotorealista Douglas Dev |
+
+Orquestrador do grupo coordena handoffs.
+
+### Conteúdo Dev — Vídeo
+
+| # | Agente | Função |
+| --- | --- | --- |
+| 1 | Radar de Pesquisa | Temas fortes para vídeo |
+| 2 | Roteirista | Script Reels ~60s |
+| 3 | Editor Reels Animação/Realismo | Corte 9:16, ritmo, legendas |
+| 4 | Editor Reels Pessoal | Você envia o vídeo → devolve pronto, editado |
+
+### Conteúdo Espanha
+
+Mercado ES (labels em português; conteúdo publicado em espanhol da Espanha):
+
+Roteirista ES → Carrossel ES → YouTube ES → Capas e Miniaturas → Editor de Vídeo ES → Orquestrador.
+
+### Grupos custom
+
+Em `/grupos` ou no dashboard você pode:
+
+- **Criar grupo** (já nasce com Orquestrador)
+- **Adicionar / remover agentes** (catálogo + agents custom)
+- Abrir a **sala** no Studio (`mode=grupo`)
+
+---
+
+## Rotas do produto
+
+| Rota | Função |
+| --- | --- |
+| `/` | Landing Douglas Dev / Central de Agentes |
+| `/app` | Hub de chat (Orquestrador Principal — interface principal) |
+| `/app/studio` | Studio completo (modos, grupos, vídeo, kits) |
+| `/dashboard` | CRM: pipelines Imagem/Vídeo + grupos custom + fila |
+| `/central` | Kanban do pipeline editorial |
+| `/central/[id]` | Detalhe do item (avançar estágio, publicar) |
+| `/studio` | Redireciona para `/app/studio` |
+| `/grupos` | Gerenciar grupos e membros |
+| `/agentes` | Criar agentes custom (persona + toolkit) |
+| `/kits` | Hub Ninja Kits (ZIP → instalar → usar) |
+| `/editor` | Editor visual EDVD |
+| `/radar` `/roteiro` `/github` `/pipeline` `/notion` | Atalhos → Studio |
+
+---
+
+## Modos do Studio
+
+| Modo | Modelo | Uso |
+| --- | --- | --- |
+| `orquestrador` | multi-agent | Coordena todos os grupos/operações |
+| `grupo` | grok-4.7 | Sala do grupo (orquestra membros) |
+| `central` | grok-4.7 | Opera o kanban CRM + fila |
+| `radar` | grok-4.7 | Briefing diário |
+| `github` | grok-4.7 | Scout de repos + roteiro 60s |
+| `roteiro` / `roteiro-pessoal` | grok-4.7 | Scripts |
+| `arte-twitter` / `arte-realista` | grok-4.7 | Direção de arte |
+| `editor-reels` / `video` | grok-4.7 | Edição de vídeo |
+| `youtube` / `carrossel` / `capas` | grok-4.7 | Mercado Espanha |
+| `custom` | conforme toolkit | Agente criado por você |
+| `kits` / `pipeline` / `notion` / `research` | — | Skills, pack Scout→Reels→Notion, Notion, pesquisa profunda |
+| `auto` | roteador | Classifica a mensagem e escolhe o modo |
+
+Query params úteis:
 
 ```
-Usuário → /api/chat → orchestrator (auto|chat|research)
-                         ├─ chat: grok-4.7 + web/X/code/image tools
-                         └─ research: grok-4.20-multi-agent + web/X
+/studio?mode=grupo&group=conteudo-dev
+/studio?mode=arte-realista&group=conteudo-dev&member=arte-realista
+/studio?mode=orquestrador
+/studio?mode=custom&agent=<id>
 ```
+
+---
+
+## Pipeline CRM (conteúdo)
+
+Estágios:
+
+```
+idea → approved → script → art → video → packaged → ready → scheduled → published
+```
+
+- **Store:** `data/content/store.json`
+- **API:** `GET/POST /api/content`, `PATCH/DELETE /api/content/[id]`
+- **Publicação:** `POST /api/publish` (fila local; Buffer opcional via `BUFFER_ACCESS_TOKEN`)
+
+---
+
+## Dados locais
+
+```
+data/
+  content/store.json     # itens do pipeline + fila
+  agents/store.json      # agentes custom
+  agents/groups.json     # grupos criados por você
+```
+
+(`data/` está no `.gitignore` — criado em runtime.)
+
+---
+
+## Estrutura do repositório
+
+```
+src/
+  app/
+    page.tsx                 # landing
+    dashboard/               # CRM + pipelines
+    central/                 # kanban + detalhe
+    studio/                  # chat de agentes
+    grupos/                  # CRUD de grupos
+    agentes/                 # CRUD de agentes custom
+    kits/ editor/ …          # módulos
+    api/
+      chat/                  # streaming (AI SDK)
+      content/ publish/      # pipeline + fila
+      agents/ groups/        # agents e grupos
+      kits/ editor/ upload/  # skills e mídia
+
+  components/
+    crm/
+      dashboard.tsx          # pipelines por grupo
+      groups-manager.tsx     # criar/add/remove
+      agents-manager.tsx
+      crm-shell.tsx          # shell lateral
+    chat-app.tsx             # Studio
+    central-board.tsx
+    landing-page.tsx
+    …
+
+  lib/
+    agents/
+      orchestrator.ts        # resolve mode → persona + tools
+      groups.ts              # grupos padrão (Imagem / Vídeo / Espanha)
+      group-store.ts         # grupos custom
+      agent-catalog.ts       # agentes disponíveis para times
+      prompts.ts             # personas
+      *-tools.ts             # tools por domínio
+    content/                 # types + store do CRM
+    kits/                    # descoberta/instalação de skills
+    video/                   # opções e runner de edição
+    brand/douglas-dev.ts     # identidade visual
+```
+
+---
+
+## Identidade visual
+
+- **Marca:** Douglas Dev · Central de Agentes  
+- **Cores:** preto `#0a0a0a` · superfície `#121212` · laranja `#F26522`  
+- **UI:** cards dark (borda sutil, texto branco)  
+- **Carrosséis realistas:** Antes → Depois fotorealista no estilo da marca  
+
+---
 
 ## Como rodar
 
 ```bash
 cp .env.example .env.local
-# cole sua XAI_API_KEY de https://console.x.ai
+# XAI_API_KEY=…   (obrigatório — https://console.x.ai)
 
 npm install
 npm run dev
 ```
 
-Abra [http://localhost:3000](http://localhost:3000).
+Abra [http://localhost:3000/app](http://localhost:3000/app) (Orquestrador) ou **Dashboard** / **Editor** (`/editor`).
 
-## Estrutura
+### Smoke tests (sem UI)
 
-```
-src/
-  app/api/chat/route.ts     # endpoint streaming
-  components/chat-app.tsx   # UI
-  lib/agents/
-    models.ts               # chat + multi-agent models
-    tools.ts                # tools do Grok Bot
-    prompts.ts              # persona + router
-    orchestrator.ts         # roteamento de modos
+Com o dev server rodando (`npm run dev`):
+
+```bash
+npm run test:smoke
 ```
 
-## Exemplo mínimo (só API)
+Valida rotas principais, APIs CRM, upload + análise do editor (`/api/editor/analyze`), streaming do chat (se `XAI_API_KEY` estiver definida) e dry-run do kit de vídeo (`fabrica.py --seco`).
 
-```ts
-import { xai } from '@ai-sdk/xai';
-import { generateText } from 'ai';
+### Variáveis opcionais
 
-const { text, sources } = await generateText({
-  model: xai.responses('grok-4.20-multi-agent'),
-  prompt: 'Pesquise o estado atual de MCP em agentes de IA',
-  tools: {
-    web_search: xai.tools.webSearch(),
-    x_search: xai.tools.xSearch(),
-  },
-  providerOptions: {
-    xai: { reasoningEffort: 'medium' }, // nº de agentes
-  },
-});
+| Variável | Uso |
+| --- | --- |
+| `GITHUB_TOKEN` | Scout com mais rate limit |
+| `NOTION_TOKEN` + `NOTION_PARENT_PAGE_ID` | Guias Notion |
+| `BUFFER_ACCESS_TOKEN` | Stub de envio social |
+
+### Vídeo / ffmpeg
+
+Para edição automática (local, **sem** XAI):
+
+```bash
+cd kit-edicao-video/skill && uv sync   # ffmpeg no PATH
 ```
 
-## Editor de vídeo (kit integrado)
+No editor (`/editor`): Upload → Dry-run → **Renderizar corte**. A API `/api/editor/render` roda a fábrica localmente.
 
-O modo **Editor de vídeo** usa o kit em `kit-edicao-video/`:
+Skills Ninja: coloque `.zip` em `ninja-kits/sources/` → `/kits` → **Instalar**.
 
-1. Uma vez: `cd kit-edicao-video/skill && uv sync`
-2. Na UI: escolha o modo **Editor de vídeo**, faça upload do MP4 e ajuste opções
-3. Peça: `Edita automaticamente este vídeo…`
+### Chat / Orquestrador
 
-### Editor visual em tempo real (EDVD)
+Exige `XAI_API_KEY` **real** (não o placeholder). Sem ela, `/app` mostra um aviso e o editor continua utilizável.
 
-Abra [http://localhost:3000/editor](http://localhost:3000/editor):
+---
 
-- Abas **Code** / **Visual** (como na referência)
-- Preview 9:16 com legendas ao vivo
-- Timeline com filmstrip, waveform e playhead
-- Takes arrastáveis + atalhos (espaço, setas)
-- Painel do agente: material analisado, transcript, gordura
-- Comandos + automação no rodapé
+## APIs principais
 
-### Opções na UI do chat e do editor EDVD
+| Endpoint | Função |
+| --- | --- |
+| `POST /api/chat` | Stream do agente (mode, groupId, memberId, customAgentId…) |
+| `GET/POST /api/content` | Listar / criar itens do pipeline |
+| `PATCH /api/content/[id]` | Atualizar / avançar estágio |
+| `GET/POST /api/publish` | Fila de posts |
+| `GET/POST /api/agents` | Agentes custom |
+| `GET/POST /api/groups` | Grupos (builtin + custom) |
+| `PATCH /api/groups/[id]` | update / add_member / remove_member / set_orchestrator |
+| `GET/POST /api/kits` | Inventário e instalação de skills |
 
-- **30 estilos**: aula, reel, quadro, VSL, podcast, shorts, teaser, story, webinar, entrevista, doc, feed, pitch, cold-open, tutorial, unboxing, hook-15s, live-highlight, carrossel, etc.
-- **16 fontes OFL** no kit (Montserrat, Bebas, Anton, Rajdhani, Teko, …)
-- **5 formatos**: 16:9, 9:16, 1:1, 4:5, 21:9
-- **11 grades** de cor + **10 SFX** sintéticos + emendas `glitch` / `flash` / `whip`
-- Resolução, idioma, Whisper, legendas, intro/outro, crop, `pause_keep`, `sil_cut`
-- Auto-confirmar plano + render automático
+---
 
-### Tools do agente
+## Fluxo típico (exemplo)
 
-`list_video_styles`, `list_edit_catalog`, `describe_video_style`, `transcribe_video`, `create_edit_plan`, `dry_run_edit`, `render_edit`, `burn_captions`, `measure_breathing`, `auto_edit_video`
+1. **Dashboard** → abrir **Conteúdo Dev — Imagem**
+2. Etapa 1: **Radar de Pesquisa** gera briefing e pede aprovação  
+3. Etapa 2: **Roteirista** fecha o copy  
+4. Etapas 3–4: **Arte Twitter** + **Arte Realista**  
+5. Item aparece no **kanban** (`/central`)  
+6. Avança até `ready` → **fila de posts**  
 
-Pipeline automático: **transcreve → plano → dry-run → render**.
+Para vídeo: mesmo radar/roteiro, depois editores; no **Reels Pessoal**, faça upload do MP4 no Studio.
 
-## Próximos passos
+---
 
-- Persistência de sessão (DB / Redis)
-- Memória de longo prazo por usuário
-- Canal Slack / Discord
-- Evals para qualidade das respostas research
-- Deploy na Vercel com `XAI_API_KEY` nas env vars
-- Fila de jobs para renders longos
+## Deploy
+
+- **Web (Studio/CRM):** Vercel com `XAI_API_KEY`  
+- **Vídeo/ffmpeg:** precisa de máquina com binários (VPS) — o FS da Vercel é efêmero; para produção use Blob/DB no lugar de `data/*.json`
+
+---
+
+## Próximos passos (opcional)
+
+- APIs reais Meta / YouTube / TikTok / Buffer  
+- Cron diário do Radar  
+- Persistência em Postgres/Blob  
+- TTS/avatar (HyperFrames) roteiro → MP4  
+- Gate PIN local

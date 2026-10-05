@@ -1,46 +1,406 @@
 @import "tailwindcss";
 
 :root {
-  --ink: #102033;
-  --muted: #5b6b7c;
-  --panel: #f4f7fb;
-  --line: #c9d4e1;
-  --accent: #14b8a6;
-  --accent-ink: #06251f;
-  --chip: #d7f6f0;
-  --background: #e7eef6;
-  --foreground: var(--ink);
+  /* Douglas Dev identity */
+  --dd-black: #0a0a0a;
+  --dd-ink: #111111;
+  --dd-surface: #121212;
+  --dd-surface-2: #161616;
+  --dd-elevated: #1a1a1a;
+  --dd-line: rgba(255, 255, 255, 0.1);
+  --dd-orange: #f26522;
+  --dd-orange-hot: #ff6a1a;
+  --dd-text: #ffffff;
+  --dd-muted: #a8a8a8;
+  --dd-soft: #e8e8e8;
+
+  /* App aliases (CRM) */
+  --ink: var(--dd-text);
+  --muted: var(--dd-muted);
+  --panel: var(--dd-surface);
+  --line: var(--dd-line);
+  --accent: var(--dd-orange);
+  --accent-ink: #140a04;
+  --chip: rgba(242, 101, 34, 0.18);
+  --background: var(--dd-black);
+  --foreground: var(--dd-text);
+
+  --fase-ink: var(--dd-text);
+  --fase-muted: var(--dd-muted);
+  --fase-panel: var(--dd-surface);
+  --fase-line: var(--dd-line);
+  --fase-accent: var(--dd-orange);
+  --fase-accent-ink: #140a04;
+  --fase-chip: rgba(242, 101, 34, 0.2);
+  --fase-cream: #f2f2f2;
+  --fase-ember: var(--dd-orange);
+  --fase-night: var(--dd-black);
+  --fase-side: #070707;
+  --fase-side-2: #101010;
+  --fase-glow: var(--dd-orange-hot);
+  --fase-warn: #ff7a59;
+  --fase-surface: rgba(28, 28, 28, 0.92);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-dm-sans);
-  --font-display: var(--font-syne);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
   --font-mono: var(--font-geist-mono);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-dm-sans), ui-sans-serif, sans-serif;
+  background: var(--dd-black);
+  color: var(--dd-text);
+  font-family: var(--font-body), ui-sans-serif, sans-serif;
 }
 
 .font-display {
-  font-family: var(--font-syne), ui-sans-serif, sans-serif;
+  font-family: var(--font-display), Impact, Haettenschweiler, sans-serif;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+/* —— CRM shell (Douglas Dev) —— */
+.crm-app {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 268px 1fr;
+  background: var(--dd-black);
+}
+
+@media (max-width: 960px) {
+  .crm-app {
+    grid-template-columns: 1fr;
+  }
+}
+
+.crm-sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.25rem 1rem 1rem;
+  background:
+    radial-gradient(420px 260px at 0% 0%, rgba(242, 101, 34, 0.22), transparent 60%),
+    linear-gradient(180deg, #070707 0%, #0e0e0e 100%);
+  border-right: 1px solid var(--dd-line);
+  color: var(--dd-text);
+  overflow-y: auto;
+}
+
+.crm-main {
+  min-width: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(900px 480px at 10% -8%, rgba(242, 101, 34, 0.12), transparent 55%),
+    linear-gradient(180deg, #0c0c0c 0%, #0a0a0a 100%);
+  position: relative;
+}
+
+.crm-main::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0.45;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: linear-gradient(180deg, black, transparent 85%);
+}
+
+.crm-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: 999px;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.58);
+  transition: background 180ms ease, color 180ms ease, transform 180ms ease;
+}
+
+.crm-nav-link:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  transform: translateX(2px);
+}
+
+.crm-nav-link[data-active="true"] {
+  background: rgba(242, 101, 34, 0.16);
+  color: #fff;
+  box-shadow: inset 3px 0 0 var(--dd-orange);
+}
+
+.crm-nav-ico {
+  display: inline-flex;
+  width: 1.7rem;
+  height: 1.7rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.55rem;
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--dd-orange);
+}
+
+.crm-panel {
+  position: relative;
+  border: 1px solid var(--dd-line);
+  background: var(--dd-surface);
+  border-radius: 1.25rem;
+  padding: 1.15rem 1.25rem;
+  color: var(--dd-text);
+  transition: border-color 220ms ease, transform 220ms ease, background 220ms ease;
+}
+
+.crm-panel:hover {
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+/* Dark charcoal cards — suggestion chips, list rows, member tiles */
+.crm-card {
+  display: block;
+  width: 100%;
+  border-radius: 0.9rem;
+  border: 1px solid var(--dd-line);
+  background: var(--dd-surface);
+  color: var(--dd-text);
+  padding: 0.85rem 1rem;
+  text-align: left;
+  transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
+}
+
+.crm-card:hover {
+  border-color: rgba(255, 255, 255, 0.18);
+  background: var(--dd-elevated);
+}
+
+.crm-card-sm {
+  border-radius: 0.85rem;
+  border: 1px solid var(--dd-line);
+  background: var(--dd-surface);
+  color: var(--dd-text);
+  padding: 0.65rem 0.85rem;
+  transition: border-color 180ms ease, background 180ms ease;
+}
+
+.crm-card-sm:hover {
+  border-color: rgba(255, 255, 255, 0.18);
+  background: var(--dd-elevated);
+}
+
+.crm-tile {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  min-height: 132px;
+  border-radius: 1.25rem;
+  border: 1px solid var(--dd-line);
+  background: var(--dd-surface);
+  padding: 1.1rem 1.15rem;
+  text-decoration: none;
+  color: var(--dd-text);
+  transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1), border-color 280ms ease, background 280ms ease;
+}
+
+.crm-tile::after {
+  content: "";
+  position: absolute;
+  inset: auto -20% -45% 35%;
+  height: 120%;
+  background: radial-gradient(circle, rgba(242, 101, 34, 0.28), transparent 65%);
+  opacity: 0;
+  transition: opacity 280ms ease;
+}
+
+.crm-tile:hover {
+  transform: translateY(-3px);
+  border-color: rgba(242, 101, 34, 0.55);
+}
+
+.crm-tile:hover::after {
+  opacity: 1;
+}
+
+.crm-stat {
+  border-radius: 1.15rem;
+  border: 1px solid var(--dd-line);
+  background: var(--dd-surface);
+  padding: 0.9rem 1rem;
+}
+
+.crm-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 999px;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--dd-muted);
+}
+
+.crm-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border-radius: 999px;
+  padding: 0.65rem 1.1rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  transition: transform 160ms ease, filter 160ms ease, background 160ms ease;
+}
+
+.crm-btn:hover {
+  transform: translateY(-1px);
+}
+
+.crm-btn-primary {
+  background: var(--dd-orange);
+  color: #fff;
+}
+
+.crm-btn-primary:hover {
+  filter: brightness(1.08);
+}
+
+.crm-btn-dark {
+  border: 1px solid var(--dd-line);
+  background: var(--dd-surface);
+  color: #fff;
+}
+
+.crm-btn-dark:hover {
+  background: var(--dd-elevated);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.crm-btn-ghost {
+  border: 1px solid var(--dd-line);
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+}
+
+.fase-shell {
+  min-height: 100vh;
+  background: var(--dd-black);
+}
+
+.fase-landing {
+  background: #050505;
+  color: #fff;
+  overflow: hidden;
+}
+
+.fase-landing-glow {
+  pointer-events: none;
+  position: absolute;
+  inset: -10% -5% auto;
+  height: 75vh;
+  background:
+    radial-gradient(ellipse at 50% 35%, rgba(242, 101, 34, 0.45), transparent 52%),
+    radial-gradient(ellipse at 20% 70%, rgba(120, 20, 10, 0.35), transparent 48%);
+  animation: fase-orbit 14s ease-in-out infinite alternate;
+}
+
+.fase-landing-grain {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0.12;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: linear-gradient(180deg, black, transparent 88%);
+}
+
+@keyframes fase-orbit {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(2%, 3%, 0) scale(1.06);
+  }
+}
+
+@keyframes fase-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fase-shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-fase-rise {
+  animation: fase-rise 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.fase-shimmer-text {
+  background: linear-gradient(90deg, #fff 0%, #f26522 45%, #ff9a5a 70%, #fff 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: fase-shimmer 6s linear infinite;
+}
+
+.field {
+  width: 100%;
+  border-radius: 999px;
+  border: 1px solid var(--dd-line);
+  background: var(--dd-elevated);
+  color: #fff;
+  padding: 0.65rem 1rem;
+  font-size: 0.875rem;
+  outline: none;
+}
+
+textarea.field {
+  border-radius: 1.15rem;
+}
+
+.field:focus {
+  border-color: var(--dd-orange);
+  box-shadow: 0 0 0 3px rgba(242, 101, 34, 0.25);
 }
 
 .atmosphere {
   background:
-    radial-gradient(900px 480px at 12% -10%, rgba(20, 184, 166, 0.28), transparent 60%),
-    radial-gradient(700px 420px at 90% 0%, rgba(37, 99, 235, 0.16), transparent 55%),
-    linear-gradient(180deg, #edf3f9 0%, #e3ebf4 45%, #dfe8f2 100%);
+    radial-gradient(900px 480px at 12% -10%, rgba(242, 101, 34, 0.14), transparent 60%),
+    linear-gradient(180deg, #0c0c0c 0%, #0a0a0a 100%);
 }
 
 .grid-fade {
   background-image:
-    linear-gradient(rgba(16, 32, 51, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(16, 32, 51, 0.04) 1px, transparent 1px);
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
   background-size: 28px 28px;
   mask-image: linear-gradient(180deg, black, transparent 85%);
 }
@@ -61,9 +421,149 @@ body {
 }
 
 .editor-root {
-  font-family: var(--font-dm-sans), ui-sans-serif, sans-serif;
+  font-family: var(--font-body), ui-sans-serif, sans-serif;
 }
 
 .editor-root .font-display {
-  font-family: var(--font-syne), ui-sans-serif, sans-serif;
+  font-family: var(--font-display), Impact, sans-serif;
+}
+
+.crm-kanban {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+  scroll-snap-type: x proximity;
+}
+
+.crm-kanban-col {
+  width: 220px;
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  border-radius: 1.35rem;
+  border: 1px solid var(--dd-line);
+  background: var(--dd-surface);
+  padding: 0.75rem;
+}
+
+.crm-kanban-card {
+  border-radius: 1rem;
+  border: 1px solid var(--dd-line);
+  background: var(--dd-elevated);
+  padding: 0.75rem;
+  transition: transform 180ms ease, border-color 180ms ease;
+}
+
+.crm-kanban-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(242, 101, 34, 0.45);
+}
+
+/* Brand arrow accent used in carousels / marketing blocks */
+.dd-arrow {
+  color: var(--dd-orange);
+  font-weight: 800;
+}
+
+.dd-halo {
+  background: radial-gradient(circle at center, rgba(242, 101, 34, 0.55), transparent 62%);
+}
+
+/* —— Grok-style hub (Orquestrador Principal) —— */
+.grok-app {
+  display: flex;
+  min-height: 100vh;
+  height: 100dvh;
+  background: #050505;
+  color: #fff;
+}
+
+.grok-sidebar {
+  width: 268px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, #070707 0%, #0a0a0a 100%);
+}
+
+.grok-main {
+  background:
+    radial-gradient(720px 400px at 50% -10%, rgba(242, 101, 34, 0.12), transparent 55%),
+    #050505;
+}
+
+.grok-topbar {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(5, 5, 5, 0.85);
+  backdrop-filter: blur(12px);
+}
+
+.grok-new-chat {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.65rem 1rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #fff;
+  transition: background 160ms ease, border-color 160ms ease;
+}
+
+.grok-new-chat:hover {
+  background: rgba(242, 101, 34, 0.15);
+  border-color: rgba(242, 101, 34, 0.45);
+}
+
+.grok-nav-link {
+  display: block;
+  border-radius: 0.65rem;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.55);
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.grok-nav-link:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+.grok-nav-link[data-active="true"] {
+  background: rgba(242, 101, 34, 0.14);
+  color: #fff;
+  box-shadow: inset 3px 0 0 var(--dd-orange);
+}
+
+.grok-hub-chat {
+  --ink: #ffffff;
+  --muted: rgba(255, 255, 255, 0.45);
+  --panel: #121212;
+  --line: rgba(255, 255, 255, 0.1);
+  --accent: var(--dd-orange);
+  --accent-ink: #140a04;
+  --chip: rgba(242, 101, 34, 0.2);
+  height: 100%;
+  min-height: 0;
+}
+
+.grok-hub-chat .grok-composer {
+  background: rgba(8, 8, 8, 0.92);
+}
+
+.grok-hub-chat .crm-card {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.88);
+  text-align: left;
+  width: 100%;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  padding: 0.75rem 1rem;
 }

@@ -1,0 +1,143 @@
+{
+  "meta": {
+    "brand_name": "Friday Labs",
+    "brand_color": "#ff8c42",
+    "brand_glow": "rgba(255, 140, 66, 0.25)",
+    "window_start": "2026-05-13",
+    "window_end": "2026-05-19",
+    "sources": [
+      { "name": "Google Analytics 4", "status": "ok" },
+      { "name": "Meta Ads", "status": "ok" },
+      { "name": "Metricool (social)", "status": "ok" },
+      { "name": "Hyros", "status": "ok" },
+      { "name": "ActiveCampaign (email)", "status": "missing" }
+    ]
+  },
+  "kpi_section_lede": "Six core metrics for the trailing seven days, with a delta against the prior seven-day window and a 14-point sparkline showing the trajectory entering this period.",
+  "kpis": [
+    {
+      "label": "Booked calls",
+      "value": "47",
+      "sub": "Hyros-attributed, all sources",
+      "delta_pct": 23.7,
+      "spark": [22, 19, 25, 21, 28, 24, 30, 27, 33, 31, 36, 34, 41, 47]
+    },
+    {
+      "label": "Qualified leads",
+      "value": "183",
+      "sub": "Application step-2 completes",
+      "delta_pct": 14.1,
+      "spark": [110, 118, 122, 126, 130, 138, 142, 149, 154, 161, 165, 170, 176, 183]
+    },
+    {
+      "label": "Web visitors",
+      "value": "12,847",
+      "sub": "GA4 sessions, 7d",
+      "delta_pct": 8.4,
+      "spark": [9700, 10100, 10400, 10800, 11000, 11200, 11400, 11600, 11800, 12000, 12200, 12400, 12600, 12847]
+    },
+    {
+      "label": "Blended CAC",
+      "value": "$214",
+      "sub": "Total spend ÷ booked calls",
+      "delta_pct": -11.2,
+      "spark": [285, 280, 272, 268, 260, 256, 248, 242, 238, 232, 228, 222, 218, 214]
+    },
+    {
+      "label": "Conversion rate",
+      "value": "3.7%",
+      "sub": "Visitor → call booked",
+      "delta_pct": 18.9,
+      "spark": [2.6, 2.7, 2.8, 2.9, 3.0, 3.0, 3.1, 3.2, 3.3, 3.4, 3.5, 3.5, 3.6, 3.7]
+    },
+    {
+      "label": "MER",
+      "value": "4.21x",
+      "sub": "Revenue ÷ ad spend",
+      "delta_pct": 6.8,
+      "spark": [3.6, 3.7, 3.7, 3.8, 3.8, 3.9, 3.9, 4.0, 4.0, 4.0, 4.1, 4.1, 4.2, 4.21]
+    },
+    {
+      "label": "Ad spend",
+      "value": "$10,058",
+      "sub": "Meta + Google combined",
+      "delta_pct": 4.2,
+      "spark": [9100, 9180, 9250, 9320, 9400, 9480, 9560, 9640, 9720, 9800, 9870, 9930, 9990, 10058]
+    },
+    {
+      "label": "New revenue",
+      "value": "$42,344",
+      "sub": "Hyros-attributed, 7d",
+      "delta_pct": 27.5,
+      "spark": [25800, 27200, 28100, 29400, 30600, 31900, 33200, 34500, 35900, 37300, 38600, 39800, 41100, 42344]
+    }
+  ],
+  "channels": {
+    "title": "Where the traffic and spend went.",
+    "lede": "Web sessions came in across five sources, but the channel mix shifted measurably — organic and direct compounded faster than paid, even as paid spend grew modestly.",
+    "web": {
+      "title": "Sessions by source — daily, last 14 days",
+      "meta": "Source: GA4 · window 2026-05-06 → 2026-05-19",
+      "x_labels": ["5/6","5/7","5/8","5/9","5/10","5/11","5/12","5/13","5/14","5/15","5/16","5/17","5/18","5/19"],
+      "series": [
+        { "name": "Organic", "values": [820, 870, 910, 940, 980, 1020, 1080, 1110, 1180, 1220, 1290, 1340, 1420, 1510] },
+        { "name": "Paid",    "values": [410, 420, 425, 430, 440, 445, 450, 455, 462, 470, 478, 485, 492, 500] },
+        { "name": "Direct",  "values": [180, 190, 195, 200, 210, 215, 220, 230, 240, 250, 260, 270, 280, 290] },
+        { "name": "Referral","values": [60,  65,  70,  72,  75,  80,  82,  85,  90,  92,  95,  100, 105, 110] }
+      ]
+    },
+    "ads": {
+      "title": "Ad ROAS by channel",
+      "meta": "Last 7 days vs. prior 7 days · Hyros-attributed revenue",
+      "labels": ["Meta", "Google", "YouTube", "TikTok", "LinkedIn"],
+      "values": [4.8, 5.2, 3.9, 2.1, 1.4],
+      "compare": [4.1, 5.0, 3.2, 2.4, 1.7],
+      "y_format": "{:.1f}x"
+    },
+    "spend": {
+      "title": "Spend distribution",
+      "meta": "Last 7 days · all paid channels",
+      "sublabel": "Total ad spend",
+      "slices": [
+        { "name": "Meta Ads", "value": 4820 },
+        { "name": "Google Ads", "value": 2740 },
+        { "name": "YouTube", "value": 1180 },
+        { "name": "TikTok", "value": 890 },
+        { "name": "LinkedIn", "value": 428 }
+      ]
+    }
+  },
+  "content": {
+    "title": "Content & social performance.",
+    "lede": "Posts across IG, TT, YT, and LinkedIn this week. The pattern: short-form on TikTok and IG Reels carried; static carousels underperformed across the board.",
+    "heatmap": {
+      "title": "Engagement by day × hour (all platforms, normalized)",
+      "meta": "Source: Metricool · last 28 days · darker = higher engagement",
+      "row_labels": ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
+      "col_labels": ["12a","2a","4a","6a","8a","10a","12p","2p","4p","6p","8p","10p"],
+      "grid": [
+        [0.10,0.05,0.05,0.15,0.40,0.65,0.85,0.95,0.90,0.75,0.45,0.20],
+        [0.10,0.05,0.05,0.20,0.50,0.70,0.90,0.98,0.92,0.78,0.50,0.25],
+        [0.12,0.06,0.05,0.18,0.45,0.68,0.88,0.92,0.88,0.72,0.48,0.22],
+        [0.15,0.08,0.05,0.20,0.50,0.75,0.95,0.99,0.94,0.80,0.55,0.30],
+        [0.18,0.10,0.06,0.20,0.45,0.65,0.78,0.80,0.72,0.60,0.42,0.30],
+        [0.30,0.20,0.10,0.15,0.30,0.45,0.55,0.60,0.62,0.65,0.55,0.40],
+        [0.35,0.25,0.12,0.18,0.32,0.48,0.58,0.62,0.65,0.70,0.62,0.48]
+      ]
+    },
+    "top_posts": [
+      { "title": "POV: every AI tool you've tried is a tab open right now", "platform": "TikTok",    "reach": "184,300", "engagement": "9.4%" },
+      { "title": "The Investigator agent demo (28 sec)",                    "platform": "Instagram", "reach": "62,400",  "engagement": "7.8%" },
+      { "title": "Why your team has 'AI fatigue' (not AI shortage)",         "platform": "TikTok",    "reach": "48,900",  "engagement": "6.2%" },
+      { "title": "Walk-through: building a Sales Coaching Dashboard",       "platform": "YouTube",   "reach": "31,200",  "engagement": "5.9%" },
+      { "title": "We deleted 47 Zapier flows this week",                    "platform": "LinkedIn",  "reach": "22,700",  "engagement": "5.1%" }
+    ],
+    "bottom_posts": [
+      { "title": "5 ways to use AI in your business (carousel)",            "platform": "Instagram", "reach": "1,840",   "engagement": "0.8%" },
+      { "title": "Behind the scenes of a build day (long video)",           "platform": "Instagram", "reach": "2,210",   "engagement": "1.1%" },
+      { "title": "Quote graphic — 'AI without infrastructure'",             "platform": "LinkedIn",  "reach": "1,640",   "engagement": "0.9%" },
+      { "title": "Team photo from the Austin offsite",                      "platform": "Instagram", "reach": "1,950",   "engagement": "1.0%" },
+      { "title": "Weekly newsletter teaser",                                "platform": "TikTok",    "reach": "1,200",   "engagement": "0.7%" }
+    ]
+  }
+}

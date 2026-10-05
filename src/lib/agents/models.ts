@@ -4,12 +4,34 @@ import { xai } from "@ai-sdk/xai";
 export const chatModel = xai.responses("grok-4.7");
 
 /**
- * Multi-agent nativo da xAI: vários agentes em paralelo para deep research.
+ * Multi-agente nativo da xAI: vários agentes em paralelo para deep research.
  * Em grok-4.20-multi-agent, reasoningEffort controla a *quantidade* de agentes
  * (low/medium/high), não só a profundidade de thinking.
  */
 export const multiAgentModel = xai.responses("grok-4.20-multi-agent");
 
-export type AgentMode = "chat" | "research" | "video" | "auto";
+export type AgentMode =
+  | "chat"
+  | "research"
+  | "video"
+  | "kits"
+  | "github"
+  | "roteiro"
+  | "roteiro-pessoal"
+  | "notion"
+  | "pipeline"
+  | "radar"
+  | "arte-twitter"
+  | "arte-realista"
+  | "bit"
+  | "editor-reels"
+  | "youtube"
+  | "carrossel"
+  | "capas"
+  | "central"
+  | "orquestrador"
+  | "custom"
+  | "grupo"
+  | "auto";
 
 export type ResearchDepth = "low" | "medium" | "high";

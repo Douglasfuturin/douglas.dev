@@ -1,0 +1,61 @@
+{
+  "headline": {
+    "title": "Booked calls up <span class=\"accent\">23.7%</span> to 47, blended CAC down to $214 — the cheapest week of the quarter.",
+    "lede": "The composition of the wins matters more than the totals: organic and direct traffic compounded faster than paid, TikTok's short-form output started carrying its weight, and the application step-2 completion rate finally crossed 3.7% — the threshold the offer was designed for.",
+    "kpis": [
+      { "label": "New revenue (7d)",     "value": "$42,344", "delta_pct": 27.5 },
+      { "label": "Blended CAC",          "value": "$214",    "delta_pct": -11.2 },
+      { "label": "Application → call",   "value": "26%",     "delta_pct": 6.4 }
+    ]
+  },
+  "insights_title": "Patterns worth your attention.",
+  "insights_lede": "Cross-channel patterns surfaced by analysis of the period's data against the trailing four-week baseline. Each insight is paired with a single recommended action — not a list, on purpose.",
+  "insights": [
+    {
+      "tag": "WHERE GROWTH ACTUALLY CAME FROM",
+      "title": "Organic search compounded harder than paid this week — but you're still spending like paid is the growth engine.",
+      "body": "Organic sessions grew 84% week-over-week while paid grew 22%, which means organic now drives 53% of total sessions (it was 41% four weeks ago). Despite this, paid spend rose 4.2% and organic SEO content output dropped — only two new long-form pieces published last week vs. the four-per-week pace from March. The shift in source mix is structural, not noise; the four blog posts published in mid-April are responsible for 31% of the organic lift, and they're still ramping.",
+      "action": "Hold paid spend flat for two weeks, redirect the saved attention toward shipping four more long-form pieces on the same three topic clusters that drove the April win."
+    },
+    {
+      "tag": "CONTENT FORMAT INSIGHT",
+      "title": "Short-form TikTok and IG Reels are now your highest-engagement format by 4x, but your posting schedule still skews carousel-heavy.",
+      "body": "Across the last 28 days, vertical short-form averages 5.8% engagement; carousels average 1.4%. Of last week's 14 posts, only 5 were short-form vertical — the rest were carousels and static. The two TikToks at the top of the engagement table together reached 233,200 people on their own, more than every carousel post combined for the entire month.",
+      "action": "Re-weight the content calendar: minimum 3 short-form vertical videos per week, drop static quote-card carousels entirely until a hook variant tests above 3% engagement."
+    },
+    {
+      "tag": "ATTRIBUTION GAP",
+      "title": "LinkedIn ads are spending at 1.4x ROAS, but qualified-lead quality from LinkedIn is the highest of any channel by a wide margin.",
+      "body": "Hyros says LinkedIn is your worst ROAS channel at 1.4x — last in the bar chart. But of the 47 booked calls, 11 came from LinkedIn, and those 11 had the highest application step-2 completion rate (78% vs. 51% blended) and the highest close rate on calls so far this quarter (54% vs. 31% blended). Hyros is undercounting because most LinkedIn buyers research on multiple devices and Hyros's last-click model gives the credit to the final touch.",
+      "action": "Don't cut LinkedIn spend. Instead, look at the same channels through a first-touch attribution model in Hyros for one week — if the picture flips, the LinkedIn budget is actually underweight, not overweight."
+    },
+    {
+      "tag": "POSTING TIME PATTERN",
+      "title": "Your peak posting window is Thursday 2pm — and you've published exactly zero posts in that slot for the last 21 days.",
+      "body": "The heatmap shows engagement peaks Thursday 12pm–4pm across all four platforms (0.94–0.99 normalized), with Tuesday 12pm a clear second. Yet your actual posting schedule clusters between 9am and 11am Tue/Wed/Fri — outside the high-engagement windows on every day except Tuesday. Aligning the post times to the heatmap (without changing content quantity) projects to an 18–24% lift in baseline engagement.",
+      "action": "Move two regular weekly slots to Thursday 2pm and Tuesday 1pm. Hold content type constant for two weeks to isolate the timing variable, then reassess."
+    },
+    {
+      "tag": "FUNNEL ANOMALY",
+      "title": "The application step-2 dropoff fixed itself — but you didn't change anything on the page.",
+      "body": "Step-2 completion was hovering at 23% for six weeks (the metric was the focus of two previous reports). This week it jumped to 36% with no page changes deployed. Looking at source mix: the new step-2 completers are 71% from organic, where the four April long-form posts are sending visitors who arrive much further along the consideration curve. The dropoff isn't a UX issue — it's a traffic-quality issue, and it's resolving on its own as organic mix grows.",
+      "action": "Pause the planned step-2 UX redesign. Reinvest that engineering time into improving the three highest-ranking organic pages instead."
+    }
+  ],
+  "focus": {
+    "title": "Where to spend the next week.",
+    "lede": "Three to start, two to stop, and one to test — picked by leverage, not effort. Bias these against your team's capacity.",
+    "start": [
+      "Publish four new long-form posts on the same three topic clusters that drove April's organic lift; brief by Tuesday, draft by Thursday, published by Sunday.",
+      "Re-weight the content calendar toward vertical short-form: minimum three TikToks plus three IG Reels per week.",
+      "Run a first-touch attribution view in Hyros for one week to validate whether LinkedIn is underweight."
+    ],
+    "stop": [
+      "Static carousel and quote-card posts on Instagram and LinkedIn — they're consuming production time without earning their slot.",
+      "The planned step-2 UX redesign — the metric resolved itself on its own and the engineering hours are better spent elsewhere."
+    ],
+    "test": [
+      "Move two weekly posting slots to Thursday 2pm and Tuesday 1pm, hold content type constant for two weeks, and measure baseline engagement lift."
+    ]
+  }
+}

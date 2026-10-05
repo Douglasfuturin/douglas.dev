@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<!-- GANCHO — letreiro de title drop: linhas empilhadas que entram cada uma no seu tempo, junto
+     com o jingle da série. 1080x1920, --alpha. Uma linha é texto ou IMAGEM (prefixo @ + url,
+     de preferência PNG transparente: a palavra desenhada que o texto não alcança). O texto
+     sobe; a imagem estala e assenta. `tempos` dá o instante de cada linha (a palavra cantada);
+     sem `tempos`, entram a cada 0,4 s. `fundo` escurece o vídeo atrás (0 a 1). `junta` aproxima
+     as linhas, em px (negativo encosta: a imagem com acento traz um vão em cima); um número vale
+     pra todas, uma lista (-20,-30,-110) dá o vão antes de cada linha a partir da segunda.
+     `y` desloca o bloco do meio da tela, em px (negativo sobe): a carta citada na fala fica
+     acima da faixa da legenda; `x` faz o mesmo de lado (no vídeo deitado, a carta ao lado do
+     rosto). ?ar=1920x1080 pro vídeo deitado.
+       ?l=Treinando|@../midia/perfil-avatar.png|pra deixar de ser|@../midia/perfil-avatar.png&tempos=0.2,0.85,1.7,2.8&larg=940&alt=300&fundo=0.55&junta=0&dur=4 -->
+<html data-qa="entra-seco" lang="pt-BR" class="alfa">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../nucleo/direcao-v2.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="../nucleo/direcao-v2.js"></script>
+<style>
+html,body{width:1080px;height:1920px;background:transparent}
+#stage{width:1080px;height:1920px;background:none;padding:0;display:block}
+#veu{position:absolute;inset:0;background:var(--pp);opacity:0}
+.zona{position:absolute;left:40px;right:40px;top:0;bottom:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:10px}
+.tx{font:900 84px/1 var(--fd);letter-spacing:var(--ls);text-transform:uppercase;color:var(--ink);
+  text-align:center;white-space:nowrap;opacity:0;text-shadow:0 6px 0 var(--ink9),0 0 30px rgba(0,0,0,.6)}
+html.h,html.h body,html.h #stage{width:1920px;height:1080px}
+html.h .zona{left:80px;right:80px}
+.im{display:block;width:var(--larg,940px);max-height:var(--alt,300px);object-fit:contain;opacity:0}
+</style>
+</head>
+<body>
+<div id="stage"><div id="veu"></div><div class="zona" id="z"></div></div>
+<script>
+const dur = D.n('dur', '4');
+const ls = D.q('l', 'Treinando|pra deixar de ser').split('|');
+const ts = D.q('tempos', '').split(',').map(Number).filter(x => !isNaN(x));
+const R = document.documentElement.style;
+R.setProperty('--larg', D.n('larg', '940') + 'px');
+R.setProperty('--alt', D.n('alt', '300') + 'px');
+if ((D.q('ar', '')).startsWith('1920x1080')) document.documentElement.classList.add('h');
+document.getElementById('z').style.transform = `translate(${D.n('x', '0')}px, ${D.n('y', '0')}px)`;
+const z = document.getElementById('z');
+ls.forEach((s, i) => {
+  const el = s.startsWith('@') ? Object.assign(new Image(), {src: s.slice(1), alt: '', className: 'im'})
+                               : Object.assign(document.createElement('div'), {textContent: s, className: 'tx'});
+  el.id = 'l' + i;
+  const js = D.q('junta', '0').split(',').map(Number);
+  if (i) el.style.marginTop = (js.length > 1 ? js[i - 1] ?? 0 : js[0]) + 'px';
+  z.appendChild(el);
+});
+
+D.monta(tl => {
+  D.cabe('.tx', 44, '.zona');
+  tl.to('#veu', {opacity: D.n('fundo', '0.55'), duration: .25, ease: 'power1.out'}, 0);
+  ls.forEach((s, i) => {
+    const t = ts[i] ?? .2 + i * .4;
+    if (s.startsWith('@')) {
+      // a palavra desenhada estala: cresce além do tamanho, gira um pouco e assenta
+      tl.fromTo('#l' + i, {opacity: 0, scale: .35, rotation: i % 2 ? 6 : -6},
+        {opacity: 1, scale: 1, rotation: 0, duration: .42, ease: 'back.out(2.6)'}, D.at(t));
+    } else {
+      tl.fromTo('#l' + i, {opacity: 0, y: 40}, {opacity: 1, y: 0, duration: .3, ease: 'power3.out'}, D.at(t));
+    }
+  });
+  D.flutua([...z.children], Math.max(...ts, .6) + .4, dur - .45, 1.2);
+  tl.to([...z.children, '#veu'], {opacity: 0, duration: .3, ease: 'power1.in'}, dur - .35);
+  return dur;
+});
+</script>
+</body>
+</html>

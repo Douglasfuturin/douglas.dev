@@ -1,0 +1,124 @@
+{
+  "deck": {
+    "title": "The 90-Minute Webinar Framework",
+    "accent_color": "#FF5C28",
+    "output_dir": "workspace/test-deck"
+  },
+  "slides": [
+    {
+      "n": 1,
+      "pattern": "title",
+      "content": {
+        "title": "The 90-Minute Webinar Framework",
+        "meta_main": "Live training",
+        "meta_accent": "May 2026",
+        "meta_secondary": "End-to-end render test"
+      }
+    },
+    {
+      "n": 2,
+      "pattern": "big-text",
+      "content": {
+        "text_html": "How to <accent>2x</accent> your conversion rate without spending more on ads."
+      }
+    },
+    {
+      "n": 3,
+      "pattern": "mono-word",
+      "content": { "text": "Today." }
+    },
+    {
+      "n": 4,
+      "pattern": "three-lines",
+      "content": {
+        "lines": [
+          "Why most webinars convert at 2%",
+          "The 3 beliefs you have to install",
+          "How the stack actually works"
+        ]
+      }
+    },
+    {
+      "n": 5,
+      "pattern": "section-divider",
+      "content": { "eyebrow": "Part 1", "title": "The Story" }
+    },
+    {
+      "n": 6,
+      "pattern": "photo-full",
+      "visual": {
+        "prompt": "A 30-year-old founder in a worn charcoal hoodie leaning toward a laptop in a dim home office at night, mid-typing, intense focused expression, eyes on the screen. Single warm desk-lamp key light from camera right, hard directional, deep shadows. Shot on 35mm, f/2.0, shallow depth of field. Warm cinematic color grade, deep blacks. Cinematic, atmospheric, documentary, restrained.",
+        "aspect": "16:9"
+      }
+    },
+    {
+      "n": 7,
+      "pattern": "big-claim",
+      "content": {
+        "claim_html": "The webinar isn't a sales pitch. <accent>It's a belief installation system.</accent>"
+      }
+    },
+    {
+      "n": 8,
+      "pattern": "photo-text-overlay",
+      "visual": {
+        "prompt": "Atmospheric out-of-focus background: warm amber bokeh lights scattered across a deep near-black field, heavy blur, no recognizable scene, no focal subject, dominant negative space, subtle film grain, dark moody cinematic tone.",
+        "aspect": "16:9"
+      },
+      "content": { "overlay_text": "2019. Boise. Everything was about to change." }
+    },
+    {
+      "n": 9,
+      "pattern": "framework-step",
+      "content": {
+        "step_number": "1.",
+        "step_name": "The Vehicle",
+        "step_description": "Convince them the method works."
+      }
+    },
+    {
+      "n": 10,
+      "pattern": "image-split",
+      "visual": {
+        "prompt": "A founder standing beside a wall covered in sticky notes and printouts, viewed from the side, mid-gesture explaining something, natural soft window light, portrait composition. Cinematic muted color grade, shot on 50mm, shallow depth of field. Documentary, candid, real.",
+        "aspect": "9:16"
+      },
+      "content": {
+        "title": "The shift that changed everything.",
+        "body": "It wasn't about better slides. It was about better beliefs — installed before the offer reveal."
+      }
+    },
+    {
+      "n": 11,
+      "pattern": "stat-row",
+      "content": {
+        "stats": [
+          { "number": "47x", "label": "Average ROAS" },
+          { "number": "143", "label": "Students" },
+          { "number": "11", "label": "Industries" }
+        ]
+      }
+    },
+    {
+      "n": 12,
+      "pattern": "stack-line",
+      "content": {
+        "rows": [
+          { "name": "The 90-Minute Webinar Framework", "description": "The complete 150-slide system with templates", "value": "$2,997" },
+          { "name": "First-30-Days Quick Start", "description": "Daily checklist to ship your first deck", "value": "$497", "bonus": true },
+          { "name": "Done-For-You Slide Templates", "description": "All 50+ slide patterns pre-built", "value": "$1,497", "bonus": true }
+        ]
+      }
+    },
+    {
+      "n": 13,
+      "pattern": "price-reveal",
+      "content": { "label": "Today's price", "price": "$1,997" }
+    },
+    {
+      "n": 14,
+      "pattern": "final-cta",
+      "content": { "url": "webinarframework.com/join", "signoff": "See you on the other side." }
+    }
+  ]
+}
